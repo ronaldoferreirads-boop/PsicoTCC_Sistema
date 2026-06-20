@@ -3188,25 +3188,35 @@ async function handleGDriveCallback() {
   const token = params.get('access_token');
   if (!token) return;
 
-  // Clean URL
   history.replaceState(null, '', location.pathname);
 
   try {
-    // Get user email
     const userResp = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: 'Bearer ' + token }
     });
+    if (!userResp.ok) throw new Error('Falha ao obter dados do usuario Google (HTTP ' + userResp.status + ')');
     const user = await userResp.json();
-    const email = user.email || 'usuário Google';
+    const email = user.email || 'usuario Google';
 
-    // Save token in session (expires ~1h, user must reconnect)
     sessionStorage.setItem('psicotcc_gd_token', token);
     localStorage.setItem('psicotcc_gd_email', email);
-
     APP.gDriveToken = token;
     APP.gDriveConnected = true;
 
-    // Get or create PsicoTCC folder
+    // Verify Drive API is enabled
+    const driveTestResp = await fetch(
+      'https://www.googleapis.com/drive/v3/about?fields=user',
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+
+    if (!driveTestResp.ok) {
+      const errData = await driveTestResp.json().catch(() => ({}));
+      const errMsg = errData && errData.error ? errData.error.message : '';
+      updateGDriveStatus(true, email);
+      showModal('API do Google Drive nao habilitada', '<div class="alert alert-warning" style="margin-bottom:16px">O login funcionou, mas a <strong>API do Google Drive</strong> precisa ser habilitada no projeto. E rapido e gratuito.</div><div class="api-instructions"><h4>Como habilitar</h4><ol><li>Acesse <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank">este link direto</a></li><li>Certifique-se que o projeto <strong>ProjetoLalaPSI</strong> esta selecionado no topo</li><li>Clique no botao azul <strong>Ativar</strong></li><li>Aguarde 1 minuto</li><li>Volte ao sistema e clique em <strong>Conectar com Google</strong> novamente</li></ol></div>', [{ label: 'Entendido', cls: 'btn-primary', action: closeModal }]);
+      return;
+    }
+
     const folderName = localStorage.getItem('psicotcc_gd_folder_name') || GDRIVE_FOLDER_NAME_DEFAULT;
     const folderId = await getOrCreateGDriveFolder(folderName, token);
     if (folderId) {
@@ -3217,15 +3227,15 @@ async function handleGDriveCallback() {
     updateGDriveStatus(true, email);
     checkAlerts();
 
-    // Restore session if still on app
     if (sessionStorage.getItem('psicotcc_session') === '1') {
-      // Load data from Drive
       await loadFromGDrive();
-      toast('✅ Google Drive conectado! Dados sincronizados.', 'success');
+      await saveToGDrive('psicotcc_patients.json', APP.patients);
+      toast('Google Drive conectado! Conta: ' + email, 'success');
     } else {
-      toast('✅ Google conectado como ' + email, 'success');
+      toast('Google conectado como ' + email, 'success');
     }
   } catch(e) {
+    console.error('GDrive callback error:', e);
     toast('Erro ao conectar ao Google Drive: ' + e.message, 'error');
   }
 }

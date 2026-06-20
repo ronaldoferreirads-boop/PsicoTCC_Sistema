@@ -1959,16 +1959,27 @@ function initApp() {
 
   toast('Bem-vindo ao PsicoTCC!', 'success');
 
-  // Check Google Drive token
+  // Check Google Drive
   const gdToken = sessionStorage.getItem('psicotcc_gd_token');
   const gdEmail = localStorage.getItem('psicotcc_gd_email');
   const gdFolderId = localStorage.getItem('psicotcc_gd_folder_id');
+
   if (gdToken && gdEmail) {
+    // Token still active (same browser session)
     APP.gDriveToken = gdToken;
     APP.gDriveFolderId = gdFolderId || null;
     APP.gDriveConnected = true;
     updateGDriveStatus(true, gdEmail);
     loadFromGDrive();
+  } else if (gdEmail && !gdToken) {
+    // User has connected before but token expired (browser was closed)
+    // Show reconnecting indicator and silently reconnect
+    const badge = document.getElementById('sync-badge');
+    const syncText = document.getElementById('sync-text');
+    if (badge) badge.className = 'topbar-badge badge-sync syncing';
+    if (syncText) syncText.textContent = 'Reconectando Drive...';
+    toast('Reconectando ao Google Drive automaticamente...', 'info');
+    setTimeout(() => silentReconnectGDrive(), 1200);
   }
 }
 
@@ -3149,6 +3160,30 @@ function connectGDrive() {
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
 }
 
+function silentReconnectGDrive() {
+  const clientId = localStorage.getItem('psicotcc_gd_client_id');
+  if (!clientId || clientId === 'SEU_CLIENT_ID_AQUI.apps.googleusercontent.com') return;
+  const gdEmail = localStorage.getItem('psicotcc_gd_email');
+  if (!gdEmail) return;
+
+  const redirectUri = location.href.split('?')[0].split('#')[0];
+  const state = 'silent_' + Math.random().toString(36).substr(2);
+  sessionStorage.setItem('gdrive_oauth_state', state);
+  sessionStorage.setItem('psicotcc_session', '1');
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: GDRIVE_SCOPES,
+    state,
+    prompt: 'none',
+    login_hint: gdEmail
+  });
+
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
 function saveClientIdAndConnect() {
   const id = document.getElementById('gdrive-client-id-input')?.value?.trim();
   if (!id || !id.includes('.apps.googleusercontent.com')) {
@@ -3182,13 +3217,31 @@ function getGDriveClientId() {
 
 async function handleGDriveCallback() {
   const hash = window.location.hash;
-  if (!hash || !hash.includes('access_token')) return;
+  if (!hash || (!hash.includes('access_token') && !hash.includes('error'))) return;
 
   const params = new URLSearchParams(hash.substring(1));
   const token = params.get('access_token');
-  if (!token) return;
+  const error = params.get('error');
+  const state = params.get('state') || '';
 
   history.replaceState(null, '', location.pathname);
+
+  // If silent reconnect failed (needs user interaction), show reconnect button
+  if (!token && error) {
+    checkSession();
+    if (state.startsWith('silent_')) {
+      // Silent failed — show non-intrusive reconnect button in topbar
+      const badge = document.getElementById('sync-badge');
+      const syncText = document.getElementById('sync-text');
+      if (badge) badge.className = 'topbar-badge badge-sync offline';
+      if (syncText) {
+        syncText.innerHTML = '<button onclick="connectGDrive()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;font-weight:600;text-decoration:underline">Reconectar Drive</button>';
+      }
+    }
+    return;
+  }
+
+  if (!token) return;
 
   try {
     const userResp = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {

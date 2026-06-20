@@ -1,0 +1,3643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsicoTCC — Sistema Clínico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #2C5F8A;
+  --primary-light: #3A7AB0;
+  --primary-dark: #1E4266;
+  --secondary: #4A9B8E;
+  --secondary-light: #5BB5A7;
+  --accent: #E8A838;
+  --accent-dark: #C8891A;
+  --danger: #C0392B;
+  --danger-light: #E74C3C;
+  --success: #27AE60;
+  --warning: #F39C12;
+  --bg: #F4F7FA;
+  --surface: #FFFFFF;
+  --surface-alt: #EEF2F7;
+  --border: #D0DBE8;
+  --text: #1A2B3C;
+  --text-secondary: #4A5E72;
+  --text-muted: #7A8FA3;
+  --sidebar-w: 260px;
+  --header-h: 64px;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(44,95,138,0.10);
+  --shadow-lg: 0 8px 32px rgba(44,95,138,0.16);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ====== AUTH SCREEN ====== */
+#auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--secondary) 100%);
+  position: relative;
+  overflow: hidden;
+}
+#auth-screen::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+  top: -200px; right: -200px;
+}
+#auth-screen::after {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  bottom: -150px; left: -150px;
+}
+
+.auth-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 420px;
+  max-width: 95vw;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  z-index: 1;
+}
+.auth-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.auth-logo-img {
+  max-width: 140px;
+  max-height: 60px;
+  object-fit: contain;
+  margin-bottom: 12px;
+  display: none;
+}
+.auth-logo-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+.auth-logo-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--border);
+}
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+.auth-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.auth-panel { display: none; }
+.auth-panel.active { display: block; }
+
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.form-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(44,95,138,0.12);
+}
+.form-input::placeholder { color: var(--text-muted); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(44,95,138,0.3); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--primary);
+  border: 2px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--primary); background: var(--surface-alt); }
+.btn-accent { background: var(--accent); color: white; }
+.btn-accent:hover { background: var(--accent-dark); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: var(--danger-light); }
+.btn-success { background: var(--success); color: white; }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: none; }
+.btn-ghost:hover { background: var(--surface-alt); color: var(--text); }
+.btn-sm { padding: 7px 14px; font-size: 12px; }
+.btn-lg { padding: 14px 28px; font-size: 15px; }
+.btn-full { width: 100%; }
+.btn-ms {
+  background: #0078d4;
+  color: white;
+  gap: 10px;
+}
+.btn-ms:hover { background: #006cbf; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+.auth-divider {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 16px 0;
+  position: relative;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: var(--border);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+
+.auth-link {
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 12px;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+.auth-msg {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  display: none;
+}
+.auth-msg.error { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; display: block; }
+.auth-msg.success { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; display: block; }
+.auth-msg.info { background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; display: block; }
+
+/* ====== APP LAYOUT ====== */
+#app { display: none; }
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--primary-dark);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+  transition: transform 0.3s;
+}
+.sidebar-header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-logo-img {
+  max-width: 36px;
+  max-height: 36px;
+  object-fit: contain;
+  border-radius: 8px;
+  display: none;
+}
+.sidebar-logo-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.sidebar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+}
+.sidebar-subtitle {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-section-label {
+  padding: 0 16px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  user-select: none;
+}
+.sidebar-item:hover { background: rgba(255,255,255,0.07); color: white; }
+.sidebar-item.active {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border-left-color: var(--accent);
+}
+.sidebar-item-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+.sidebar-patient-box {
+  margin: 12px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 12px;
+}
+.sidebar-patient-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.sidebar-patient-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-patient-change { font-size: 11px; color: var(--accent); cursor: pointer; text-decoration: underline; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px;
+}
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sidebar-user:hover { background: rgba(255,255,255,0.07); }
+.sidebar-user-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--secondary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.sidebar-user-name { font-size: 12px; font-weight: 600; color: white; }
+.sidebar-user-crp { font-size: 11px; color: rgba(255,255,255,0.4); }
+.sidebar-logout { font-size: 18px; margin-left: auto; color: rgba(255,255,255,0.3); cursor: pointer; }
+.sidebar-logout:hover { color: var(--danger-light); }
+
+/* MAIN CONTENT */
+.main-content {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.topbar-title { font-size: 17px; font-weight: 700; color: var(--text); flex: 1; }
+.topbar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-sync { background: #e8f5e9; color: var(--success); }
+.badge-sync.syncing { background: #fff3e0; color: var(--warning); }
+.badge-sync.offline { background: #fce4ec; color: var(--danger); }
+
+.content-area {
+  padding: 28px;
+  flex: 1;
+}
+
+/* PANELS */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(90deg, var(--surface-alt) 0%, var(--surface) 100%);
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title .icon { font-size: 18px; }
+.card-body { padding: 22px; }
+
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+/* STATS */
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: box-shadow 0.2s;
+}
+.stat-card:hover { box-shadow: var(--shadow-lg); }
+.stat-icon {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* PATIENT CARDS */
+.patient-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.patient-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.patient-card:hover { border-color: var(--primary); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.patient-card.active-patient { border-color: var(--secondary); background: #f0fdf9; }
+.patient-avatar {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 12px;
+}
+.patient-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.patient-info { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.patient-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.tag-blue { background: #eff6ff; color: var(--primary); }
+.tag-green { background: #f0fdf4; color: var(--success); }
+.tag-amber { background: #fffbeb; color: var(--accent-dark); }
+.tag-red { background: #fef2f2; color: var(--danger); }
+
+/* FORM STYLES */
+.form-section {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.form-section-header {
+  padding: 14px 20px;
+  background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.form-section-header:hover { opacity: 0.92; }
+.form-section-body { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-section-body.cols-1 { grid-template-columns: 1fr; }
+.form-section-body.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-section-body.collapsed { display: none; }
+
+.form-row { display: flex; flex-direction: column; gap: 4px; }
+.form-row.span-2 { grid-column: 1 / -1; }
+.form-row label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-row input, .form-row select, .form-row textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color 0.2s;
+  outline: none;
+}
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(44,95,138,0.08);
+}
+.form-row textarea { resize: vertical; min-height: 80px; }
+.form-row select { cursor: pointer; }
+
+/* TOOLBAR */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.toolbar-search {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+.toolbar-search input {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.toolbar-search input:focus { border-color: var(--primary); }
+.toolbar-search-icon {
+  position: absolute;
+  left: 11px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface-alt); }
+tr.clickable { cursor: pointer; }
+
+/* AI CHAT */
+.ai-chat-wrap {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px);
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.ai-chat-header {
+  padding: 14px 20px;
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ai-mode-select {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: white;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+.ai-mode-select option { background: var(--primary-dark); color: white; }
+.ai-chat-title { color: white; font-weight: 700; font-size: 14px; flex: 1; }
+.ai-msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ai-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 90%;
+}
+.ai-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.ai-msg-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  font-weight: 700;
+  align-self: flex-end;
+}
+.ai-msg.user .ai-msg-avatar { background: var(--primary); color: white; }
+.ai-msg.ai .ai-msg-avatar { background: var(--secondary); color: white; }
+.ai-msg-bubble {
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.ai-msg.user .ai-msg-bubble {
+  background: var(--primary);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+.ai-msg.ai .ai-msg-bubble {
+  background: var(--surface-alt);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+}
+.ai-msg-bubble h3 { font-size: 13px; margin-bottom: 6px; color: var(--primary); }
+.ai-msg-bubble h4 { font-size: 12px; margin: 8px 0 4px; }
+.ai-msg-bubble p { margin-bottom: 6px; }
+.ai-msg-bubble ul, .ai-msg-bubble ol { padding-left: 18px; margin-bottom: 6px; }
+.ai-msg-bubble strong { font-weight: 700; }
+.ai-msg-bubble code { background: rgba(0,0,0,0.08); padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+.ai-msg-bubble .tag-fato { color: #1565c0; font-weight: 700; }
+.ai-msg-bubble .tag-inf { color: #6a1b9a; font-weight: 700; }
+.ai-msg-bubble .tag-hip { color: #e65100; font-weight: 700; }
+
+.ai-thinking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface-alt);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  width: fit-content;
+}
+.ai-thinking-dots span {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--secondary);
+  animation: bounce 1.2s ease-in-out infinite;
+}
+.ai-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.ai-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+.ai-input-row {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.ai-input-row textarea {
+  flex: 1;
+  resize: none;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  min-height: 44px;
+  max-height: 120px;
+  outline: none;
+  line-height: 1.5;
+}
+.ai-input-row textarea:focus { border-color: var(--primary); }
+.ai-send-btn {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.ai-send-btn:hover { background: var(--primary-light); }
+.ai-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* TRANSCRIPTION */
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-muted);
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--primary);
+  background: #eff6ff;
+  color: var(--primary);
+}
+.drop-zone-icon { font-size: 40px; margin-bottom: 12px; }
+.drop-zone-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.drop-zone-sub { font-size: 12px; }
+
+.transcript-output {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  line-height: 1.9;
+}
+.transcript-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--primary);
+}
+.transcript-header h2 { font-size: 20px; color: var(--primary); margin-bottom: 4px; }
+.transcript-header p { font-size: 13px; color: var(--text-muted); }
+.transcript-block { margin-bottom: 18px; }
+.transcript-speaker {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.transcript-speaker.psi { color: var(--primary); }
+.transcript-speaker.pac { color: var(--secondary); }
+.transcript-text { color: var(--text); }
+.transcript-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* EVOLUTION */
+.evolution-doc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  line-height: 1.85;
+}
+.evolution-doc h1 {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+.evolution-doc h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 20px 0 8px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+}
+.evolution-doc p { margin-bottom: 8px; }
+.evolution-doc ul { padding-left: 22px; margin-bottom: 8px; }
+.evolution-meta-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+}
+.evolution-meta-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+}
+.evolution-meta-table td:first-child { font-weight: 700; color: var(--text-secondary); background: var(--surface-alt); width: 40%; }
+
+/* DOCUMENT TEMPLATES */
+.doc-template {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  line-height: 1.85;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.doc-header {
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--primary);
+}
+.doc-logo { max-width: 120px; max-height: 60px; object-fit: contain; margin-bottom: 10px; display: none; }
+.doc-psi-name { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--primary); }
+.doc-psi-crp { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); }
+.doc-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin: 20px 0 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.doc-section { margin-bottom: 18px; }
+.doc-section h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--primary);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.doc-section p { color: var(--text); margin-bottom: 6px; }
+.doc-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.doc-sig-line {
+  margin-top: 40px;
+  text-align: center;
+}
+.doc-sig-line .line {
+  width: 250px;
+  border-top: 1px solid var(--text);
+  margin: 0 auto 6px;
+}
+.doc-sig-line p { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-secondary); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  width: 560px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+.modal-lg { width: 780px; }
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* TOAST */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  background: var(--text);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  box-shadow: var(--shadow-lg);
+  animation: slideIn 0.3s ease;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.warning { background: var(--warning); }
+.toast.info { background: var(--primary); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* RISK BADGE */
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.risk-baixo { background: #e8f5e9; color: #1b5e20; }
+.risk-moderado { background: #fff8e1; color: #e65100; }
+.risk-elevado { background: #fce4ec; color: #880e4f; }
+.risk-critico { background: #212121; color: white; }
+
+/* PRINT */
+@media print {
+  .sidebar, .topbar, .toolbar, .btn, .no-print, .modal-overlay { display: none !important; }
+  .main-content { margin-left: 0 !important; }
+  .content-area { padding: 0 !important; }
+  body { background: white; font-size: 12px; }
+  .doc-template, .evolution-doc, .transcript-output { border: none; box-shadow: none; padding: 10px 20px; }
+  .card { border: 1px solid #ccc; box-shadow: none; }
+}
+
+/* SETTINGS */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  min-height: 400px;
+}
+.settings-nav {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.settings-nav-item:hover { background: var(--surface-alt); color: var(--text); }
+.settings-nav-item.active { background: var(--surface-alt); color: var(--primary); border-left-color: var(--primary); font-weight: 700; }
+
+.settings-panel { display: none; }
+.settings-panel.active { display: block; }
+
+/* ONEDRIVE */
+.onedrive-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.onedrive-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.onedrive-dot.connected { background: var(--success); box-shadow: 0 0 0 3px rgba(39,174,96,0.2); }
+.onedrive-dot.disconnected { background: var(--danger); }
+
+/* HISTORY LIST */
+.history-item {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.history-item:hover { background: var(--surface-alt); }
+.history-item:last-child { border-bottom: none; }
+.history-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--secondary);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.history-date { font-size: 11px; color: var(--text-muted); }
+.history-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.history-preview { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .form-section-body { grid-template-columns: 1fr; }
+  .settings-grid { grid-template-columns: 1fr; }
+  .content-area { padding: 16px; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
+.empty-state p { font-size: 13px; max-width: 320px; margin: 0 auto; }
+
+.progress-bar-wrap { background: var(--border); border-radius: 20px; height: 6px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 20px; transition: width 0.5s; }
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.alert-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+.separator { height: 1px; background: var(--border); margin: 20px 0; }
+
+.contract-form textarea { min-height: 60px; }
+
+/* API Key Instructions */
+.api-instructions {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.api-instructions h4 { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+.api-instructions ol { padding-left: 20px; }
+.api-instructions li { margin-bottom: 6px; }
+.api-instructions a { color: var(--primary); }
+.api-instructions code { background: white; border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; color: var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- ====== AUTH SCREEN ====== -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img id="auth-logo-img" class="auth-logo-img" src="" alt="Logo">
+      <div class="auth-logo-title">🧠 PsicoTCC</div>
+      <div class="auth-logo-sub">Sistema Clínico para Psicólogos</div>
+    </div>
+
+    <div id="auth-tabs" class="auth-tabs">
+      <div class="auth-tab active" onclick="showAuthPanel('login')">Entrar</div>
+      <div class="auth-tab" onclick="showAuthPanel('setup')" id="setup-tab" style="display:none">Configuração</div>
+      <div class="auth-tab" onclick="showAuthPanel('recover')">Recuperar Senha</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="panel-login" class="auth-panel active">
+      <div id="login-msg" class="auth-msg"></div>
+      <div class="form-group">
+        <label class="form-label">Senha de Acesso</label>
+        <input type="password" id="login-pwd" class="form-input" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()">🔐 Entrar no Sistema</button>
+      <div style="margin-top:12px; text-align:center">
+        <span style="font-size:12px; color:var(--text-muted)">Primeiro acesso? </span>
+        <button class="auth-link" onclick="showAuthPanel('setup')">Configurar sistema</button>
+      </div>
+    </div>
+
+    <!-- SETUP (first access) -->
+    <div id="panel-setup" class="auth-panel">
+      <div id="setup-msg" class="auth-msg"></div>
+      <div class="alert alert-info">⚙️ Configure seu sistema. Os dados serão sincronizados com o Google Drive.</div>
+      <div class="form-group">
+        <label class="form-label">Seu Nome Completo</label>
+        <input type="text" id="setup-name" class="form-input" placeholder="Dra. Maria Silva">
+      </div>
+      <div class="form-group">
+        <label class="form-label">CRP</label>
+        <input type="text" id="setup-crp" class="form-input" placeholder="CRP 02/12345">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Criar Senha de Acesso</label>
+        <input type="password" id="setup-pwd" class="form-input" placeholder="Mínimo 8 caracteres">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar Senha</label>
+        <input type="password" id="setup-pwd2" class="form-input" placeholder="Repita a senha">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Código de Recuperação de Senha</label>
+        <input type="text" id="setup-recovery" class="form-input" placeholder="Uma palavra secreta fácil de lembrar">
+        <small style="color:var(--text-muted); font-size:11px">Guarde esse código. Ele será usado para recuperar o acesso caso esqueça a senha.</small>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doSetup()">✅ Criar Meu Acesso</button>
+    </div>
+
+    <!-- RECOVER -->
+    <div id="panel-recover" class="auth-panel">
+      <div id="recover-msg" class="auth-msg"></div>
+      <div class="form-group">
+        <label class="form-label">Código de Recuperação</label>
+        <input type="text" id="recover-code" class="form-input" placeholder="Sua palavra secreta">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nova Senha</label>
+        <input type="password" id="recover-pwd" class="form-input" placeholder="Nova senha">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar Nova Senha</label>
+        <input type="password" id="recover-pwd2" class="form-input" placeholder="Repita a nova senha">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doRecover()">🔄 Redefinir Senha</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MAIN APP ====== -->
+<div id="app">
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <img id="sb-logo-img" class="sidebar-logo-img" src="" alt="">
+          <div class="sidebar-logo-icon" id="sb-logo-icon">🧠</div>
+          <div>
+            <div class="sidebar-title">PsicoTCC</div>
+            <div class="sidebar-subtitle">Sistema Clínico</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sb-patient-box" style="display:none">
+        <div class="sidebar-patient-box">
+          <div class="sidebar-patient-label">Paciente ativo</div>
+          <div class="sidebar-patient-name" id="sb-patient-name">—</div>
+          <span class="sidebar-patient-change" onclick="showPanel('patients')">Trocar</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Principal</div>
+        <div class="sidebar-item active" onclick="showPanel('dashboard')" data-panel="dashboard">
+          <span class="sidebar-item-icon">🏠</span> Dashboard
+        </div>
+        <div class="sidebar-item" onclick="showPanel('patients')" data-panel="patients">
+          <span class="sidebar-item-icon">👥</span> Pacientes
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Ferramentas Clínicas</div>
+        <div class="sidebar-item" onclick="showPanel('anamnese')" data-panel="anamnese">
+          <span class="sidebar-item-icon">📋</span> Anamnese
+        </div>
+        <div class="sidebar-item" onclick="showPanel('prontuario')" data-panel="prontuario">
+          <span class="sidebar-item-icon">📁</span> Prontuário Eletrônico
+        </div>
+        <div class="sidebar-item" onclick="showPanel('evolucao')" data-panel="evolucao">
+          <span class="sidebar-item-icon">📈</span> Evolução de Sessão
+        </div>
+        <div class="sidebar-item" onclick="showPanel('transcricao')" data-panel="transcricao">
+          <span class="sidebar-item-icon">🎙️</span> Transcrição
+        </div>
+        <div class="sidebar-item" onclick="showPanel('documentos')" data-panel="documentos">
+          <span class="sidebar-item-icon">📄</span> Documentos Clínicos
+        </div>
+        <div class="sidebar-item" onclick="showPanel('contrato')" data-panel="contrato">
+          <span class="sidebar-item-icon">✍️</span> Contrato de Serviços
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">IA Clínica</div>
+        <div class="sidebar-item" onclick="showPanel('supervisor')" data-panel="supervisor">
+          <span class="sidebar-item-icon">🤖</span> Supervisor TCC (IA)
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Sistema</div>
+        <div class="sidebar-item" onclick="showPanel('settings')" data-panel="settings">
+          <span class="sidebar-item-icon">⚙️</span> Configurações
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="sb-avatar">P</div>
+          <div>
+            <div class="sidebar-user-name" id="sb-user-name">Psicólogo</div>
+            <div class="sidebar-user-crp" id="sb-user-crp">CRP —</div>
+          </div>
+          <span class="sidebar-logout" onclick="doLogout()" title="Sair">⏻</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div id="sync-badge" class="topbar-badge badge-sync offline">
+          <span>●</span> <span id="sync-text">Desconectado</span>
+        </div>
+        <button class="btn btn-sm btn-secondary no-print" onclick="syncToGDrive()">☁️ Sincronizar</button>
+        <button class="btn btn-sm btn-secondary no-print" onclick="window.print()">🖨️ Imprimir / PDF</button>
+      </div>
+
+      <div class="content-area">
+
+        <!-- DASHBOARD -->
+        <div id="panel-dashboard" class="panel active">
+          <div id="dash-welcome" style="margin-bottom:20px">
+            <h2 style="font-size:22px; font-weight:700; color:var(--text)">Olá, <span id="dash-name">Psicólogo</span> 👋</h2>
+            <p style="color:var(--text-muted); margin-top:4px">Bem-vindo ao PsicoTCC — seu sistema clínico integrado.</p>
+          </div>
+
+          <div id="dash-onedrive-alert" class="alert alert-warning no-print" style="display:none">
+            ⚠️ <strong>Google Drive não conectado.</strong> Configure a conexão em <button class="auth-link" onclick="showPanel('settings')">Configurações → Google Drive</button> para salvar seus dados na nuvem.
+          </div>
+          <div id="dash-apikey-alert" class="alert alert-info no-print" style="display:none">
+            🤖 <strong>Chave da API Claude não configurada.</strong> Configure em <button class="auth-link" onclick="showPanel('settings')">Configurações → API Claude</button> para usar o Supervisor TCC.
+          </div>
+
+          <div class="grid-4" style="margin-bottom:24px">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#eff6ff">👥</div>
+              <div>
+                <div class="stat-value" id="dash-total-pac">0</div>
+                <div class="stat-label">Pacientes</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#f0fdf4">📈</div>
+              <div>
+                <div class="stat-value" id="dash-total-evo">0</div>
+                <div class="stat-label">Evoluções</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fffbeb">📄</div>
+              <div>
+                <div class="stat-value" id="dash-total-docs">0</div>
+                <div class="stat-label">Documentos</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fdf4ff">🎙️</div>
+              <div>
+                <div class="stat-value" id="dash-total-trans">0</div>
+                <div class="stat-label">Transcrições</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><span class="icon">🕐</span> Últimas Atividades</div>
+              </div>
+              <div id="dash-activity-list">
+                <div class="empty-state" style="padding:30px">
+                  <div class="empty-state-icon">📋</div>
+                  <h3>Sem atividades</h3>
+                  <p>Comece criando um paciente</p>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><span class="icon">⚡</span> Acesso Rápido</div>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+                <button class="btn btn-secondary btn-full" onclick="showPanel('patients'); openNewPatient()">➕ Novo Paciente</button>
+                <button class="btn btn-secondary btn-full" onclick="showPanel('evolucao')">📈 Registrar Evolução</button>
+                <button class="btn btn-secondary btn-full" onclick="showPanel('transcricao')">🎙️ Processar Transcrição</button>
+                <button class="btn btn-secondary btn-full" onclick="showPanel('supervisor')">🤖 Abrir Supervisor TCC</button>
+                <button class="btn btn-secondary btn-full" onclick="showPanel('documentos')">📄 Novo Documento</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PATIENTS -->
+        <div id="panel-patients" class="panel">
+          <div class="toolbar">
+            <div class="toolbar-search">
+              <span class="toolbar-search-icon">🔍</span>
+              <input type="text" id="patient-search" placeholder="Buscar paciente..." onkeyup="filterPatients()">
+            </div>
+            <button class="btn btn-primary" onclick="openNewPatient()">➕ Novo Paciente</button>
+          </div>
+          <div id="patient-grid" class="patient-grid"></div>
+        </div>
+
+        <!-- ANAMNESE -->
+        <div id="panel-anamnese" class="panel">
+          <div class="toolbar no-print">
+            <button class="btn btn-secondary btn-sm" onclick="loadAnamnese()">📂 Carregar Existente</button>
+            <button class="btn btn-primary btn-sm" onclick="saveAnamnese()">💾 Salvar Anamnese</button>
+            <button class="btn btn-accent btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
+          </div>
+          <div id="anamnese-form">
+            <div class="alert alert-info no-print">📋 Selecione um paciente ativo na barra lateral antes de preencher.</div>
+            <!-- Sections built by JS -->
+          </div>
+        </div>
+
+        <!-- PRONTUARIO -->
+        <div id="panel-prontuario" class="panel">
+          <div class="toolbar no-print">
+            <button class="btn btn-primary btn-sm" onclick="addProntuarioEntry()">➕ Novo Registro</button>
+            <button class="btn btn-accent btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">📁</span> Prontuário Eletrônico — <span id="prontuario-patient-name">Selecione um paciente</span></div>
+            </div>
+            <div id="prontuario-list"></div>
+          </div>
+        </div>
+
+        <!-- EVOLUCAO -->
+        <div id="panel-evolucao" class="panel">
+          <div class="toolbar no-print">
+            <button class="btn btn-secondary btn-sm" onclick="loadEvolutionList()">📂 Histórico</button>
+            <button class="btn btn-accent btn-sm" onclick="genEvolution()">🤖 Gerar com IA</button>
+            <button class="btn btn-primary btn-sm" onclick="saveEvolution()">💾 Salvar Evolução</button>
+            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
+          </div>
+          <div id="evolution-editor">
+            <div class="grid-2" style="margin-bottom:16px">
+              <div class="card">
+                <div class="card-header"><div class="card-title">📋 Dados da Sessão</div></div>
+                <div class="card-body">
+                  <div class="form-row" style="margin-bottom:12px">
+                    <label>Data da Sessão</label>
+                    <input type="date" id="evo-date">
+                  </div>
+                  <div class="form-row" style="margin-bottom:12px">
+                    <label>Duração (minutos)</label>
+                    <input type="number" id="evo-duration" value="50">
+                  </div>
+                  <div class="form-row" style="margin-bottom:12px">
+                    <label>Modalidade</label>
+                    <select id="evo-modality">
+                      <option>Presencial / individual</option>
+                      <option>Online / individual</option>
+                      <option>Presencial / casal</option>
+                      <option>Online / casal</option>
+                      <option>Presencial / grupo</option>
+                    </select>
+                  </div>
+                  <div class="form-row">
+                    <label>Número da Sessão</label>
+                    <input type="number" id="evo-session-num" value="1" min="1">
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header"><div class="card-title">🚨 Avaliação de Risco</div></div>
+                <div class="card-body">
+                  <div class="form-row" style="margin-bottom:12px">
+                    <label>Nível de Risco</label>
+                    <select id="evo-risk">
+                      <option value="baixo">🟢 Baixo — Sem ideação ativa</option>
+                      <option value="moderado">🟡 Moderado — Ideação passiva</option>
+                      <option value="elevado">🔴 Elevado — Ideação com plano</option>
+                      <option value="critico">⚫ Crítico — Risco imediato</option>
+                    </select>
+                  </div>
+                  <div class="form-row">
+                    <label>Observações de Risco</label>
+                    <textarea id="evo-risk-obs" rows="4" placeholder="Descreva a avaliação de risco desta sessão..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="evolution-doc" id="evolution-doc-preview">
+              <div class="doc-header" style="margin-bottom:16px">
+                <img id="evo-doc-logo" class="doc-logo" src="" alt="">
+                <div class="doc-psi-name" id="evo-doc-psi">—</div>
+                <div class="doc-psi-crp" id="evo-doc-crp">—</div>
+              </div>
+              <h1>Registro de Evolução — Psicoterapia</h1>
+              <table class="evolution-meta-table" id="evo-meta-table">
+                <tr><td>Paciente</td><td id="evo-meta-patient">—</td></tr>
+                <tr><td>Data da Sessão</td><td id="evo-meta-date">—</td></tr>
+                <tr><td>Duração</td><td id="evo-meta-duration">—</td></tr>
+                <tr><td>Modalidade</td><td id="evo-meta-modality">—</td></tr>
+              </table>
+
+              <h2>1. Estado Emocional e Funcional Relatado</h2>
+              <div contenteditable="true" class="form-row" id="evo-s1" style="min-height:60px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none" placeholder="Descreva o estado emocional..."></div>
+
+              <h2>2. Temas Trabalhados na Sessão</h2>
+              <div contenteditable="true" class="form-row" id="evo-s2" style="min-height:80px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none"></div>
+
+              <h2>3. Intervenções e Técnicas Utilizadas</h2>
+              <div contenteditable="true" class="form-row" id="evo-s3" style="min-height:60px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none"></div>
+
+              <h2>4. Observações Clínicas</h2>
+              <div contenteditable="true" class="form-row" id="evo-s4" style="min-height:60px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none"></div>
+
+              <h2>5. Avaliação de Risco</h2>
+              <div contenteditable="true" class="form-row" id="evo-s5" style="min-height:40px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none"></div>
+
+              <h2>6. Encaminhamentos e Tarefa para a Semana</h2>
+              <div contenteditable="true" class="form-row" id="evo-s6" style="min-height:60px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none"></div>
+
+              <h2>7. Plano para a Próxima Sessão</h2>
+              <div contenteditable="true" class="form-row" id="evo-s7" style="min-height:60px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none"></div>
+
+              <div class="doc-sig-line" style="margin-top:30px">
+                <div class="line"></div>
+                <p id="evo-sig-name">—</p>
+                <p id="evo-sig-crp" style="font-size:11px; color:var(--text-muted)">—</p>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:4px">Documento gerado com revisão e responsabilidade clínica da psicóloga responsável.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSCRICAO -->
+        <div id="panel-transcricao" class="panel">
+          <div class="toolbar no-print">
+            <button class="btn btn-secondary btn-sm" onclick="loadTranscriptionHistory()">📂 Histórico</button>
+            <button class="btn btn-primary btn-sm" onclick="saveTranscription()">💾 Salvar</button>
+            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
+          </div>
+
+          <div id="transcricao-upload-area">
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header"><div class="card-title">🎙️ Processar Transcrição de Sessão</div></div>
+              <div class="card-body">
+                <div class="alert alert-info">
+                  📌 Faça upload do arquivo <strong>.docx</strong> com a transcrição gravada. O sistema, via IA, irá reorganizar e identificar as falas da <strong>Psicóloga</strong> e do <strong>Paciente</strong>.
+                </div>
+                <div style="margin-bottom:14px">
+                  <label class="form-label">Data da Sessão</label>
+                  <input type="date" id="trans-date" class="form-input">
+                </div>
+                <div id="drop-zone" class="drop-zone" onclick="document.getElementById('trans-file').click()" 
+                     ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                     ondragleave="this.classList.remove('drag-over')"
+                     ondrop="handleTransDrop(event)">
+                  <div class="drop-zone-icon">📎</div>
+                  <div class="drop-zone-title">Clique ou arraste o arquivo .docx aqui</div>
+                  <div class="drop-zone-sub">Suporta transcrições geradas pelo Word, Google Docs ou IA</div>
+                </div>
+                <input type="file" id="trans-file" accept=".docx" style="display:none" onchange="handleTransFile(event)">
+                <div id="trans-file-name" style="margin-top:10px; font-size:12px; color:var(--text-muted)"></div>
+                <div style="margin-top:14px; display:flex; gap:10px">
+                  <button class="btn btn-primary" onclick="processTranscription()" id="btn-process-trans" disabled>🤖 Processar com IA</button>
+                  <button class="btn btn-secondary" onclick="clearTranscription()">🗑️ Limpar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="transcricao-output" style="display:none">
+            <div class="transcript-output" id="transcript-content">
+              <!-- Populated by AI -->
+            </div>
+          </div>
+        </div>
+
+        <!-- DOCUMENTOS CLÍNICOS -->
+        <div id="panel-documentos" class="panel">
+          <div class="toolbar no-print">
+            <select id="doc-type-select" class="form-input" style="max-width:260px" onchange="loadDocTemplate()">
+              <option value="">— Selecione o tipo de documento —</option>
+              <option value="laudo">📋 Laudo Psicológico</option>
+              <option value="relatorio">📄 Relatório Psicológico</option>
+              <option value="atestado">📝 Atestado Psicológico</option>
+              <option value="parecer">🔍 Parecer Psicológico</option>
+              <option value="encaminhamento">➡️ Encaminhamento</option>
+            </select>
+            <button class="btn btn-accent btn-sm" onclick="genDocWithAI()">🤖 Gerar com IA</button>
+            <button class="btn btn-primary btn-sm" onclick="saveDoc()">💾 Salvar</button>
+            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
+          </div>
+          <div id="doc-template-area">
+            <div class="empty-state">
+              <div class="empty-state-icon">📄</div>
+              <h3>Selecione o tipo de documento</h3>
+              <p>Escolha acima o tipo de documento clínico que deseja gerar</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTRATO -->
+        <div id="panel-contrato" class="panel">
+          <div class="toolbar no-print">
+            <button class="btn btn-primary btn-sm" onclick="saveContract()">💾 Salvar</button>
+            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
+          </div>
+          <div id="contrato-area"><!-- built by JS --></div>
+        </div>
+
+        <!-- SUPERVISOR IA -->
+        <div id="panel-supervisor" class="panel">
+          <div class="ai-chat-wrap">
+            <div class="ai-chat-header">
+              <span style="font-size:24px">🧠</span>
+              <div class="ai-chat-title">Supervisor Clínico TCC (IA)</div>
+              <select class="ai-mode-select" id="ai-mode">
+                <option value="LIVRE">⚪ Modo Livre</option>
+                <option value="ANAMNESE INICIAL">🔵 Anamnese Inicial</option>
+                <option value="SESSÃO CLÍNICA">🟢 Sessão Clínica</option>
+                <option value="SUPERVISÃO">🟠 Supervisão de Caso</option>
+                <option value="CRISE">🔴 Crise / Risco</option>
+              </select>
+              <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:none" onclick="clearAIChat()">🗑️ Limpar</button>
+            </div>
+            <div class="ai-msgs" id="ai-msgs">
+              <div class="ai-msg ai">
+                <div class="ai-msg-avatar">🧠</div>
+                <div class="ai-msg-bubble">
+                  <strong>Supervisor Clínico TCC ativo.</strong><br>
+                  Sou um sistema de apoio ao raciocínio clínico baseado em TCC. Selecione o modo de operação acima e compartilhe os dados do caso.<br><br>
+                  <em>⚠️ Este sistema é uma ferramenta de apoio. Nunca substitui julgamento profissional ou supervisão humana.</em>
+                </div>
+              </div>
+            </div>
+            <div class="ai-input-row">
+              <textarea id="ai-input" placeholder="Digite sua solicitação clínica... (Enter para enviar, Shift+Enter para nova linha)" onkeydown="handleAIKey(event)"></textarea>
+              <button class="ai-send-btn" onclick="sendAIMessage()" id="ai-send-btn">➤</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="panel-settings" class="panel">
+          <div class="settings-grid">
+            <div class="settings-nav">
+              <div class="settings-nav-item active" onclick="showSettingsPanel('profile')" data-sp="profile">👤 Perfil do Psicólogo</div>
+              <div class="settings-nav-item" onclick="showSettingsPanel('brand')" data-sp="brand">🎨 Marca e Logo</div>
+              <div class="settings-nav-item" onclick="showSettingsPanel('onedrive')" data-sp="onedrive">☁️ Google Drive</div>
+              <div class="settings-nav-item" onclick="showSettingsPanel('apikey')" data-sp="apikey">🤖 API Claude</div>
+              <div class="settings-nav-item" onclick="showSettingsPanel('security')" data-sp="security">🔐 Segurança</div>
+            </div>
+
+            <div>
+              <!-- PROFILE -->
+              <div id="sp-profile" class="settings-panel active card">
+                <div class="card-header"><div class="card-title">👤 Dados do Psicólogo</div></div>
+                <div class="card-body">
+                  <div class="form-row" style="margin-bottom:14px"><label>Nome Completo</label><input type="text" id="cfg-name" class="form-input"></div>
+                  <div class="form-row" style="margin-bottom:14px"><label>CRP</label><input type="text" id="cfg-crp" class="form-input" placeholder="CRP 02/12345"></div>
+                  <div class="form-row" style="margin-bottom:14px"><label>Especialidade</label><input type="text" id="cfg-spec" class="form-input" placeholder="Psicóloga Clínica · TCC"></div>
+                  <div class="form-row" style="margin-bottom:14px"><label>E-mail</label><input type="email" id="cfg-email" class="form-input"></div>
+                  <div class="form-row" style="margin-bottom:14px"><label>Telefone / WhatsApp</label><input type="text" id="cfg-phone" class="form-input"></div>
+                  <div class="form-row" style="margin-bottom:14px"><label>Endereço do Consultório</label><textarea id="cfg-address" class="form-input" rows="2"></textarea></div>
+                  <button class="btn btn-primary" onclick="saveProfile()">💾 Salvar Perfil</button>
+                </div>
+              </div>
+
+              <!-- BRAND -->
+              <div id="sp-brand" class="settings-panel card">
+                <div class="card-header"><div class="card-title">🎨 Marca e Logo</div></div>
+                <div class="card-body">
+                  <div class="form-row" style="margin-bottom:16px">
+                    <label>Logo Principal</label>
+                    <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
+                      <img id="preview-logo" style="max-width:120px;max-height:60px;object-fit:contain;border:1px solid var(--border);border-radius:6px;padding:4px;display:none" src="" alt="Logo">
+                      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('upload-logo').click()">📁 Escolher Imagem</button>
+                      <button class="btn btn-ghost btn-sm" onclick="removeLogo('main')">✕ Remover</button>
+                    </div>
+                    <input type="file" id="upload-logo" accept="image/*" style="display:none" onchange="handleLogoUpload(event,'main')">
+                  </div>
+                  <div class="form-row" style="margin-bottom:16px">
+                    <label>Submarca / Logo Secundário</label>
+                    <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
+                      <img id="preview-logo2" style="max-width:120px;max-height:60px;object-fit:contain;border:1px solid var(--border);border-radius:6px;padding:4px;display:none" src="" alt="Logo 2">
+                      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('upload-logo2').click()">📁 Escolher Imagem</button>
+                      <button class="btn btn-ghost btn-sm" onclick="removeLogo('sub')">✕ Remover</button>
+                    </div>
+                    <input type="file" id="upload-logo2" accept="image/*" style="display:none" onchange="handleLogoUpload(event,'sub')">
+                  </div>
+                  <div class="alert alert-info">As logos aparecem automaticamente em todos os documentos impressos e no cabeçalho do sistema.</div>
+                </div>
+              </div>
+
+              <!-- GOOGLE DRIVE -->
+              <div id="sp-onedrive" class="settings-panel card">
+                <div class="card-header"><div class="card-title">☁️ Integração Google Drive</div></div>
+                <div class="card-body">
+                  <div class="alert alert-info" style="margin-bottom:16px">
+                    📌 O PsicoTCC salva todos os dados automaticamente na sua conta Google Drive. Clique em "Conectar com Google" e faça login com seu Gmail normalmente.
+                  </div>
+
+                  <div class="onedrive-status" id="od-status-box">
+                    <div class="onedrive-dot" id="od-dot"></div>
+                    <div>
+                      <strong id="od-status-title">Não conectado</strong>
+                      <div style="font-size:12px;color:var(--text-muted)" id="od-status-sub">Faça login com sua conta Google para sincronizar</div>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" id="od-disconnect-btn" onclick="disconnectGDrive()" style="display:none;margin-left:auto">Desconectar</button>
+                  </div>
+
+                  <div id="od-msg" class="auth-msg"></div>
+
+                  <div style="margin-bottom:20px">
+                    <button class="btn btn-lg btn-full" id="btn-gdrive-connect" onclick="connectGDrive()" style="background:#4285F4;color:white;gap:12px;font-size:15px">
+                      <svg width="20" height="20" viewBox="0 0 48 48" style="flex-shrink:0"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 32.8 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.4 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.4 6.5 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.5C9.8 35.9 16.4 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.9 2.4-2.4 4.5-4.4 5.9l6.2 5.2C36.8 36 44 30 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>
+                      Conectar com Google
+                    </button>
+                  </div>
+
+                  <div id="gdrive-folder-info" style="display:none; margin-bottom:16px">
+                    <div class="form-row">
+                      <label>Pasta no Google Drive (opcional)</label>
+                      <input type="text" id="gdrive-folder-name" class="form-input" placeholder="PsicoTCC" value="PsicoTCC">
+                      <small style="font-size:11px;color:var(--text-muted)">Os dados serão salvos nessa pasta no seu Google Drive. Se não existir, será criada automaticamente.</small>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="saveDriveFolder()">💾 Salvar Configuração da Pasta</button>
+                  </div>
+
+                  <div class="separator"></div>
+                  <div class="api-instructions">
+                    <h4>📖 Como funciona</h4>
+                    <ol>
+                      <li>Clique em <strong>"Conectar com Google"</strong> acima</li>
+                      <li>Uma janela do Google será aberta — faça login com seu Gmail normalmente</li>
+                      <li>Autorize o PsicoTCC a salvar arquivos no seu Drive</li>
+                      <li>Pronto! Todos os dados são salvos automaticamente na pasta <strong>PsicoTCC</strong> do seu Drive</li>
+                      <li>Em outro computador, basta clicar em "Conectar com Google" novamente e seus dados aparecem</li>
+                    </ol>
+                    <div style="margin-top:12px;padding:10px;background:#e8f5e9;border-radius:6px;font-size:12px;color:#1b5e20">
+                      ✅ <strong>Seguro:</strong> O Google controla o acesso. O PsicoTCC não armazena sua senha em nenhum momento.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- API KEY -->
+              <div id="sp-apikey" class="settings-panel card">
+                <div class="card-header"><div class="card-title">🤖 Chave de API — Claude (Anthropic)</div></div>
+                <div class="card-body">
+                  <div class="api-instructions" style="margin-bottom:20px">
+                    <h4>📖 Como obter sua chave de API</h4>
+                    <ol>
+                      <li>Acesse <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> e crie ou faça login na sua conta</li>
+                      <li>No menu lateral, clique em <strong>"API Keys"</strong></li>
+                      <li>Clique em <strong>"Create Key"</strong>, dê um nome (ex: "PsicoTCC") e copie a chave gerada</li>
+                      <li>A chave começa com <code>sk-ant-...</code></li>
+                      <li>Cole a chave no campo abaixo e clique em Salvar</li>
+                      <li><strong>Importante:</strong> Em cada dispositivo novo, você precisará inserir a chave novamente nas Configurações</li>
+                    </ol>
+                    <div style="margin-top:12px; padding:10px; background:#fff3cd; border-radius:6px; font-size:12px; color:#856404;">
+                      ⚠️ <strong>Segurança:</strong> Nunca compartilhe sua chave de API. Ela fica armazenada apenas neste dispositivo (localStorage).
+                    </div>
+                  </div>
+                  <div class="form-row" style="margin-bottom:14px">
+                    <label>Chave de API Anthropic</label>
+                    <input type="password" id="cfg-apikey" class="form-input" placeholder="sk-ant-...">
+                    <small style="font-size:11px;color:var(--text-muted)">A chave fica salva apenas neste dispositivo. Em outro PC, insira novamente aqui.</small>
+                  </div>
+                  <div id="apikey-status" style="margin-bottom:12px; font-size:12px; color:var(--text-muted)"></div>
+                  <div style="display:flex;gap:10px">
+                    <button class="btn btn-primary" onclick="saveApiKey()">💾 Salvar Chave</button>
+                    <button class="btn btn-secondary" onclick="testApiKey()">🔍 Testar Conexão</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECURITY -->
+              <div id="sp-security" class="settings-panel card">
+                <div class="card-header"><div class="card-title">🔐 Segurança e Acesso</div></div>
+                <div class="card-body">
+                  <h4 style="font-size:14px;font-weight:700;margin-bottom:14px">Trocar Senha do Sistema</h4>
+                  <div class="form-row" style="margin-bottom:14px"><label>Senha Atual</label><input type="password" id="sec-old-pwd" class="form-input" placeholder="Sua senha atual"></div>
+                  <div class="form-row" style="margin-bottom:14px"><label>Nova Senha</label><input type="password" id="sec-new-pwd" class="form-input" placeholder="Mínimo 8 caracteres"></div>
+                  <div class="form-row" style="margin-bottom:14px"><label>Confirmar Nova Senha</label><input type="password" id="sec-new-pwd2" class="form-input" placeholder="Repita a nova senha"></div>
+                  <button class="btn btn-primary" onclick="changePwd()">🔄 Trocar Senha</button>
+
+                  <div class="separator"></div>
+                  <h4 style="font-size:14px;font-weight:700;margin-bottom:10px">Código de Recuperação</h4>
+                  <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Atualize sua palavra-chave de recuperação de acesso:</p>
+                  <div class="form-row" style="margin-bottom:14px"><label>Novo Código de Recuperação</label><input type="text" id="sec-recovery" class="form-input" placeholder="Nova palavra secreta"></div>
+                  <button class="btn btn-secondary" onclick="updateRecovery()">💾 Salvar Código</button>
+
+                  <div class="separator"></div>
+                  <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--danger)">Zona de Perigo</h4>
+                  <button class="btn btn-danger btn-sm" onclick="exportData()">📦 Exportar Todos os Dados</button>
+                  &nbsp;
+                  <button class="btn btn-danger btn-sm" onclick="if(confirm('Isso apagará TODOS os dados locais. Tem certeza?')) clearAllData()">🗑️ Limpar Dados Locais</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /content-area -->
+    </div><!-- /main-content -->
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="modal-overlay" class="modal-overlay" style="display:none" onclick="closeModal(event)">
+  <div id="modal-box" class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- mammoth.js for docx reading -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+<script>
+// ============================================================
+//  GLOBAL STATE
+// ============================================================
+const APP = {
+  patients: [],
+  activePatient: null,
+  settings: {},
+  gDriveConnected: false,
+  gDriveToken: null,
+  gDriveFolderId: null,
+  currentTranscriptionText: '',
+  aiHistory: [],
+  currentDocType: '',
+  unsaved: false
+};
+
+// ============================================================
+//  CRYPTO / AUTH HELPERS
+// ============================================================
+async function hashStr(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function getConfig() {
+  try { return JSON.parse(localStorage.getItem('psicotcc_config') || '{}'); } catch { return {}; }
+}
+function setConfig(obj) {
+  const cur = getConfig();
+  localStorage.setItem('psicotcc_config', JSON.stringify({...cur, ...obj}));
+}
+
+// ============================================================
+//  AUTH
+// ============================================================
+function showAuthPanel(p) {
+  document.querySelectorAll('.auth-panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.auth-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('panel-' + p).classList.add('active');
+  const tabs = document.querySelectorAll('.auth-tab');
+  const map = { login: 0, setup: 1, recover: 2 };
+  if (tabs[map[p]]) tabs[map[p]].classList.add('active');
+}
+
+async function doLogin() {
+  const pwd = document.getElementById('login-pwd').value;
+  const msg = document.getElementById('login-msg');
+  const cfg = getConfig();
+
+  if (!cfg.pwdHash) {
+    showMsg(msg, 'Sistema não configurado. Use "Configurar sistema".', 'error');
+    showAuthPanel('setup');
+    return;
+  }
+  const h = await hashStr(pwd);
+  if (h !== cfg.pwdHash) {
+    showMsg(msg, 'Senha incorreta. Verifique ou use "Recuperar Senha".', 'error');
+    return;
+  }
+  sessionStorage.setItem('psicotcc_session', '1');
+  initApp();
+}
+
+async function doSetup() {
+  const name = document.getElementById('setup-name').value.trim();
+  const crp = document.getElementById('setup-crp').value.trim();
+  const pwd = document.getElementById('setup-pwd').value;
+  const pwd2 = document.getElementById('setup-pwd2').value;
+  const rec = document.getElementById('setup-recovery').value.trim();
+  const msg = document.getElementById('setup-msg');
+
+  if (!name || !crp) return showMsg(msg, 'Informe nome e CRP.', 'error');
+  if (pwd.length < 8) return showMsg(msg, 'Senha deve ter ao menos 8 caracteres.', 'error');
+  if (pwd !== pwd2) return showMsg(msg, 'Senhas não coincidem.', 'error');
+  if (!rec) return showMsg(msg, 'Informe o código de recuperação.', 'error');
+
+  const pwdHash = await hashStr(pwd);
+  const recHash = await hashStr(rec.toLowerCase().trim());
+  setConfig({ name, crp, pwdHash, recHash, setupDone: true });
+  sessionStorage.setItem('psicotcc_session', '1');
+  showMsg(msg, 'Configuração concluída! Iniciando...', 'success');
+  setTimeout(initApp, 800);
+}
+
+async function doRecover() {
+  const code = document.getElementById('recover-code').value.trim().toLowerCase();
+  const pwd = document.getElementById('recover-pwd').value;
+  const pwd2 = document.getElementById('recover-pwd2').value;
+  const msg = document.getElementById('recover-msg');
+  const cfg = getConfig();
+
+  if (!cfg.recHash) return showMsg(msg, 'Sistema não configurado ainda.', 'error');
+  const h = await hashStr(code);
+  if (h !== cfg.recHash) return showMsg(msg, 'Código de recuperação incorreto.', 'error');
+  if (pwd.length < 8) return showMsg(msg, 'Senha deve ter ao menos 8 caracteres.', 'error');
+  if (pwd !== pwd2) return showMsg(msg, 'Senhas não coincidem.', 'error');
+
+  const pwdHash = await hashStr(pwd);
+  setConfig({ pwdHash });
+  showMsg(msg, 'Senha redefinida com sucesso! Faça login.', 'success');
+  setTimeout(() => showAuthPanel('login'), 1200);
+}
+
+function showMsg(el, txt, type) {
+  el.className = 'auth-msg ' + type;
+  el.textContent = txt;
+  el.style.display = 'block';
+}
+
+function doLogout() {
+  sessionStorage.removeItem('psicotcc_session');
+  location.reload();
+}
+
+// ============================================================
+//  APP INIT
+// ============================================================
+function initApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  const cfg = getConfig();
+  APP.settings = cfg;
+
+  // Load patients
+  try { APP.patients = JSON.parse(localStorage.getItem('psicotcc_patients') || '[]'); } catch { APP.patients = []; }
+
+  updateSidebarUser();
+  updateDashboard();
+  buildAnamneseForm();
+  buildContrato();
+  loadProfileSettings();
+  checkAlerts();
+  restoreLogos();
+
+  // Set today's date on forms
+  const today = new Date().toISOString().split('T')[0];
+  ['evo-date', 'trans-date'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
+
+  toast('Bem-vindo ao PsicoTCC!', 'success');
+
+  // Check Google Drive token
+  const gdToken = sessionStorage.getItem('psicotcc_gd_token');
+  const gdEmail = localStorage.getItem('psicotcc_gd_email');
+  const gdFolderId = localStorage.getItem('psicotcc_gd_folder_id');
+  if (gdToken && gdEmail) {
+    APP.gDriveToken = gdToken;
+    APP.gDriveFolderId = gdFolderId || null;
+    APP.gDriveConnected = true;
+    updateGDriveStatus(true, gdEmail);
+    loadFromGDrive();
+  }
+}
+
+function checkSession() {
+  if (sessionStorage.getItem('psicotcc_session') === '1') {
+    initApp();
+  } else {
+    const cfg = getConfig();
+    if (cfg.setupDone) {
+      document.getElementById('setup-tab').style.display = 'none';
+    }
+  }
+}
+
+function checkAlerts() {
+  const cfg = getConfig();
+  document.getElementById('dash-onedrive-alert').style.display = APP.gDriveConnected ? 'none' : 'flex';
+  const hasKey = localStorage.getItem('psicotcc_apikey');
+  document.getElementById('dash-apikey-alert').style.display = hasKey ? 'none' : 'flex';
+}
+
+function updateSidebarUser() {
+  const cfg = getConfig();
+  document.getElementById('sb-user-name').textContent = cfg.name || 'Psicólogo';
+  document.getElementById('sb-user-crp').textContent = cfg.crp || 'CRP —';
+  document.getElementById('sb-avatar').textContent = (cfg.name || 'P')[0].toUpperCase();
+  document.getElementById('dash-name').textContent = (cfg.name || 'Psicólogo').split(' ')[0];
+}
+
+function updateDashboard() {
+  document.getElementById('dash-total-pac').textContent = APP.patients.length;
+  const evos = APP.patients.reduce((a, p) => a + (p.evolutions || []).length, 0);
+  const docs = APP.patients.reduce((a, p) => a + (p.docs || []).length, 0);
+  const trans = APP.patients.reduce((a, p) => a + (p.transcriptions || []).length, 0);
+  document.getElementById('dash-total-evo').textContent = evos;
+  document.getElementById('dash-total-docs').textContent = docs;
+  document.getElementById('dash-total-trans').textContent = trans;
+
+  // Activity
+  const acts = [];
+  APP.patients.forEach(p => {
+    (p.evolutions || []).forEach(e => acts.push({ date: e.date, text: `Evolução — ${p.name}`, icon: '📈' }));
+    (p.transcriptions || []).forEach(t => acts.push({ date: t.date, text: `Transcrição — ${p.name}`, icon: '🎙️' }));
+  });
+  acts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const list = document.getElementById('dash-activity-list');
+  if (acts.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-state-icon">📋</div><h3>Sem atividades</h3><p>Comece criando um paciente</p></div>';
+  } else {
+    list.innerHTML = acts.slice(0, 8).map(a => `
+      <div class="history-item">
+        <div class="history-dot"></div>
+        <div>
+          <div class="history-title">${a.icon} ${a.text}</div>
+          <div class="history-date">${a.date ? new Date(a.date + 'T00:00').toLocaleDateString('pt-BR') : ''}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function showPanel(p) {
+  document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  const panel = document.getElementById('panel-' + p);
+  if (panel) panel.classList.add('active');
+  const item = document.querySelector(`[data-panel="${p}"]`);
+  if (item) item.classList.add('active');
+
+  const titles = {
+    dashboard: 'Dashboard', patients: 'Pacientes', anamnese: 'Anamnese',
+    prontuario: 'Prontuário Eletrônico', evolucao: 'Evolução de Sessão',
+    transcricao: 'Transcrição de Sessão', documentos: 'Documentos Clínicos',
+    contrato: 'Contrato de Prestação de Serviços', supervisor: 'Supervisor TCC (IA)',
+    settings: 'Configurações'
+  };
+  document.getElementById('topbar-title').textContent = titles[p] || p;
+
+  if (p === 'anamnese') loadAnamnese();
+  if (p === 'prontuario') renderProntuario();
+  if (p === 'evolucao') updateEvoHeader();
+  if (p === 'settings') loadProfileSettings();
+  if (p === 'patients') renderPatients();
+  if (p === 'dashboard') updateDashboard();
+}
+
+// ============================================================
+//  PATIENTS
+// ============================================================
+function renderPatients() {
+  const grid = document.getElementById('patient-grid');
+  const q = (document.getElementById('patient-search')?.value || '').toLowerCase();
+  const filtered = APP.patients.filter(p => !q || p.name.toLowerCase().includes(q) || (p.complaint || '').toLowerCase().includes(q));
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><h3>Nenhum paciente encontrado</h3><p>Clique em "Novo Paciente" para começar</p></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(p => `
+    <div class="patient-card ${APP.activePatient?.id === p.id ? 'active-patient' : ''}" onclick="selectPatient('${p.id}')">
+      <div class="patient-avatar">${p.name[0].toUpperCase()}</div>
+      <div class="patient-name">${p.name}</div>
+      <div class="patient-info">${p.age ? p.age + ' anos · ' : ''}${p.modality || 'Individual'}</div>
+      <div class="patient-info" style="margin-top:2px">${p.complaint ? p.complaint.substring(0, 60) + (p.complaint.length > 60 ? '...' : '') : '—'}</div>
+      <div class="patient-tags">
+        ${p.sessions ? `<span class="tag tag-blue">${p.sessions} sessões</span>` : ''}
+        ${p.risk ? `<span class="tag tag-${p.risk === 'baixo' ? 'green' : p.risk === 'moderado' ? 'amber' : 'red'}">${p.risk}</span>` : ''}
+        ${APP.activePatient?.id === p.id ? '<span class="tag tag-green">✓ Ativo</span>' : ''}
+      </div>
+    </div>`).join('');
+}
+
+function filterPatients() { renderPatients(); }
+
+function selectPatient(id) {
+  APP.activePatient = APP.patients.find(p => p.id === id);
+  if (!APP.activePatient) return;
+  document.getElementById('sb-patient-box').style.display = 'block';
+  document.getElementById('sb-patient-name').textContent = APP.activePatient.name;
+  renderPatients();
+  updateEvoHeader();
+  renderProntuario();
+  document.getElementById('prontuario-patient-name').textContent = APP.activePatient.name;
+  toast(`Paciente ativo: ${APP.activePatient.name}`, 'success');
+}
+
+function openNewPatient() {
+  showModal('Novo Paciente', `
+    <div class="form-row" style="margin-bottom:12px"><label>Nome Completo *</label><input type="text" id="np-name" class="form-input" placeholder="Nome do paciente"></div>
+    <div class="grid-2" style="gap:10px;margin-bottom:12px">
+      <div class="form-row"><label>Idade</label><input type="number" id="np-age" class="form-input" placeholder="28"></div>
+      <div class="form-row"><label>Gênero</label><select id="np-gender" class="form-input"><option>—</option><option>Feminino</option><option>Masculino</option><option>Não-binário</option><option>Outro</option></select></div>
+    </div>
+    <div class="form-row" style="margin-bottom:12px"><label>Queixa Principal</label><textarea id="np-complaint" class="form-input" rows="2" placeholder="Motivo do encaminhamento ou queixa principal..."></textarea></div>
+    <div class="grid-2" style="gap:10px;margin-bottom:12px">
+      <div class="form-row"><label>Modalidade</label><select id="np-modality" class="form-input"><option>Individual</option><option>Casal</option><option>Grupo</option></select></div>
+      <div class="form-row"><label>Data de Início</label><input type="date" id="np-start" class="form-input"></div>
+    </div>
+  `, [
+    { label: '💾 Criar Paciente', cls: 'btn-primary', action: createPatient },
+    { label: 'Cancelar', cls: 'btn-secondary', action: closeModal }
+  ]);
+  document.getElementById('np-start').value = new Date().toISOString().split('T')[0];
+}
+
+function createPatient() {
+  const name = document.getElementById('np-name').value.trim();
+  if (!name) return toast('Informe o nome do paciente.', 'error');
+  const p = {
+    id: Date.now().toString(),
+    name,
+    age: document.getElementById('np-age').value,
+    gender: document.getElementById('np-gender').value,
+    complaint: document.getElementById('np-complaint').value,
+    modality: document.getElementById('np-modality').value,
+    startDate: document.getElementById('np-start').value,
+    sessions: 0,
+    anamnese: {},
+    evolutions: [],
+    transcriptions: [],
+    prontuario: [],
+    docs: [],
+    contract: {}
+  };
+  APP.patients.push(p);
+  savePatients();
+  closeModal();
+  selectPatient(p.id);
+  renderPatients();
+  toast(`Paciente "${name}" criado com sucesso!`, 'success');
+}
+
+function savePatients() {
+  localStorage.setItem('psicotcc_patients', JSON.stringify(APP.patients));
+  updateDashboard();
+  autoSyncGDrive();
+}
+
+// ============================================================
+//  ANAMNESE FORM
+// ============================================================
+const ANAMNESE_SECTIONS = [
+  { title: '👤 Dados Sociodemográficos', fields: [
+    ['Nome Completo', 'an-nome', 'text', ''],
+    ['Data de Nascimento', 'an-nasc', 'date', ''],
+    ['Idade', 'an-idade', 'number', ''],
+    ['Sexo/Gênero', 'an-genero', 'select', ['—','Feminino','Masculino','Não-binário','Outro']],
+    ['Estado Civil', 'an-estado-civil', 'select', ['—','Solteiro(a)','Casado(a)','União Estável','Divorciado(a)','Viúvo(a)']],
+    ['Escolaridade', 'an-escolaridade', 'select', ['—','Fundamental Incompleto','Fundamental Completo','Médio Incompleto','Médio Completo','Superior Incompleto','Superior Completo','Pós-Graduação']],
+    ['Profissão', 'an-profissao', 'text', ''],
+    ['Situação Profissional', 'an-sit-prof', 'select', ['—','Empregado','Desempregado','Autônomo','Estudante','Aposentado','Do lar']],
+    ['Situação Socioeconômica', 'an-socio', 'select', ['—','Baixa','Média-Baixa','Média','Média-Alta','Alta']],
+    ['Arranjo Familiar', 'an-familia', 'text', ''],
+    ['Endereço', 'an-endereco', 'text', ''],
+    ['Telefone / WhatsApp', 'an-tel', 'text', ''],
+    ['E-mail', 'an-email', 'email', ''],
+    ['Como chegou ao atendimento?', 'an-como-chegou', 'select', ['—','Indicação de amigo/familiar','Indicação médica','Plano de saúde','Busca própria (internet)','Outro']],
+  ]},
+  { title: '📢 Queixa Principal e História do Problema Atual', fields: [
+    ['Queixa Principal (nas palavras do paciente)', 'an-queixa', 'textarea', ''],
+    ['Há quanto tempo apresenta a queixa?', 'an-tempo-queixa', 'text', ''],
+    ['Como o problema se iniciou?', 'an-inicio-prob', 'textarea', ''],
+    ['Evolução do problema (melhoras, pioras, variações)', 'an-evolucao-prob', 'textarea', ''],
+    ['Fatores precipitantes / Eventos associados', 'an-precipitantes', 'textarea', ''],
+    ['O que melhora o problema?', 'an-melhora', 'textarea', ''],
+    ['O que piora o problema?', 'an-piora', 'textarea', ''],
+    ['Impacto na vida diária', 'an-impacto', 'textarea', ''],
+  ]},
+  { title: '🧠 Histórico Psiquiátrico e Psicológico', fields: [
+    ['Diagnósticos psiquiátricos anteriores', 'an-diag-ant', 'textarea', ''],
+    ['Internações psiquiátricas', 'an-internacoes', 'textarea', ''],
+    ['Medicações em uso (psiquiátricas e outras)', 'an-medicacoes', 'textarea', ''],
+    ['Tentativas de suicídio anteriores', 'an-tentativas', 'select', ['—','Não','Sim — 1 vez','Sim — 2 vezes','Sim — 3+ vezes']],
+    ['Autolesão sem intenção suicida', 'an-autolesao', 'select', ['—','Nunca','Passado','Atualmente']],
+    ['Atendimentos psicológicos anteriores', 'an-psi-ant', 'textarea', ''],
+    ['Abordagem(ns) utilizada(s) anteriormente', 'an-abordagens-ant', 'text', ''],
+    ['Motivo de interrupção do atendimento anterior', 'an-motivo-int', 'textarea', ''],
+  ]},
+  { title: '🏥 Histórico Médico e Uso de Substâncias', fields: [
+    ['Doenças crónicas / condições de saúde', 'an-doencas', 'textarea', ''],
+    ['Condições neurológicas', 'an-neuro', 'textarea', ''],
+    ['Alergias a medicamentos', 'an-alergias', 'text', ''],
+    ['Uso de álcool', 'an-alcool', 'select', ['—','Nunca','Raramente','Moderado (fins de semana)','Frequente (diário)','Dependência']],
+    ['Uso de tabaco', 'an-tabaco', 'select', ['—','Nunca','Ex-fumante','Fumante atual']],
+    ['Uso de outras substâncias', 'an-substancias', 'textarea', ''],
+    ['Padrão de sono', 'an-sono', 'textarea', ''],
+    ['Apetite e alimentação', 'an-apetite', 'textarea', ''],
+    ['Atividade física', 'an-ativ-fisica', 'select', ['—','Sedentário','Atividade leve','Atividade moderada','Atividade intensa']],
+  ]},
+  { title: '👨‍👩‍👧 Histórico Familiar e Desenvolvimento', fields: [
+    ['Composição familiar de origem', 'an-familia-orig', 'textarea', ''],
+    ['Qualidade do vínculo com pais/cuidadores', 'an-vinculo-pais', 'textarea', ''],
+    ['Transtornos mentais na família', 'an-tm-familia', 'textarea', ''],
+    ['Perdas significativas na família', 'an-perdas', 'textarea', ''],
+    ['Violência intrafamiliar', 'an-violencia-fam', 'select', ['—','Não','Sim — física','Sim — psicológica','Sim — sexual','Múltiplas']],
+    ['Padrões relacionais observados na família', 'an-padroes-rel', 'textarea', ''],
+    ['Desenvolvimento (gestação, infância, adolescência)', 'an-desenv', 'textarea', ''],
+    ['Experiências de abuso ou negligência', 'an-abuso', 'textarea', ''],
+  ]},
+  { title: '🤝 Contexto Social, Relacional e Espiritual', fields: [
+    ['Rede de apoio social', 'an-rede-apoio', 'textarea', ''],
+    ['Qualidade dos vínculos afetivos atuais', 'an-vinculos-atuais', 'textarea', ''],
+    ['Relacionamento amoroso atual', 'an-rel-amoroso', 'textarea', ''],
+    ['Filhos', 'an-filhos', 'textarea', ''],
+    ['Situação profissional / escolar atual', 'an-trabalho', 'textarea', ''],
+    ['Satisfação com o trabalho/estudos', 'an-sat-trab', 'select', ['—','Muito insatisfeito','Insatisfeito','Neutro','Satisfeito','Muito satisfeito']],
+    ['Espiritualidade / religião', 'an-espiritualidade', 'textarea', ''],
+    ['Hobbies e atividades prazerosas', 'an-hobbies', 'textarea', ''],
+    ['Isolamento social', 'an-isolamento', 'select', ['—','Não','Leve','Moderado','Grave']],
+  ]},
+  { title: '⚠️ Avaliação de Risco e Fatores de Proteção / Risco', fields: [
+    ['Ideação suicida atual', 'an-ideacao', 'select', ['—','Ausente','Passiva (sem plano)','Ativa sem plano','Ativa com plano']],
+    ['Plano suicida', 'an-plano-sui', 'select', ['—','Ausente','Presente']],
+    ['Acesso a meios letais', 'an-meios', 'select', ['—','Não','Sim']],
+    ['Fatores de proteção identificados', 'an-fatores-prot', 'textarea', ''],
+    ['Fatores de risco identificados', 'an-fatores-risco', 'textarea', ''],
+    ['Nível de risco geral', 'an-risco-geral', 'select', ['—','🟢 Baixo','🟡 Moderado','🔴 Elevado','⚫ Crítico']],
+    ['Observações adicionais de risco', 'an-obs-risco', 'textarea', ''],
+  ]},
+  { title: '🎯 Objetivos e Expectativas Terapêuticas', fields: [
+    ['O que o paciente espera da terapia?', 'an-expectativas', 'textarea', ''],
+    ['Objetivos terapêuticos iniciais', 'an-obj-terapia', 'textarea', ''],
+    ['Disponibilidade para tratamento', 'an-disponibilidade', 'select', ['—','Alta — muito motivado','Média — ambivalente','Baixa — resistente']],
+    ['Observações gerais do psicólogo na avaliação inicial', 'an-obs-psi', 'textarea', ''],
+  ]}
+];
+
+function buildAnamneseForm() {
+  const form = document.getElementById('anamnese-form');
+  let html = `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-title">📋 Ficha de Anamnese Psicológica</div>
+        <div style="font-size:12px;color:var(--text-muted)">Paciente: <strong id="an-patient-display">${APP.activePatient?.name || '— selecione um paciente —'}</strong></div>
+      </div>
+      <div class="card-body" style="padding:12px 22px">
+        <div class="grid-2" style="gap:10px">
+          <div class="form-row"><label>Data da Avaliação</label><input type="date" id="an-data" class="form-input"></div>
+          <div class="form-row"><label>Número de Sessões de Avaliação</label><input type="number" id="an-sessoes-aval" class="form-input" value="1" min="1"></div>
+        </div>
+      </div>
+    </div>`;
+
+  ANAMNESE_SECTIONS.forEach((sec, si) => {
+    html += `
+    <div class="form-section">
+      <div class="form-section-header" onclick="toggleSection(this)">
+        <span>${sec.title}</span>
+        <span style="margin-left:auto;font-size:12px;opacity:0.7">▼</span>
+      </div>
+      <div class="form-section-body ${sec.fields.some(f => f[2]==='textarea') ? '' : ''}">`;
+    sec.fields.forEach(([label, id, type, opts]) => {
+      const span = type === 'textarea' ? ' span-2' : '';
+      html += `<div class="form-row${span}"><label>${label}</label>`;
+      if (type === 'select') {
+        html += `<select id="${id}" class="form-input">${opts.map(o => `<option>${o}</option>`).join('')}</select>`;
+      } else if (type === 'textarea') {
+        html += `<textarea id="${id}" class="form-input" rows="3"></textarea>`;
+      } else {
+        html += `<input type="${type}" id="${id}" class="form-input">`;
+      }
+      html += `</div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  form.innerHTML = html;
+  document.getElementById('an-data').value = new Date().toISOString().split('T')[0];
+}
+
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('collapsed');
+  header.querySelector('span:last-child').textContent = body.classList.contains('collapsed') ? '▶' : '▼';
+}
+
+function getAnamneseData() {
+  const data = { data: document.getElementById('an-data')?.value, sessoesAval: document.getElementById('an-sessoes-aval')?.value };
+  ANAMNESE_SECTIONS.forEach(sec => sec.fields.forEach(([,id]) => {
+    const el = document.getElementById(id);
+    if (el) data[id] = el.value;
+  }));
+  return data;
+}
+
+function setAnamneseData(data) {
+  if (!data) return;
+  Object.keys(data).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = data[id] || '';
+  });
+}
+
+function saveAnamnese() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  APP.activePatient.anamnese = getAnamneseData();
+  savePatients();
+  toast('Anamnese salva!', 'success');
+}
+
+function loadAnamnese() {
+  if (APP.activePatient) {
+    document.getElementById('an-patient-display') && (document.getElementById('an-patient-display').textContent = APP.activePatient.name);
+    setAnamneseData(APP.activePatient.anamnese || {});
+  }
+}
+
+// ============================================================
+//  PRONTUARIO
+// ============================================================
+function renderProntuario() {
+  const list = document.getElementById('prontuario-list');
+  if (!APP.activePatient) {
+    list.innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-state-icon">📁</div><h3>Selecione um paciente</h3></div>';
+    return;
+  }
+  document.getElementById('prontuario-patient-name').textContent = APP.activePatient.name;
+  const entries = APP.activePatient.prontuario || [];
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-state-icon">📁</div><h3>Prontuário vazio</h3><p>Clique em "Novo Registro" para adicionar</p></div>';
+    return;
+  }
+  list.innerHTML = entries.slice().reverse().map((e, i) => `
+    <div class="history-item">
+      <div class="history-dot"></div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="history-title">${e.type || 'Registro'}</div>
+          <div class="history-date">${e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : ''}</div>
+        </div>
+        <div class="history-preview">${e.content || '—'}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm no-print" onclick="deleteProntuarioEntry(${entries.length-1-i})">✕</button>
+    </div>`).join('');
+}
+
+function addProntuarioEntry() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  showModal('Novo Registro no Prontuário', `
+    <div class="form-row" style="margin-bottom:12px">
+      <label>Tipo de Registro</label>
+      <select id="pr-type" class="form-input">
+        <option>Anotação clínica</option>
+        <option>Contato entre sessões</option>
+        <option>Intercorrência</option>
+        <option>Avaliação de risco</option>
+        <option>Comunicação com familiar</option>
+        <option>Encaminhamento</option>
+        <option>Observação geral</option>
+      </select>
+    </div>
+    <div class="form-row" style="margin-bottom:12px"><label>Data</label><input type="date" id="pr-date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
+    <div class="form-row"><label>Conteúdo do Registro</label><textarea id="pr-content" class="form-input" rows="6" placeholder="Descreva o registro clínico com detalhes relevantes..."></textarea></div>
+  `, [
+    { label: '💾 Salvar Registro', cls: 'btn-primary', action: saveProntuarioEntry },
+    { label: 'Cancelar', cls: 'btn-secondary', action: closeModal }
+  ]);
+}
+
+function saveProntuarioEntry() {
+  const entry = {
+    type: document.getElementById('pr-type').value,
+    date: document.getElementById('pr-date').value,
+    content: document.getElementById('pr-content').value
+  };
+  if (!APP.activePatient.prontuario) APP.activePatient.prontuario = [];
+  APP.activePatient.prontuario.push(entry);
+  savePatients();
+  renderProntuario();
+  closeModal();
+  toast('Registro adicionado ao prontuário!', 'success');
+}
+
+function deleteProntuarioEntry(i) {
+  if (!confirm('Excluir este registro?')) return;
+  APP.activePatient.prontuario.splice(i, 1);
+  savePatients();
+  renderProntuario();
+  toast('Registro removido.', 'info');
+}
+
+// ============================================================
+//  EVOLUÇÃO
+// ============================================================
+function updateEvoHeader() {
+  const cfg = getConfig();
+  const p = APP.activePatient;
+  document.getElementById('evo-doc-psi').textContent = cfg.name || '—';
+  document.getElementById('evo-doc-crp').textContent = cfg.crp || '—';
+  document.getElementById('evo-sig-name').textContent = cfg.name || '—';
+  document.getElementById('evo-sig-crp').textContent = cfg.crp ? `${cfg.crp} · ${cfg.spec || 'Psicóloga'}` : '—';
+  document.getElementById('evo-meta-patient').textContent = p ? p.name : '—';
+  updateEvoMeta();
+}
+
+function updateEvoMeta() {
+  document.getElementById('evo-meta-date').textContent = document.getElementById('evo-date')?.value ? new Date(document.getElementById('evo-date').value+'T00:00').toLocaleDateString('pt-BR') : '—';
+  document.getElementById('evo-meta-duration').textContent = (document.getElementById('evo-duration')?.value || '—') + ' minutos';
+  document.getElementById('evo-meta-modality').textContent = document.getElementById('evo-modality')?.value || '—';
+}
+
+['evo-date','evo-duration','evo-modality'].forEach(id => {
+  document.addEventListener('change', e => { if (e.target.id === id) updateEvoMeta(); });
+});
+
+async function genEvolution() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) return toast('Configure a chave de API Claude nas Configurações.', 'error');
+
+  const date = document.getElementById('evo-date').value;
+  const dur = document.getElementById('evo-duration').value;
+  const mod = document.getElementById('evo-modality').value;
+  const risk = document.getElementById('evo-risk').value;
+  const riskObs = document.getElementById('evo-risk-obs').value;
+  const an = APP.activePatient.anamnese || {};
+  const lastEvo = (APP.activePatient.evolutions || []).slice(-1)[0];
+
+  const prompt = `Você é um Supervisor Clínico de TCC. Gere um Registro de Evolução estruturado e profissional.
+
+Paciente: ${APP.activePatient.name}
+Data: ${date} | Duração: ${dur}min | Modalidade: ${mod}
+Risco avaliado: ${risk} ${riskObs ? '— '+riskObs : ''}
+Queixa principal: ${an['an-queixa'] || 'não informada'}
+${lastEvo ? `Plano da sessão anterior: ${lastEvo.s7 || '—'}` : ''}
+
+Gere os 7 campos da evolução:
+1. Estado emocional e funcional relatado
+2. Temas trabalhados na sessão
+3. Intervenções e técnicas utilizadas (TCC)
+4. Observações clínicas
+5. Avaliação de risco
+6. Encaminhamentos e tarefa para a semana
+7. Plano para a próxima sessão
+
+Responda APENAS com JSON: {"s1":"...","s2":"...","s3":"...","s4":"...","s5":"...","s6":"...","s7":"..."}`;
+
+  toast('Gerando evolução com IA...', 'info');
+  try {
+    const resp = await callClaude([{ role: 'user', content: prompt }], 1500);
+    const clean = resp.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    ['s1','s2','s3','s4','s5','s6','s7'].forEach(k => {
+      const el = document.getElementById('evo-' + k);
+      if (el && parsed[k]) el.innerHTML = parsed[k].replace(/\n/g, '<br>');
+    });
+    toast('Evolução gerada pela IA!', 'success');
+  } catch(e) {
+    toast('Erro ao gerar evolução: ' + e.message, 'error');
+  }
+}
+
+function saveEvolution() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const evo = {
+    date: document.getElementById('evo-date').value,
+    duration: document.getElementById('evo-duration').value,
+    modality: document.getElementById('evo-modality').value,
+    risk: document.getElementById('evo-risk').value,
+    riskObs: document.getElementById('evo-risk-obs').value,
+    sessionNum: document.getElementById('evo-session-num').value,
+    s1: document.getElementById('evo-s1').innerHTML,
+    s2: document.getElementById('evo-s2').innerHTML,
+    s3: document.getElementById('evo-s3').innerHTML,
+    s4: document.getElementById('evo-s4').innerHTML,
+    s5: document.getElementById('evo-s5').innerHTML,
+    s6: document.getElementById('evo-s6').innerHTML,
+    s7: document.getElementById('evo-s7').innerHTML,
+  };
+  if (!APP.activePatient.evolutions) APP.activePatient.evolutions = [];
+  APP.activePatient.evolutions.push(evo);
+  APP.activePatient.sessions = APP.activePatient.evolutions.length;
+  savePatients();
+  toast('Evolução salva!', 'success');
+}
+
+function loadEvolutionList() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const evos = APP.activePatient.evolutions || [];
+  if (!evos.length) return toast('Nenhuma evolução registrada ainda.', 'info');
+  showModal('Histórico de Evoluções', `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Data</th><th>Sessão</th><th>Duração</th><th>Risco</th><th></th></tr></thead>
+        <tbody>${evos.map((e,i) => `
+          <tr>
+            <td>${e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : '—'}</td>
+            <td>#${e.sessionNum || i+1}</td>
+            <td>${e.duration || '—'}min</td>
+            <td><span class="risk-badge risk-${e.risk || 'baixo'}">${e.risk || '—'}</span></td>
+            <td><button class="btn btn-sm btn-secondary" onclick="loadEvolution(${i}); closeModal()">Abrir</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`, [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
+}
+
+function loadEvolution(i) {
+  const e = APP.activePatient.evolutions[i];
+  if (!e) return;
+  document.getElementById('evo-date').value = e.date || '';
+  document.getElementById('evo-duration').value = e.duration || 50;
+  document.getElementById('evo-modality').value = e.modality || '';
+  document.getElementById('evo-risk').value = e.risk || 'baixo';
+  document.getElementById('evo-risk-obs').value = e.riskObs || '';
+  document.getElementById('evo-session-num').value = e.sessionNum || 1;
+  ['s1','s2','s3','s4','s5','s6','s7'].forEach(k => {
+    const el = document.getElementById('evo-' + k);
+    if (el) el.innerHTML = e[k] || '';
+  });
+  updateEvoMeta();
+}
+
+// ============================================================
+//  TRANSCRICAO
+// ============================================================
+let transFileData = null;
+
+function handleTransDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+
+function handleTransFile(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+
+function processFile(file) {
+  if (!file.name.endsWith('.docx')) return toast('Somente arquivos .docx são suportados.', 'error');
+  document.getElementById('trans-file-name').textContent = '📎 ' + file.name;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const result = await mammoth.extractRawText({ arrayBuffer: e.target.result });
+      APP.currentTranscriptionText = result.value;
+      transFileData = file;
+      document.getElementById('btn-process-trans').disabled = false;
+      toast('Arquivo carregado! Clique em "Processar com IA".', 'success');
+    } catch(err) { toast('Erro ao ler o arquivo: ' + err.message, 'error'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function processTranscription() {
+  if (!APP.currentTranscriptionText) return toast('Carregue um arquivo primeiro.', 'error');
+  const apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) return toast('Configure a chave de API Claude nas Configurações.', 'error');
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+
+  document.getElementById('btn-process-trans').disabled = true;
+  toast('Processando transcrição com IA...', 'info');
+
+  const cfg = getConfig();
+  const prompt = `Você é um assistente clínico especializado em transcrição de sessões de psicoterapia.
+
+Processe a transcrição abaixo e reformate-a identificando claramente as falas de cada interlocutor.
+
+Regras:
+- Identifique as falas da PSICÓLOGA e do/a PACIENTE
+- Se a transcrição usar rótulos como "Palestrante 1" / "Palestrante 2", identifique pelo CONTEXTO quem é o terapeuta e quem é o paciente
+- Corrija erros de ortografia, pontuação e concordância
+- Mantenha os marcadores de tempo se existirem
+- Agrupe falas fragmentadas do mesmo interlocutor
+- Formate como array JSON: [{"speaker":"PSICÓLOGA","time":"00:00","text":"..."},{"speaker":"${APP.activePatient.name.split(' ')[0].toUpperCase()}","time":"00:00","text":"..."},...]
+- Responda APENAS com o JSON, sem mais nada
+
+TRANSCRIÇÃO:
+${APP.currentTranscriptionText.substring(0, 12000)}`;
+
+  try {
+    const resp = await callClaude([{ role: 'user', content: prompt }], 4000);
+    const clean = resp.replace(/```json|```/g, '').trim();
+    const blocks = JSON.parse(clean);
+    renderTranscription(blocks);
+    // Save
+    const date = document.getElementById('trans-date').value;
+    if (!APP.activePatient.transcriptions) APP.activePatient.transcriptions = [];
+    APP.activePatient.transcriptions.push({ date, blocks });
+    savePatients();
+    toast('Transcrição processada com sucesso!', 'success');
+  } catch(e) {
+    toast('Erro ao processar: ' + e.message, 'error');
+    document.getElementById('btn-process-trans').disabled = false;
+  }
+}
+
+function renderTranscription(blocks) {
+  const cfg = getConfig();
+  const date = document.getElementById('trans-date').value;
+  const dateStr = date ? new Date(date+'T00:00').toLocaleDateString('pt-BR') : '';
+
+  let html = `
+    <div class="transcript-header">
+      <img src="" class="doc-logo" id="trans-doc-logo" style="display:none">
+      <div style="font-size:12px;font-family:Inter,sans-serif;color:var(--text-muted)">${cfg.name || ''} · ${cfg.crp || ''}</div>
+      <h2>Transcrição da Sessão — ${dateStr}</h2>
+      <p>Paciente: ${APP.activePatient?.name || '—'}</p>
+      <p style="font-size:11px;margin-top:6px;font-family:Inter,sans-serif;color:var(--text-muted)"><em>Documento reorganizado a partir de transcrição automática. Revisado e de responsabilidade da psicóloga responsável.</em></p>
+    </div>`;
+
+  blocks.forEach(b => {
+    const isPsi = b.speaker && (b.speaker.toUpperCase().includes('PSICOLOGO') || b.speaker.toUpperCase().includes('PSICÓLOGA') || b.speaker.toUpperCase().includes('TERAPEUTA') || b.speaker.toUpperCase().includes('PSI'));
+    html += `
+      <div class="transcript-block">
+        ${b.time ? `<div class="transcript-time">(${b.time})</div>` : ''}
+        <div class="transcript-speaker ${isPsi ? 'psi' : 'pac'}">${b.speaker || '—'}</div>
+        <div class="transcript-text">${b.text || ''}</div>
+      </div>`;
+  });
+
+  document.getElementById('transcript-content').innerHTML = html;
+  document.getElementById('transcricao-output').style.display = 'block';
+  restoreLogosInDoc();
+}
+
+function clearTranscription() {
+  APP.currentTranscriptionText = '';
+  transFileData = null;
+  document.getElementById('trans-file-name').textContent = '';
+  document.getElementById('trans-file').value = '';
+  document.getElementById('btn-process-trans').disabled = true;
+  document.getElementById('transcricao-output').style.display = 'none';
+}
+
+function saveTranscription() { toast('Transcrição salva automaticamente!', 'success'); }
+
+function loadTranscriptionHistory() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const trans = APP.activePatient.transcriptions || [];
+  if (!trans.length) return toast('Nenhuma transcrição salva ainda.', 'info');
+  showModal('Histórico de Transcrições', `
+    <div>${trans.map((t,i) => `
+      <div class="history-item" onclick="loadSavedTranscription(${i}); closeModal()">
+        <div class="history-dot"></div>
+        <div>
+          <div class="history-title">📝 Sessão de ${t.date ? new Date(t.date+'T00:00').toLocaleDateString('pt-BR') : '—'}</div>
+          <div class="history-preview">${(t.blocks?.length || 0)} blocos de fala</div>
+        </div>
+      </div>`).join('')}</div>`,
+    [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
+}
+
+function loadSavedTranscription(i) {
+  const t = APP.activePatient.transcriptions[i];
+  if (t) { document.getElementById('trans-date').value = t.date; renderTranscription(t.blocks); }
+}
+
+// ============================================================
+//  DOCUMENTOS CLÍNICOS
+// ============================================================
+const DOC_TEMPLATES = {
+  laudo: { title: 'LAUDO PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Identificação do Solicitante', 'Demanda e Finalidade', 'Procedimentos Utilizados', 'Análise e Resultados', 'Conclusão'] },
+  relatorio: { title: 'RELATÓRIO PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Identificação', 'Finalidade do Relatório', 'Informações Gerais', 'Análise Psicológica', 'Considerações Finais'] },
+  atestado: { title: 'ATESTADO PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Declaração'] },
+  parecer: { title: 'PARECER PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Quesito / Demanda', 'Análise', 'Conclusão Opinativa'] },
+  encaminhamento: { title: 'ENCAMINHAMENTO PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Dados de Identificação', 'Motivo do Encaminhamento', 'Informações Clínicas Relevantes', 'Profissional de Destino'] }
+};
+
+function loadDocTemplate() {
+  const type = document.getElementById('doc-type-select').value;
+  APP.currentDocType = type;
+  if (!type) { document.getElementById('doc-template-area').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📄</div><h3>Selecione o tipo</h3></div>'; return; }
+
+  const tpl = DOC_TEMPLATES[type];
+  const cfg = getConfig();
+  const p = APP.activePatient;
+  const today = new Date().toLocaleDateString('pt-BR');
+
+  let html = `
+    <div class="doc-template" id="doc-content">
+      <div class="doc-header">
+        <img id="doc-logo-main" class="doc-logo" src="" alt="">
+        <div class="doc-psi-name">${cfg.name || '—'}</div>
+        <div class="doc-psi-crp">${cfg.crp || '—'} ${cfg.spec ? '· ' + cfg.spec : ''}</div>
+        ${cfg.address ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">${cfg.address}</div>` : ''}
+      </div>
+      <div class="doc-title">${tpl.title}</div>
+      <div style="text-align:right;font-family:Inter,sans-serif;font-size:12px;color:var(--text-muted);margin-bottom:20px">Ref.: ${tpl.refCFP}</div>`;
+
+  // Special handling for atestado
+  if (type === 'atestado') {
+    html += `
+      <div class="doc-section">
+        <p>Atesto, para os devidos fins, que <strong><span contenteditable="true">${p?.name || '[Nome do Paciente]'}</span></strong>, ${p?.age ? p.age + ' anos, ' : ''} encontra-se em acompanhamento psicológico neste consultório desde <span contenteditable="true">${p?.startDate ? new Date(p.startDate+'T00:00').toLocaleDateString('pt-BR') : '[data de início]'}</span>, com periodicidade <span contenteditable="true">semanal</span>.</p>
+        <p style="margin-top:12px">O(a) paciente apresenta quadro de <span contenteditable="true">[descreva brevemente, sem revelar diagnóstico se não necessário]</span>, necessitando de <span contenteditable="true">[afastamento / acompanhamento / etc.]</span> pelo período de <span contenteditable="true">[X dias/semanas]</span>, a partir de ${today}.</p>
+        <p style="margin-top:12px">Atestado emitido a pedido do(a) interessado(a) para fins de <span contenteditable="true">[especificar finalidade]</span>.</p>
+      </div>`;
+  } else {
+    tpl.sections.forEach(sec => {
+      html += `
+        <div class="doc-section">
+          <h3>${sec}</h3>
+          <div contenteditable="true" style="min-height:60px;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;line-height:1.7;font-family:'Crimson Pro',serif" placeholder="Clique para editar...">[Clique para editar — ${sec}]</div>
+        </div>`;
+    });
+  }
+
+  html += `
+      <div class="doc-footer">
+        <p style="margin-bottom:4px">Documento elaborado em conformidade com ${tpl.refCFP}.</p>
+        <p>Este documento é de uso profissional e contém informações protegidas pelo sigilo psicológico (Art. 9º do Código de Ética do Psicólogo).</p>
+      </div>
+      <div class="doc-sig-line">
+        <div class="line"></div>
+        <p>${cfg.name || '—'}</p>
+        <p style="font-size:11px;color:var(--text-muted)">${cfg.crp || '—'}</p>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:4px">${cfg.address ? cfg.address + ' · ' : ''}${today}</p>
+      </div>
+    </div>`;
+
+  document.getElementById('doc-template-area').innerHTML = html;
+  restoreLogosInDoc();
+}
+
+async function genDocWithAI() {
+  const type = document.getElementById('doc-type-select').value;
+  if (!type) return toast('Selecione o tipo de documento primeiro.', 'error');
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) return toast('Configure a chave de API Claude.', 'error');
+
+  const tpl = DOC_TEMPLATES[type];
+  const p = APP.activePatient;
+  const an = p.anamnese || {};
+
+  toast(`Gerando ${tpl.title} com IA...`, 'info');
+  const prompt = `Você é um psicólogo clínico experiente. Gere um ${tpl.title} profissional e completo, seguindo a ${tpl.refCFP}.
+
+Dados do paciente:
+- Nome: ${p.name}
+- Idade: ${p.age || '—'} anos
+- Gênero: ${p.gender || '—'}
+- Queixa principal: ${an['an-queixa'] || p.complaint || '—'}
+- Número de sessões: ${p.sessions || 0}
+- Data de início: ${p.startDate || '—'}
+
+Seções a preencher: ${tpl.sections.join(', ')}
+
+Responda com JSON: ${JSON.stringify(Object.fromEntries(tpl.sections.map(s => [s, ''])))}
+APENAS JSON, nada mais.`;
+
+  try {
+    const resp = await callClaude([{ role: 'user', content: prompt }], 2000);
+    const clean = resp.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    // Find and fill editable divs
+    const divs = document.querySelectorAll('#doc-content [contenteditable="true"]');
+    let i = 0;
+    tpl.sections.forEach(sec => {
+      if (parsed[sec] && divs[i]) { divs[i].innerHTML = parsed[sec].replace(/\n/g, '<br>'); i++; }
+    });
+    toast(`${tpl.title} gerado pela IA!`, 'success');
+  } catch(e) { toast('Erro ao gerar documento: ' + e.message, 'error'); }
+}
+
+function saveDoc() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const type = document.getElementById('doc-type-select').value;
+  if (!type) return toast('Selecione o tipo de documento.', 'error');
+  const content = document.getElementById('doc-content')?.innerHTML || '';
+  if (!APP.activePatient.docs) APP.activePatient.docs = [];
+  APP.activePatient.docs.push({ type, date: new Date().toISOString().split('T')[0], content });
+  savePatients();
+  toast('Documento salvo!', 'success');
+}
+
+// ============================================================
+//  CONTRATO
+// ============================================================
+function buildContrato() {
+  const cfg = getConfig();
+  document.getElementById('contrato-area').innerHTML = `
+    <div class="doc-template" id="contract-doc">
+      <div class="doc-header">
+        <img id="contract-doc-logo" class="doc-logo" src="" alt="">
+        <div class="doc-psi-name">${cfg.name || '[Nome do Psicólogo]'}</div>
+        <div class="doc-psi-crp">${cfg.crp || '[CRP]'} ${cfg.spec ? '· ' + cfg.spec : ''}</div>
+      </div>
+      <div class="doc-title">CONTRATO DE PRESTAÇÃO DE SERVIÇOS PSICOLÓGICOS</div>
+
+      <div class="doc-section">
+        <h3>PARTES CONTRATANTES</h3>
+        <p><strong>CONTRATADA:</strong> ${cfg.name || '[Nome]'}, Psicóloga inscrita no Conselho Regional de Psicologia sob o nº ${cfg.crp || '[CRP]'}, com consultório localizado em ${cfg.address || '[endereço]'}.</p>
+        <p style="margin-top:8px"><strong>CONTRATANTE:</strong> <span contenteditable="true">[Nome completo do paciente ou responsável legal]</span>, CPF nº <span contenteditable="true">[CPF]</span>, residente em <span contenteditable="true">[endereço]</span>.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 1ª — OBJETO DO CONTRATO</h3>
+        <p>O presente contrato tem por objeto a prestação de serviços de atendimento psicológico individual, em conformidade com o Código de Ética Profissional do Psicólogo (Resolução CFP nº 10/2005) e demais normativas do Conselho Federal de Psicologia.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 2ª — DAS SESSÕES</h3>
+        <p>As sessões terão duração aproximada de <span contenteditable="true">50 (cinquenta)</span> minutos, realizadas com periodicidade <span contenteditable="true">semanal</span>, em dia(s) e horário(s) a serem acordados entre as partes.</p>
+        <p style="margin-top:6px">A modalidade de atendimento será: <span contenteditable="true">presencial</span>.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 3ª — DOS HONORÁRIOS</h3>
+        <p>Os honorários profissionais ficam estabelecidos no valor de <span contenteditable="true">R$ [VALOR]</span> por sessão, a serem pagos <span contenteditable="true">até o dia do atendimento, via PIX/transferência/dinheiro</span>.</p>
+        <p style="margin-top:6px">Os honorários poderão ser reajustados anualmente, mediante comunicação prévia de <span contenteditable="true">30 (trinta)</span> dias.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 4ª — DAS FALTAS E CANCELAMENTOS</h3>
+        <p>O cancelamento ou remarcação de sessão deverá ser comunicado com antecedência mínima de <span contenteditable="true">24 (vinte e quatro)</span> horas, por telefone ou mensagem.</p>
+        <p style="margin-top:6px">Ausências sem comunicação prévia dentro do prazo estabelecido serão cobradas integralmente, salvo casos de força maior devidamente justificados.</p>
+        <p style="margin-top:6px">Após <span contenteditable="true">2 (duas)</span> faltas consecutivas sem comunicação, a psicóloga poderá disponibilizar o horário para outro paciente.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 5ª — DO SIGILO PROFISSIONAL</h3>
+        <p>As informações compartilhadas durante os atendimentos são protegidas pelo sigilo profissional, conforme Art. 9º do Código de Ética do Psicólogo. O sigilo somente poderá ser quebrado nas hipóteses legalmente previstas, incluindo: risco à vida do paciente ou de terceiros; determinação judicial; ou quando necessário para a proteção de criança ou adolescente em situação de vulnerabilidade.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 6ª — DA DURAÇÃO E RESCISÃO</h3>
+        <p>O presente contrato é celebrado por prazo indeterminado, podendo ser rescindido por qualquer das partes mediante comunicação prévia de <span contenteditable="true">15 (quinze)</span> dias.</p>
+        <p style="margin-top:6px">É assegurado ao contratante o direito de interromper o tratamento a qualquer momento, sendo recomendável, no entanto, que tal decisão seja discutida com a psicóloga.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 7ª — DO CONTATO ENTRE SESSÕES</h3>
+        <p>O contato entre sessões poderá ser realizado por <span contenteditable="true">WhatsApp ou e-mail</span>, sendo reservado para situações de urgência ou dúvidas pontuais. Sessões de terapia não são realizadas por mensagem ou chamada de voz fora dos horários agendados.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 8ª — SITUAÇÕES DE RISCO E EMERGÊNCIA</h3>
+        <p>Em situações de crise ou risco imediato à vida, o contratante compromete-se a acionar os serviços de emergência (SAMU: 192, CVV: 188) ou comparecer à Unidade de Pronto Atendimento mais próxima, comunicando a psicóloga o mais breve possível.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 9ª — DO FORO</h3>
+        <p>As partes elegem o foro da Comarca de <span contenteditable="true">[cidade]</span> para dirimir quaisquer litígios decorrentes do presente contrato, renunciando a qualquer outro, por mais privilegiado que seja.</p>
+      </div>
+
+      <p style="margin-top:24px;font-family:Inter,sans-serif;font-size:12px;color:var(--text-muted);text-align:center">
+        <span contenteditable="true">[Cidade]</span>, ${new Date().toLocaleDateString('pt-BR')}
+      </p>
+
+      <div class="grid-2" style="gap:40px;margin-top:40px">
+        <div class="doc-sig-line">
+          <div class="line"></div>
+          <p>${cfg.name || '—'}</p>
+          <p style="font-size:11px;color:var(--text-muted)">${cfg.crp || '—'} — Contratada</p>
+        </div>
+        <div class="doc-sig-line">
+          <div class="line"></div>
+          <p>Contratante</p>
+          <p style="font-size:11px;color:var(--text-muted)">Nome e CPF</p>
+        </div>
+      </div>
+
+      <div class="doc-footer" style="margin-top:30px">
+        <p>Documento elaborado em conformidade com o Código de Ética Profissional do Psicólogo (CFP — Resolução nº 10/2005).</p>
+      </div>
+    </div>`;
+  restoreLogosInDoc();
+}
+
+function saveContract() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  APP.activePatient.contract = { date: new Date().toISOString().split('T')[0], content: document.getElementById('contract-doc')?.innerHTML || '' };
+  savePatients();
+  toast('Contrato salvo!', 'success');
+}
+
+// ============================================================
+//  AI SUPERVISOR
+// ============================================================
+const TCC_SYSTEM_PROMPT = `Você é um Supervisor Clínico Especialista em Terapia Cognitivo-Comportamental (TCC), Psicopatologia, Formulação Cognitiva de Casos e Psicologia Baseada em Evidências.
+
+⚠️ AVISO ÉTICO: Este sistema é uma ferramenta de apoio ao raciocínio clínico. Não substitui julgamento profissional.
+
+PRINCÍPIO DE EPISTEMOLOGIA CLÍNICA — Marque SEMPRE:
+- [FATO] — Informação objetivamente relatada
+- [INFERÊNCIA] — Conclusão plausível derivada dos fatos  
+- [HIPÓTESE] — Possibilidade clínica que requer confirmação
+
+REGRA DE DIAGNÓSTICO: Use SEMPRE o DSM-5 como referência. NUNCA afirme diagnóstico definitivo.
+
+MODOS DE OPERAÇÃO:
+🔵 ANAMNESE INICIAL: Etapas 1, 2, 5, 8, 9
+🟢 SESSÃO CLÍNICA: Etapas 3, 4, 6, 11, 12
+🟠 SUPERVISÃO: Etapas 13, 2, 7
+🔴 CRISE/RISCO: Etapa 8 (prioridade absoluta)
+⚪ LIVRE: Resposta direta
+
+ETAPAS DISPONÍVEIS:
+01 — Resumo Clínico Estruturado
+02 — Mapa de Lacunas (informações ausentes priorizadas)
+03 — Modelo Cognitivo ABC+
+04 — Análise de Distorções Cognitivas
+05 — Hierarquia de Crenças (Central/Intermediária/Pressupostos)
+06 — Fatores de Manutenção
+07 — Hipóteses Diagnósticas (DSM-5, com nível de confiança)
+08 — Avaliação de Risco
+09 — Formulação Cognitiva Integrativa
+10 — Plano Terapêutico
+11 — Intervenções TCC Indicadas
+12 — Plano de Sessão
+13 — Supervisão Reflexiva (pontos cegos, vieses, hipóteses alternativas)
+
+Responda como um colega supervisor experiente: linguagem técnica e precisa, perguntas reflexivas, reconheça quando dados são insuficientes.`;
+
+async function callClaude(messages, maxTokens = 1500) {
+  const apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) throw new Error('Chave de API não configurada');
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      system: TCC_SYSTEM_PROMPT,
+      messages
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${response.status}`);
+  }
+  const data = await response.json();
+  return data.content?.[0]?.text || '';
+}
+
+function handleAIKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAIMessage(); }
+}
+
+async function sendAIMessage() {
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) {
+    toast('Configure a chave de API Claude em Configurações → API Claude.', 'error');
+    showPanel('settings');
+    setTimeout(() => showSettingsPanel('apikey'), 100);
+    return;
+  }
+
+  const mode = document.getElementById('ai-mode').value;
+  const p = APP.activePatient;
+  const contextHeader = p ? `\n[CONTEXTO DO PACIENTE ATIVO: ${p.name}${p.age ? ', ' + p.age + ' anos' : ''}${p.complaint ? ' — Queixa: ' + p.complaint.substring(0,100) : ''}]\n` : '';
+  const fullMsg = `Modo: ${mode}${contextHeader}\n${text}`;
+
+  addAIMsg('user', text);
+  input.value = '';
+  document.getElementById('ai-send-btn').disabled = true;
+
+  // Show thinking
+  const thinking = document.createElement('div');
+  thinking.className = 'ai-msg ai';
+  thinking.id = 'ai-thinking';
+  thinking.innerHTML = `<div class="ai-msg-avatar">🧠</div><div class="ai-thinking"><div class="ai-thinking-dots"><span></span><span></span><span></span></div><span>Analisando o caso...</span></div>`;
+  document.getElementById('ai-msgs').appendChild(thinking);
+  scrollAI();
+
+  APP.aiHistory.push({ role: 'user', content: fullMsg });
+
+  try {
+    const response = await callClaude(APP.aiHistory, 3000);
+    APP.aiHistory.push({ role: 'assistant', content: response });
+    thinking.remove();
+    addAIMsg('ai', formatAIResponse(response));
+  } catch(e) {
+    thinking.remove();
+    addAIMsg('ai', `❌ Erro: ${e.message}. Verifique a chave de API nas configurações.`);
+  }
+  document.getElementById('ai-send-btn').disabled = false;
+}
+
+function formatAIResponse(text) {
+  return text
+    .replace(/\[FATO\]/g, '<span class="tag-fato">[FATO]</span>')
+    .replace(/\[INFERÊNCIA\]/g, '<span class="tag-inf">[INFERÊNCIA]</span>')
+    .replace(/\[HIPÓTESE\]/g, '<span class="tag-hip">[HIPÓTESE]</span>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/^### (.*)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*)/gm, '<h3>$1</h3>')
+    .replace(/^# (.*)/gm, '<h3>$1</h3>')
+    .replace(/\n/g, '<br>');
+}
+
+function addAIMsg(role, content) {
+  const msgs = document.getElementById('ai-msgs');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+  div.innerHTML = `<div class="ai-msg-avatar">${role === 'user' ? '👤' : '🧠'}</div><div class="ai-msg-bubble">${content}</div>`;
+  msgs.appendChild(div);
+  scrollAI();
+}
+
+function scrollAI() {
+  const msgs = document.getElementById('ai-msgs');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function clearAIChat() {
+  APP.aiHistory = [];
+  const msgs = document.getElementById('ai-msgs');
+  msgs.innerHTML = `<div class="ai-msg ai"><div class="ai-msg-avatar">🧠</div><div class="ai-msg-bubble"><strong>Supervisor Clínico TCC ativo.</strong><br>Chat reiniciado. Selecione o modo e compartilhe os dados do caso.<br><br><em>⚠️ Este sistema é uma ferramenta de apoio. Nunca substitui julgamento profissional.</em></div></div>`;
+}
+
+// ============================================================
+//  SETTINGS
+// ============================================================
+function showSettingsPanel(p) {
+  document.querySelectorAll('.settings-panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sp-' + p).classList.add('active');
+  document.querySelector(`[data-sp="${p}"]`).classList.add('active');
+}
+
+function loadProfileSettings() {
+  const cfg = getConfig();
+  ['name','crp','spec','email','phone','address'].forEach(k => {
+    const el = document.getElementById('cfg-' + k);
+    if (el) el.value = cfg[k] || '';
+  });
+
+  // API key
+  const key = localStorage.getItem('psicotcc_apikey') || '';
+  const apiel = document.getElementById('cfg-apikey');
+  if (apiel) apiel.value = key;
+  const st = document.getElementById('apikey-status');
+  if (st) st.textContent = key ? '✅ Chave configurada neste dispositivo.' : '⚠️ Chave não configurada.';
+
+  // Google Drive status
+  const gdEmail = localStorage.getItem('psicotcc_gd_email');
+  if (gdEmail && APP.gDriveConnected) {
+    updateGDriveStatus(true, gdEmail);
+    document.getElementById('gdrive-folder-info').style.display = 'block';
+  }
+}
+
+function saveProfile() {
+  const cfg = {};
+  ['name','crp','spec','email','phone','address'].forEach(k => {
+    const el = document.getElementById('cfg-' + k);
+    if (el) cfg[k] = el.value;
+  });
+  setConfig(cfg);
+  updateSidebarUser();
+  toast('Perfil salvo!', 'success');
+  buildContrato();
+}
+
+function saveApiKey() {
+  const key = document.getElementById('cfg-apikey').value.trim();
+  if (!key.startsWith('sk-ant')) return toast('Chave inválida. Deve começar com sk-ant-...', 'error');
+  localStorage.setItem('psicotcc_apikey', key);
+  document.getElementById('apikey-status').textContent = '✅ Chave salva neste dispositivo.';
+  toast('Chave de API salva!', 'success');
+  checkAlerts();
+}
+
+async function testApiKey() {
+  const key = document.getElementById('cfg-apikey').value.trim() || localStorage.getItem('psicotcc_apikey');
+  if (!key) return toast('Insira a chave primeiro.', 'error');
+  localStorage.setItem('psicotcc_apikey', key);
+  toast('Testando conexão...', 'info');
+  try {
+    const r = await callClaude([{ role: 'user', content: 'Responda apenas: OK' }], 10);
+    toast('Conexão com Claude: ✅ OK!', 'success');
+  } catch(e) { toast('Erro: ' + e.message, 'error'); }
+}
+
+// ============================================================
+//  GOOGLE DRIVE INTEGRATION (real OAuth2 + API)
+// ============================================================
+const GDRIVE_CLIENT_ID = 'SEU_CLIENT_ID_AQUI.apps.googleusercontent.com';
+const GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
+const GDRIVE_FOLDER_NAME_DEFAULT = 'PsicoTCC';
+
+function connectGDrive() {
+  if (GDRIVE_CLIENT_ID === 'SEU_CLIENT_ID_AQUI.apps.googleusercontent.com') {
+    showModal('⚙️ Configuração necessária', `
+      <div class="alert alert-info" style="margin-bottom:16px">
+        Para usar o Google Drive, é necessário criar um Client ID gratuito no Google Cloud Console. Siga o passo a passo:
+      </div>
+      <div class="api-instructions">
+        <h4>Como obter seu Google Client ID (gratuito)</h4>
+        <ol>
+          <li>Acesse <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> e faça login com seu Gmail</li>
+          <li>Clique em <strong>"Criar Projeto"</strong> → dê o nome "PsicoTCC" → clique em Criar</li>
+          <li>No menu lateral, vá em <strong>APIs e Serviços → Tela de permissão OAuth</strong></li>
+          <li>Escolha <strong>"Externo"</strong> → clique em Criar</li>
+          <li>Preencha: Nome do app = "PsicoTCC", E-mail de suporte = seu Gmail → clique em Salvar</li>
+          <li>Vá em <strong>APIs e Serviços → Credenciais → Criar Credenciais → ID do cliente OAuth</strong></li>
+          <li>Tipo: <strong>"Aplicativo da Web"</strong></li>
+          <li>Em "Origens JavaScript autorizadas" adicione: <code>${location.origin}</code></li>
+          <li>Em "URIs de redirecionamento" adicione: <code>${location.href.split('?')[0].split('#')[0]}</code></li>
+          <li>Clique em <strong>Criar</strong> e copie o <strong>ID do cliente</strong></li>
+          <li>Cole o ID do cliente no campo abaixo e clique em Salvar</li>
+        </ol>
+        <div style="margin-top:12px;font-size:12px;color:#1b5e20;background:#e8f5e9;padding:10px;border-radius:6px">
+          ✅ É 100% gratuito. Você usa a cota gratuita do Google que é mais do que suficiente.
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:16px">
+        <label>Seu Client ID do Google</label>
+        <input type="text" id="gdrive-client-id-input" class="form-input" placeholder="xxxxx.apps.googleusercontent.com">
+      </div>
+    `, [
+      { label: '💾 Salvar e Conectar', cls: 'btn-primary', action: saveClientIdAndConnect },
+      { label: 'Cancelar', cls: 'btn-secondary', action: closeModal }
+    ]);
+    return;
+  }
+
+  const redirectUri = location.href.split('?')[0].split('#')[0];
+  const state = Math.random().toString(36).substr(2);
+  sessionStorage.setItem('gdrive_oauth_state', state);
+
+  const params = new URLSearchParams({
+    client_id: GDRIVE_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: GDRIVE_SCOPES,
+    state,
+    prompt: 'select_account'
+  });
+
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+function saveClientIdAndConnect() {
+  const id = document.getElementById('gdrive-client-id-input')?.value?.trim();
+  if (!id || !id.includes('.apps.googleusercontent.com')) {
+    toast('Client ID inválido. Deve terminar com .apps.googleusercontent.com', 'error');
+    return;
+  }
+  localStorage.setItem('psicotcc_gd_client_id', id);
+  closeModal();
+
+  // Reload page to pick up new client ID — or redirect directly
+  const redirectUri = location.href.split('?')[0].split('#')[0];
+  const state = Math.random().toString(36).substr(2);
+  sessionStorage.setItem('gdrive_oauth_state', state);
+  // Save session before redirect
+  sessionStorage.setItem('psicotcc_session', '1');
+
+  const params = new URLSearchParams({
+    client_id: id,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: GDRIVE_SCOPES,
+    state,
+    prompt: 'select_account'
+  });
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+function getGDriveClientId() {
+  return localStorage.getItem('psicotcc_gd_client_id') || GDRIVE_CLIENT_ID;
+}
+
+async function handleGDriveCallback() {
+  const hash = window.location.hash;
+  if (!hash || !hash.includes('access_token')) return;
+
+  const params = new URLSearchParams(hash.substring(1));
+  const token = params.get('access_token');
+  if (!token) return;
+
+  // Clean URL
+  history.replaceState(null, '', location.pathname);
+
+  try {
+    // Get user email
+    const userResp = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const user = await userResp.json();
+    const email = user.email || 'usuário Google';
+
+    // Save token in session (expires ~1h, user must reconnect)
+    sessionStorage.setItem('psicotcc_gd_token', token);
+    localStorage.setItem('psicotcc_gd_email', email);
+
+    APP.gDriveToken = token;
+    APP.gDriveConnected = true;
+
+    // Get or create PsicoTCC folder
+    const folderName = localStorage.getItem('psicotcc_gd_folder_name') || GDRIVE_FOLDER_NAME_DEFAULT;
+    const folderId = await getOrCreateGDriveFolder(folderName, token);
+    if (folderId) {
+      APP.gDriveFolderId = folderId;
+      localStorage.setItem('psicotcc_gd_folder_id', folderId);
+    }
+
+    updateGDriveStatus(true, email);
+    checkAlerts();
+
+    // Restore session if still on app
+    if (sessionStorage.getItem('psicotcc_session') === '1') {
+      // Load data from Drive
+      await loadFromGDrive();
+      toast('✅ Google Drive conectado! Dados sincronizados.', 'success');
+    } else {
+      toast('✅ Google conectado como ' + email, 'success');
+    }
+  } catch(e) {
+    toast('Erro ao conectar ao Google Drive: ' + e.message, 'error');
+  }
+}
+
+async function getOrCreateGDriveFolder(name, token) {
+  try {
+    // Search for existing folder
+    const searchResp = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id,name)`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    const searchData = await searchResp.json();
+    if (searchData.files && searchData.files.length > 0) {
+      return searchData.files[0].id;
+    }
+
+    // Create folder
+    const createResp = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name,
+        mimeType: 'application/vnd.google-apps.folder'
+      })
+    });
+    const folder = await createResp.json();
+    return folder.id;
+  } catch(e) {
+    console.error('Erro ao criar pasta no Drive:', e);
+    return null;
+  }
+}
+
+async function saveToGDrive(filename, data) {
+  if (!APP.gDriveConnected || !APP.gDriveToken) return;
+  const token = APP.gDriveToken;
+  const folderId = APP.gDriveFolderId;
+  const content = JSON.stringify(data, null, 2);
+
+  try {
+    // Check if file exists
+    let query = `name='${filename}' and trashed=false`;
+    if (folderId) query += ` and '${folderId}' in parents`;
+    const searchResp = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    const searchData = await searchResp.json();
+    const existingId = searchData.files?.[0]?.id;
+
+    if (existingId) {
+      // Update existing file
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existingId}?uploadType=media`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: content
+      });
+    } else {
+      // Create new file
+      const metadata = { name: filename, mimeType: 'application/json' };
+      if (folderId) metadata.parents = [folderId];
+
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', new Blob([content], { type: 'application/json' }));
+
+      await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: form
+      });
+    }
+  } catch(e) {
+    console.error('Erro ao salvar no Drive:', e);
+    if (e.message?.includes('401') || (e.status === 401)) {
+      handleGDriveExpired();
+    }
+  }
+}
+
+async function loadFromGDrive() {
+  if (!APP.gDriveConnected || !APP.gDriveToken) return;
+  const token = APP.gDriveToken;
+  const folderId = APP.gDriveFolderId;
+
+  try {
+    let query = `name='psicotcc_patients.json' and trashed=false`;
+    if (folderId) query += ` and '${folderId}' in parents`;
+
+    const searchResp = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    const searchData = await searchResp.json();
+    const fileId = searchData.files?.[0]?.id;
+
+    if (fileId) {
+      const fileResp = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+        { headers: { Authorization: 'Bearer ' + token } }
+      );
+      const data = await fileResp.json();
+      if (Array.isArray(data)) {
+        APP.patients = data;
+        localStorage.setItem('psicotcc_patients', JSON.stringify(data));
+        updateDashboard();
+        renderPatients();
+      }
+    }
+
+    // Load config from Drive
+    let cfgQuery = `name='psicotcc_config.json' and trashed=false`;
+    if (folderId) cfgQuery += ` and '${folderId}' in parents`;
+    const cfgSearch = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(cfgQuery)}&fields=files(id)`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    const cfgSearchData = await cfgSearch.json();
+    const cfgFileId = cfgSearchData.files?.[0]?.id;
+    if (cfgFileId) {
+      const cfgResp = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${cfgFileId}?alt=media`,
+        { headers: { Authorization: 'Bearer ' + token } }
+      );
+      const cfgData = await cfgResp.json();
+      // Merge Drive config with local (preserve password hashes from local)
+      const local = getConfig();
+      const merged = { ...cfgData, pwdHash: local.pwdHash, recHash: local.recHash };
+      localStorage.setItem('psicotcc_config', JSON.stringify(merged));
+      APP.settings = merged;
+      updateSidebarUser();
+    }
+  } catch(e) {
+    console.error('Erro ao carregar do Drive:', e);
+  }
+}
+
+function handleGDriveExpired() {
+  APP.gDriveConnected = false;
+  APP.gDriveToken = null;
+  sessionStorage.removeItem('psicotcc_gd_token');
+  updateGDriveStatus(false);
+  toast('⚠️ Sessão do Google Drive expirada. Reconecte em Configurações.', 'warning');
+}
+
+function disconnectGDrive() {
+  if (!confirm('Desconectar do Google Drive? Os dados locais permanecem salvos.')) return;
+  sessionStorage.removeItem('psicotcc_gd_token');
+  localStorage.removeItem('psicotcc_gd_email');
+  localStorage.removeItem('psicotcc_gd_folder_id');
+  APP.gDriveConnected = false;
+  APP.gDriveToken = null;
+  APP.gDriveFolderId = null;
+  updateGDriveStatus(false);
+  checkAlerts();
+  toast('Google Drive desconectado.', 'info');
+}
+
+function saveDriveFolder() {
+  const name = document.getElementById('gdrive-folder-name')?.value?.trim() || GDRIVE_FOLDER_NAME_DEFAULT;
+  localStorage.setItem('psicotcc_gd_folder_name', name);
+  toast(`Pasta "${name}" configurada. Será criada automaticamente no próximo sync.`, 'success');
+}
+
+function updateGDriveStatus(connected, email) {
+  const dot = document.getElementById('od-dot');
+  const title = document.getElementById('od-status-title');
+  const sub = document.getElementById('od-status-sub');
+  const disconnBtn = document.getElementById('od-disconnect-btn');
+  const badge = document.getElementById('sync-badge');
+  const syncText = document.getElementById('sync-text');
+  const connectBtn = document.getElementById('btn-gdrive-connect');
+  const folderInfo = document.getElementById('gdrive-folder-info');
+
+  if (connected) {
+    dot?.classList.add('connected'); dot?.classList.remove('disconnected');
+    if (title) title.textContent = 'Conectado ao Google Drive';
+    if (sub) sub.textContent = `Conta: ${email || '—'}`;
+    if (disconnBtn) disconnBtn.style.display = 'block';
+    if (connectBtn) { connectBtn.textContent = '✅ Reconectar com Google'; connectBtn.style.background = '#34a853'; }
+    if (folderInfo) folderInfo.style.display = 'block';
+    if (badge) badge.className = 'topbar-badge badge-sync';
+    if (syncText) syncText.textContent = 'Drive ativo';
+  } else {
+    dot?.classList.remove('connected'); dot?.classList.add('disconnected');
+    if (title) title.textContent = 'Não conectado';
+    if (sub) sub.textContent = 'Faça login com sua conta Google para sincronizar';
+    if (disconnBtn) disconnBtn.style.display = 'none';
+    if (connectBtn) { connectBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 48 48" style="flex-shrink:0"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 32.8 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.4 6.5 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.1 8 2.9l5.7-5.7C34.4 6.5 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.5C9.8 35.9 16.4 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.9 2.4-2.4 4.5-4.4 5.9l6.2 5.2C36.8 36 44 30 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg> Conectar com Google'; connectBtn.style.background = '#4285F4'; }
+    if (folderInfo) folderInfo.style.display = 'none';
+    if (badge) badge.className = 'topbar-badge badge-sync offline';
+    if (syncText) syncText.textContent = 'Desconectado';
+  }
+}
+
+function autoSyncGDrive() {
+  if (!APP.gDriveConnected || !APP.gDriveToken) return;
+  const badge = document.getElementById('sync-badge');
+  const syncText = document.getElementById('sync-text');
+  if (badge) badge.className = 'topbar-badge badge-sync syncing';
+  if (syncText) syncText.textContent = 'Sincronizando...';
+
+  Promise.all([
+    saveToGDrive('psicotcc_patients.json', APP.patients),
+    saveToGDrive('psicotcc_config.json', (() => { const c = {...getConfig()}; delete c.pwdHash; delete c.recHash; return c; })())
+  ]).then(() => {
+    if (badge) badge.className = 'topbar-badge badge-sync';
+    if (syncText) syncText.textContent = 'Salvo no Drive';
+    setTimeout(() => { if (syncText) syncText.textContent = 'Drive ativo'; }, 2000);
+  }).catch(e => {
+    if (badge) badge.className = 'topbar-badge badge-sync offline';
+    if (syncText) syncText.textContent = 'Erro no sync';
+    if (e.message?.includes('401')) handleGDriveExpired();
+  });
+}
+
+async function syncToGDrive() {
+  if (!APP.gDriveConnected || !APP.gDriveToken) {
+    toast('Conecte ao Google Drive primeiro em Configurações → Google Drive.', 'error');
+    showPanel('settings');
+    setTimeout(() => showSettingsPanel('onedrive'), 100);
+    return;
+  }
+  const badge = document.getElementById('sync-badge');
+  if (badge) badge.className = 'topbar-badge badge-sync syncing';
+  document.getElementById('sync-text').textContent = 'Sincronizando...';
+
+  try {
+    await Promise.all([
+      saveToGDrive('psicotcc_patients.json', APP.patients),
+      saveToGDrive('psicotcc_config.json', (() => { const c = {...getConfig()}; delete c.pwdHash; delete c.recHash; return c; })()),
+      saveToGDrive('psicotcc_logos.json', {
+        logo: localStorage.getItem('psicotcc_logo') || '',
+        logo2: localStorage.getItem('psicotcc_logo2') || ''
+      })
+    ]);
+    if (badge) badge.className = 'topbar-badge badge-sync';
+    document.getElementById('sync-text').textContent = 'Drive ativo';
+    toast('✅ Dados sincronizados com o Google Drive!', 'success');
+  } catch(e) {
+    if (badge) badge.className = 'topbar-badge badge-sync offline';
+    document.getElementById('sync-text').textContent = 'Erro no sync';
+    toast('Erro ao sincronizar: ' + e.message, 'error');
+  }
+}
+
+// ---- Security ----
+async function changePwd() {
+  const old = document.getElementById('sec-old-pwd').value;
+  const n1 = document.getElementById('sec-new-pwd').value;
+  const n2 = document.getElementById('sec-new-pwd2').value;
+  const cfg = getConfig();
+  const oh = await hashStr(old);
+  if (oh !== cfg.pwdHash) return toast('Senha atual incorreta.', 'error');
+  if (n1.length < 8) return toast('Nova senha deve ter ao menos 8 caracteres.', 'error');
+  if (n1 !== n2) return toast('Senhas não coincidem.', 'error');
+  const pwdHash = await hashStr(n1);
+  setConfig({ pwdHash });
+  document.getElementById('sec-old-pwd').value = '';
+  document.getElementById('sec-new-pwd').value = '';
+  document.getElementById('sec-new-pwd2').value = '';
+  toast('Senha alterada com sucesso!', 'success');
+}
+
+async function updateRecovery() {
+  const code = document.getElementById('sec-recovery').value.trim();
+  if (!code) return toast('Informe o novo código.', 'error');
+  const recHash = await hashStr(code.toLowerCase().trim());
+  setConfig({ recHash });
+  document.getElementById('sec-recovery').value = '';
+  toast('Código de recuperação atualizado!', 'success');
+}
+
+function exportData() {
+  const data = {
+    config: getConfig(),
+    patients: APP.patients,
+    exportedAt: new Date().toISOString()
+  };
+  delete data.config.pwdHash;
+  delete data.config.recHash;
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `psicotcc_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  toast('Dados exportados!', 'success');
+}
+
+function clearAllData() {
+  localStorage.removeItem('psicotcc_patients');
+  APP.patients = [];
+  APP.activePatient = null;
+  updateDashboard();
+  renderPatients();
+  toast('Dados locais apagados.', 'info');
+}
+
+// ============================================================
+//  LOGOS
+// ============================================================
+function handleLogoUpload(e, type) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const data = ev.target.result;
+    if (type === 'main') {
+      localStorage.setItem('psicotcc_logo', data);
+      document.getElementById('preview-logo').src = data;
+      document.getElementById('preview-logo').style.display = 'block';
+    } else {
+      localStorage.setItem('psicotcc_logo2', data);
+      document.getElementById('preview-logo2').src = data;
+      document.getElementById('preview-logo2').style.display = 'block';
+    }
+    restoreLogos();
+    toast('Logo carregado!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLogo(type) {
+  if (type === 'main') {
+    localStorage.removeItem('psicotcc_logo');
+    const el = document.getElementById('preview-logo');
+    el.src = ''; el.style.display = 'none';
+  } else {
+    localStorage.removeItem('psicotcc_logo2');
+    const el = document.getElementById('preview-logo2');
+    el.src = ''; el.style.display = 'none';
+  }
+  restoreLogos();
+  toast('Logo removido.', 'info');
+}
+
+function restoreLogos() {
+  const logo = localStorage.getItem('psicotcc_logo');
+  const logo2 = localStorage.getItem('psicotcc_logo2');
+  if (logo) {
+    const el = document.getElementById('preview-logo');
+    if (el) { el.src = logo; el.style.display = 'block'; }
+    const auth = document.getElementById('auth-logo-img');
+    if (auth) { auth.src = logo; auth.style.display = 'block'; }
+    const sb = document.getElementById('sb-logo-img');
+    if (sb) { sb.src = logo; sb.style.display = 'block'; document.getElementById('sb-logo-icon').style.display = 'none'; }
+  }
+  restoreLogosInDoc();
+}
+
+function restoreLogosInDoc() {
+  const logo = localStorage.getItem('psicotcc_logo');
+  ['doc-logo-main','evo-doc-logo','trans-doc-logo','contract-doc-logo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && logo) { el.src = logo; el.style.display = 'block'; }
+  });
+  document.querySelectorAll('.doc-logo').forEach(el => {
+    if (logo) { el.src = logo; el.style.display = 'block'; }
+  });
+}
+
+// ============================================================
+//  MODAL
+// ============================================================
+function showModal(title, body, buttons = []) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('modal-footer').innerHTML = buttons.map((b, i) =>
+    `<button class="btn ${b.cls}" id="modal-btn-${i}">${b.label}</button>`).join('');
+  buttons.forEach((b, i) => {
+    document.getElementById('modal-btn-' + i).addEventListener('click', b.action);
+  });
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').style.display = 'none';
+  }
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function toast(msg, type = 'info', duration = 3500) {
+  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), duration);
+}
+
+// ============================================================
+//  BOOTSTRAP
+// ============================================================
+window.addEventListener('load', () => {
+  // Handle Google OAuth2 callback (token in URL hash)
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    handleGDriveCallback().then(() => {
+      checkSession();
+    });
+  } else {
+    checkSession();
+  }
+});
+</script>
+</body>
+</html>

@@ -868,12 +868,29 @@ tr.clickable { cursor: pointer; }
   margin: 0 auto;
 }
 .doc-header {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 28px;
   padding-bottom: 20px;
   border-bottom: 2px solid var(--primary);
 }
-.doc-logo { max-width: 240px; max-height: 160px; object-fit: contain; margin-bottom: 14px; display: none; border-radius: 16px; }
+.doc-header-left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+.doc-header-right {
+  flex: 0 0 auto;
+  text-align: right;
+}
+/* Quando não há logo, centraliza tudo */
+.doc-header.centered {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.doc-logo { max-width: 180px; max-height: 100px; object-fit: contain; object-position: left center; display: none; border-radius: 12px; }
 .doc-psi-name { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--primary); }
 .doc-psi-crp { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); }
 .doc-title {
@@ -1011,11 +1028,14 @@ tr.clickable { cursor: pointer; }
   display: none; /* oculta na tela — só aparece na impressão */
 }
 .watermark-img {
-  max-width: 55vw;
-  max-height: 55vh;
+  max-width: 60vw;
+  max-height: 60vh;
+  width: 60vw;
   object-fit: contain;
+  object-position: center center;
   border-radius: 32px;
-  transform: rotate(-30deg);
+  transform: none;
+  display: block;
 }
 
 @media print {
@@ -1025,14 +1045,29 @@ tr.clickable { cursor: pointer; }
   body { background: white; font-size: 12px; }
   .doc-template, .evolution-doc, .transcript-output { border: none; box-shadow: none; padding: 10px 20px; }
   .card { border: 1px solid #ccc; box-shadow: none; }
-  /* MARCA D'ÁGUA NA IMPRESSÃO */
+  /* MARCA D'ÁGUA NA IMPRESSÃO — horizontal, centralizada, sem rotação */
   .watermark-overlay {
     display: flex !important;
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
+    z-index: 9999;
   }
+  .watermark-img {
+    transform: none !important;
+    max-width: 65%;
+    width: 65%;
+    max-height: 65%;
+    object-fit: contain;
+    object-position: center center;
+    border-radius: 32px;
+    display: block;
+  }
+  /* Cabeçalho da anamnese na impressão — mantém layout lado a lado */
+  .doc-template { page-break-inside: avoid; }
 }
 
 /* SETTINGS */
@@ -1496,9 +1531,13 @@ tr.clickable { cursor: pointer; }
 
             <div class="evolution-doc" id="evolution-doc-preview">
               <div class="doc-header" style="margin-bottom:16px">
-                <img id="evo-doc-logo" class="doc-logo" src="" alt="">
-                <div class="doc-psi-name" id="evo-doc-psi">—</div>
-                <div class="doc-psi-crp" id="evo-doc-crp">—</div>
+                <div class="doc-header-left">
+                  <img id="evo-doc-logo" class="doc-logo" src="" alt="" style="max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
+                </div>
+                <div class="doc-header-right">
+                  <div class="doc-psi-name" id="evo-doc-psi">—</div>
+                  <div class="doc-psi-crp" id="evo-doc-crp">—</div>
+                </div>
               </div>
               <h1>Registro de Evolução — Psicoterapia</h1>
               <table class="evolution-meta-table" id="evo-meta-table">
@@ -2339,23 +2378,31 @@ function buildAnamneseForm() {
   const form = document.getElementById('anamnese-form');
   const cfg = getConfig();
   const logoSrc = localStorage.getItem('psicotcc_logo') || '';
-  const logoHtml = logoSrc ? '<img src="' + logoSrc + '" style="max-width:240px;max-height:160px;object-fit:contain;border-radius:16px;margin-bottom:12px">' : '';
+  const logoHtml = logoSrc
+    ? '<img src="' + logoSrc + '" style="max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px;display:block">'
+    : '';
   const psiName = cfg.name || '';
   const psiCrp  = (cfg.crp || '') + (cfg.spec ? ' · ' + cfg.spec : '');
   const patName = APP.activePatient ? APP.activePatient.name : '— selecione um paciente —';
   let html = `
     <div class="doc-template" style="margin-bottom:20px;padding:24px 32px">
-      <div class="doc-header" style="margin-bottom:16px">
-        ${logoHtml}
-        <div class="doc-psi-name">${psiName}</div>
-        <div class="doc-psi-crp">${psiCrp}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;border-bottom:2px solid var(--primary);margin-bottom:18px">
+        <!-- LOGO — lado esquerdo, horizontal -->
+        <div style="flex:0 0 auto;display:flex;align-items:center">
+          ${logoHtml}
+        </div>
+        <!-- NOME DO PSICÓLOGO — lado direito, centralizado verticalmente -->
+        <div style="flex:0 0 auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;justify-content:center">
+          <div class="doc-psi-name" style="font-size:18px">${psiName}</div>
+          <div class="doc-psi-crp" style="font-size:13px;margin-top:4px">${psiCrp}</div>
+        </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
         <div>
           <div style="font-size:18px;font-weight:700;color:var(--primary)">📋 Ficha de Anamnese Psicológica</div>
           <div style="font-size:13px;color:var(--text-muted);margin-top:4px">Paciente: <strong id="an-patient-display">${patName}</strong></div>
         </div>
-        <div style="display:flex;gap:12px;align-items:flex-end">
+        <div style="display:flex;gap:12px;align-items:flex-end" class="no-print">
           <div class="form-row"><label>Data da Avaliação</label><input type="date" id="an-data" class="form-input" style="width:180px"></div>
           <div class="form-row"><label>Nº de Sessões</label><input type="number" id="an-sessoes-aval" class="form-input" value="1" min="1" style="width:80px"></div>
         </div>
@@ -2712,7 +2759,7 @@ function renderTranscription(blocks) {
 
   let html = `
     <div class="transcript-header">
-      <img src="" class="doc-logo" id="trans-doc-logo" style="display:none">
+      <img src="" class="doc-logo" id="trans-doc-logo" style="display:none;max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
       <div style="font-size:12px;font-family:Inter,sans-serif;color:var(--text-muted)">${cfg.name || ''} · ${cfg.crp || ''}</div>
       <h2>Transcrição da Sessão — ${dateStr}</h2>
       <p>Paciente: ${APP.activePatient?.name || '—'}</p>
@@ -2894,9 +2941,13 @@ function buildContrato() {
   document.getElementById('contrato-area').innerHTML = `
     <div class="doc-template" id="contract-doc">
       <div class="doc-header">
-        <img id="contract-doc-logo" class="doc-logo" src="" alt="">
-        <div class="doc-psi-name">${cfg.name || '[Nome do Psicólogo]'}</div>
-        <div class="doc-psi-crp">${cfg.crp || '[CRP]'} ${cfg.spec ? '· ' + cfg.spec : ''}</div>
+        <div class="doc-header-left">
+          <img id="contract-doc-logo" class="doc-logo" src="" alt="" style="max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
+        </div>
+        <div class="doc-header-right">
+          <div class="doc-psi-name">${cfg.name || '[Nome do Psicólogo]'}</div>
+          <div class="doc-psi-crp">${cfg.crp || '[CRP]'} ${cfg.spec ? '· ' + cfg.spec : ''}</div>
+        </div>
       </div>
       <div class="doc-title">CONTRATO DE PRESTAÇÃO DE SERVIÇOS PSICOLÓGICOS</div>
 

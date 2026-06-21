@@ -3701,7 +3701,7 @@ function zoomLogo(img) {
   document.body.appendChild(overlay);
 }
 
-// ── MARCA D'ÁGUA ──────────────────────────────────────────
+// -- MARCA DAGUA ------------------------------------------────
 function handleWatermarkUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -3712,7 +3712,7 @@ function handleWatermarkUpload(e) {
     const el = document.getElementById('preview-watermark');
     if (el) { el.src = data; el.style.display = 'block'; }
     applyWatermark();
-    toast('Marca d'água carregada!', 'success');
+    toast('Marca dágua carregada!', 'success');
   };
   reader.readAsDataURL(file);
 }
@@ -3723,7 +3723,7 @@ function removeWatermark() {
   if (el) { el.src = ''; el.style.display = 'none'; }
   const wm = document.getElementById('watermark-img');
   if (wm) wm.src = '';
-  toast('Marca d'água removida.', 'info');
+  toast('Marca dágua removida.', 'info');
 }
 
 function updateWatermarkOpacity(val) {
@@ -3738,7 +3738,7 @@ function updateWatermarkOpacity(val) {
 function saveWatermarkSettings() {
   const opacity = document.getElementById('watermark-opacity')?.value || 30;
   localStorage.setItem('psicotcc_watermark_opacity', opacity);
-  toast('Configuração da marca d'água salva!', 'success');
+  toast('Configuração da marca dágua salva!', 'success');
 }
 
 function applyWatermark() {
@@ -3764,7 +3764,7 @@ function restoreWatermarkSettings() {
 
 function previewWatermark() {
   applyWatermark();
-  toast('A marca d'água aparecerá na impressão. Use Ctrl+P para visualizar.', 'info');
+  toast('A marca dagua aparecerá na impressão. Use Ctrl+P para visualizar.', 'info');
 }
 
 // ── IMPRESSÃO COM MARCA D'ÁGUA ───────────────────────────────

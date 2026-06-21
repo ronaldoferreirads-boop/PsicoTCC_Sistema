@@ -1630,27 +1630,44 @@ tr.clickable { cursor: pointer; }
         <div
 </div>
 <div id="panel-documentos" class="panel">
-          <div style="margin-bottom:16px">
-            <select id="doc-type-select" class="form-input no-print" style="max-width:320px" onchange="loadDocTemplate()">
-              <option value="">— Selecione o tipo de documento —</option>
-              <option value="laudo">📋 Laudo Psicológico</option>
-              <option value="relatorio">📄 Relatório Psicológico</option>
-              <option value="atestado">📝 Atestado Psicológico</option>
-              <option value="parecer">🔍 Parecer Psicológico</option>
-              <option value="encaminhamento">➡️ Encaminhamento</option>
-            </select>
-          </div>
-          <div id="doc-template-area">
-            <div class="empty-state">
-              <div class="empty-state-icon">📄</div>
-              <h3>Selecione o tipo de documento</h3>
-              <p>Escolha acima o tipo de documento clínico que deseja gerar</p>
-            </div>
-          </div>
-        </div>
+  <div style="margin-bottom:16px">
+    <select id="doc-type-select" class="form-input no-print" style="max-width:320px" onchange="loadDocTemplate()">
+      <option value="">— Selecione o tipo de documento —</option>
+      <option value="laudo">📋 Laudo Psicológico</option>
+      <option value="relatorio">📄 Relatório Psicológico</option>
+      <option value="atestado">📝 Atestado Psicológico</option>
+      <option value="parecer">🔍 Parecer Psicológico</option>
+      <option value="encaminhamento">➡️ Encaminhamento</option>
+    </select>
+  </div>
 
-        <!-- CONTRATO -->
-        <div
+  <div class="grid-2" style="gap:20px">
+    <!-- Editor do documento -->
+    <div>
+      <div id="doc-template-area">
+        <div class="empty-state">
+          <div class="empty-state-icon">📄</div>
+          <h3>Selecione o tipo de documento</h3>
+          <p>Escolha acima o tipo de documento clínico que deseja gerar</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de documentos salvos do paciente -->
+    <div class="card no-print">
+      <div class="card-header">
+        <div class="card-title">📂 Documentos Salvos do Paciente</div>
+        <button class="btn btn-sm btn-secondary" onclick="renderDocList()">🔄 Atualizar</button>
+      </div>
+      <div id="doc-saved-list">
+        <div class="empty-state" style="padding:30px">
+          <div class="empty-state-icon">📄</div>
+          <h3>Nenhum documento salvo</h3>
+          <p>Gere e salve um documento para vê-lo aqui</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="panel-contrato" class="panel">
           <div id="contrato-area"><!-- built by JS --></div>
@@ -1912,7 +1929,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 21/06/2026 16:10
+//  Gerado automaticamente em 21/06/2026 16:27
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2038,6 +2055,7 @@ function initApp() {
   updateDashboard();
   buildAnamneseForm();
   buildContrato();
+  renderDocList();
   loadProfileSettings();
   checkAlerts();
   restoreLogos();
@@ -2173,6 +2191,7 @@ function showPanel(p) {
   if (p === 'settings') loadProfileSettings();
   if (p === 'patients') renderPatients();
   if (p === 'dashboard') updateDashboard();
+  if (p === 'documentos') renderDocList();
 }
 
 function updateDashboard() {
@@ -2576,6 +2595,10 @@ function updateEvoMeta() {
   document.getElementById('evo-meta-modality').textContent = document.getElementById('evo-modality')?.value || '—';
 }
 
+['evo-date','evo-duration','evo-modality'].forEach(id => {
+  document.addEventListener('change', e => { if (e.target.id === id) updateEvoMeta(); });
+});
+
 async function genEvolution() {
   if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
   const apiKey = localStorage.getItem('psicotcc_apikey');
@@ -2668,25 +2691,20 @@ function loadEvolutionList() {
     </div>`, [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
 }
 
-function loadEvolutionList() {
-  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
-  const evos = APP.activePatient.evolutions || [];
-  if (!evos.length) return toast('Nenhuma evolução registrada ainda.', 'info');
-  showModal('Histórico de Evoluções', `
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Data</th><th>Sessão</th><th>Duração</th><th>Risco</th><th></th></tr></thead>
-        <tbody>${evos.map((e,i) => `
-          <tr>
-            <td>${e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : '—'}</td>
-            <td>#${e.sessionNum || i+1}</td>
-            <td>${e.duration || '—'}min</td>
-            <td><span class="risk-badge risk-${e.risk || 'baixo'}">${e.risk || '—'}</span></td>
-            <td><button class="btn btn-sm btn-secondary" onclick="loadEvolution(${i}); closeModal()">Abrir</button></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`, [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
+function loadEvolution(i) {
+  const e = APP.activePatient.evolutions[i];
+  if (!e) return;
+  document.getElementById('evo-date').value = e.date || '';
+  document.getElementById('evo-duration').value = e.duration || 50;
+  document.getElementById('evo-modality').value = e.modality || '';
+  document.getElementById('evo-risk').value = e.risk || 'baixo';
+  document.getElementById('evo-risk-obs').value = e.riskObs || '';
+  document.getElementById('evo-session-num').value = e.sessionNum || 1;
+  ['s1','s2','s3','s4','s5','s6','s7'].forEach(k => {
+    const el = document.getElementById('evo-' + k);
+    if (el) el.innerHTML = e[k] || '';
+  });
+  updateEvoMeta();
 }
 
 // ── TRANSCRIÇÃO ──────────────────────────────────────────────
@@ -2933,10 +2951,74 @@ function saveDoc() {
   const type = document.getElementById('doc-type-select').value;
   if (!type) return toast('Selecione o tipo de documento.', 'error');
   const content = document.getElementById('doc-content')?.innerHTML || '';
+  const typeLabels = {
+    laudo: 'Laudo Psicológico', relatorio: 'Relatório Psicológico',
+    atestado: 'Atestado Psicológico', parecer: 'Parecer Psicológico',
+    encaminhamento: 'Encaminhamento'
+  };
   if (!APP.activePatient.docs) APP.activePatient.docs = [];
-  APP.activePatient.docs.push({ type, date: new Date().toISOString().split('T')[0], content });
+  APP.activePatient.docs.push({
+    id: Date.now().toString(),
+    type,
+    label: typeLabels[type] || type,
+    date: new Date().toISOString().split('T')[0],
+    content
+  });
   savePatients();
+  renderDocList();
   toast('Documento salvo!', 'success');
+}
+
+function renderDocList() {
+  const listEl = document.getElementById('doc-saved-list');
+  if (!listEl) return;
+  if (!APP.activePatient) {
+    listEl.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">📄</div><h3>Selecione um paciente</h3></div>';
+    return;
+  }
+  const docs = (APP.activePatient.docs || []).slice().reverse();
+  if (!docs.length) {
+    listEl.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-state-icon">📄</div><h3>Nenhum documento salvo</h3><p>Gere e salve um documento acima</p></div>';
+    return;
+  }
+  listEl.innerHTML = docs.map((d, i) => `
+    <div class="history-item" style="cursor:default">
+      <div class="history-dot"></div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="history-title">${d.label || d.type}</div>
+          <div class="history-date">${d.date ? new Date(d.date+'T00:00').toLocaleDateString('pt-BR') : ''}</div>
+        </div>
+        <div class="history-preview">${APP.activePatient.name || ''}</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-left:10px">
+        <button class="btn btn-sm btn-secondary" onclick="openSavedDoc(${(APP.activePatient.docs||[]).length-1-i})">📂 Abrir</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteSavedDoc(${(APP.activePatient.docs||[]).length-1-i})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function openSavedDoc(i) {
+  const doc = (APP.activePatient.docs || [])[i];
+  if (!doc) return;
+  // Seleciona o tipo no select
+  const sel = document.getElementById('doc-type-select');
+  if (sel) { sel.value = doc.type; loadDocTemplate(); }
+  // Aguarda o template carregar e injeta o conteúdo
+  setTimeout(() => {
+    const area = document.getElementById('doc-content');
+    if (area && doc.content) area.innerHTML = doc.content;
+    toast('Documento carregado!', 'success');
+  }, 100);
+}
+
+function deleteSavedDoc(i) {
+  if (!confirm('Excluir este documento permanentemente?')) return;
+  if (!APP.activePatient.docs) return;
+  APP.activePatient.docs.splice(i, 1);
+  savePatients();
+  renderDocList();
+  toast('Documento excluído.', 'info');
 }
 
 // ── CONTRATO ─────────────────────────────────────────────────

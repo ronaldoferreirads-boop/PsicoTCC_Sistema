@@ -9,6 +9,31 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
+  --primary:        #C96F58;
+  --primary-light:  #F0C0B4;
+  --primary-dark:   #823F2E;
+  --secondary:      #4A9B8E;
+  --secondary-light:#5BB5A7;
+  --accent:         #E8A838;
+  --accent-dark:    #C8891A;
+  --danger:         #C0392B;
+  --danger-light:   #E74C3C;
+  --success:        #27AE60;
+  --warning:        #F39C12;
+  --bg:             #F6E9D7;
+  --surface:        #FFFFFF;
+  --surface-alt:    #EEF2F7;
+  --border:         #C96F58;
+  --text:           #1A2B3C;
+  --text-secondary: #4A5E72;
+  --text-muted:     #7A8FA3;
+  --sidebar-w:      260px;
+  --header-h:       68px;
+  --radius:         10px;
+  --shadow:         0 2px 12px rgba(44,95,138,0.10);
+  --shadow-lg:      0 8px 32px rgba(44,95,138,0.16);
+}
+:root {
   --primary: #2C5F8A;
   --primary-light: #3A7AB0;
   --primary-dark: #1E4266;
@@ -1203,8 +1228,7 @@ tr.clickable { cursor: pointer; }
 </head>
 <body>
 
-<!-- ====== AUTH SCREEN ====== -->
-<div id="auth-screen">
+id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
       <img id="auth-logo-img" class="auth-logo-img" src="" alt="Logo">
@@ -1280,12 +1304,10 @@ tr.clickable { cursor: pointer; }
   </div>
 </div>
 
-<!-- ====== MAIN APP ====== -->
 <div id="app">
   <div class="app-layout">
 
-    <!-- SIDEBAR -->
-    <nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">
           <img id="sb-logo-img" class="sidebar-logo-img" src="" alt="">
@@ -1361,24 +1383,23 @@ tr.clickable { cursor: pointer; }
           <span class="sidebar-logout" onclick="doLogout()" title="Sair">⏻</span>
         </div>
       </div>
-    </nav>
 
-    <!-- MAIN -->
     <div class="main-content">
+
       <div class="topbar">
         <div class="topbar-title" id="topbar-title">Dashboard</div>
-        <!-- Botões contextuais — trocados dinamicamente por showPanel() -->
         <div id="topbar-actions" class="topbar-actions"></div>
         <div id="sync-badge" class="topbar-badge badge-sync offline">
           <span>●</span> <span id="sync-text">Desconectado</span>
         </div>
-        <button class="btn btn-md btn-secondary no-print" onclick="syncToGDrive()">☁️ Sincronizar</button>
+        <button class="btn btn-md btn-secondary no-print" onclick="syncToGDrive()">
+          ☁️ Sincronizar
+        </button>
       </div>
 
       <div class="content-area">
 
-        <!-- DASHBOARD -->
-        <div id="panel-dashboard" class="panel active">
+id="panel-dashboard" class="panel active">
           <div id="dash-welcome" style="margin-bottom:20px">
             <h2 style="font-size:22px; font-weight:700; color:var(--text)">Olá, <span id="dash-name">Psicólogo</span> 👋</h2>
             <p style="color:var(--text-muted); margin-top:4px">Bem-vindo ao PsicoTCC — seu sistema clínico integrado.</p>
@@ -1451,27 +1472,27 @@ tr.clickable { cursor: pointer; }
         </div>
 
         <!-- PATIENTS -->
+        <div
+
         <div id="panel-patients" class="panel">
-          <div class="toolbar">
+          <div class="toolbar no-print">
             <div class="toolbar-search">
               <span class="toolbar-search-icon">🔍</span>
-              <input type="text" id="patient-search" placeholder="Buscar paciente..." onkeyup="filterPatients()">
+              <input type="text" id="patient-search"
+                     placeholder="Buscar paciente..." onkeyup="filterPatients()">
             </div>
-            <button class="btn btn-primary" onclick="openNewPatient()">➕ Novo Paciente</button>
           </div>
           <div id="patient-grid" class="patient-grid"></div>
         </div>
 
-        <!-- ANAMNESE -->
         <div id="panel-anamnese" class="panel">
           <div id="anamnese-form">
-            <div class="alert alert-info no-print">📋 Selecione um paciente ativo na barra lateral antes de preencher.</div>
-            <!-- Sections built by JS -->
+            <div class="alert alert-info no-print">
+              Selecione um paciente ativo na barra lateral antes de preencher.
+            </div>
           </div>
         </div>
-
-        <!-- PRONTUARIO -->
-        <div id="panel-prontuario" class="panel">
+id="panel-prontuario" class="panel">
           <div class="card">
             <div class="card-header">
               <div class="card-title"><span class="icon">📁</span> Prontuário Eletrônico — <span id="prontuario-patient-name">Selecione um paciente</span></div>
@@ -1481,7 +1502,8 @@ tr.clickable { cursor: pointer; }
         </div>
 
         <!-- EVOLUCAO -->
-        <div id="panel-evolucao" class="panel">
+        <div
+id="panel-evolucao" class="panel">
           <div id="evolution-editor">
 
             <!-- CABEÇALHO COM LOGO — aparece apenas na impressão, no topo da página -->
@@ -1586,7 +1608,8 @@ tr.clickable { cursor: pointer; }
         </div>
 
         <!-- TRANSCRICAO -->
-        <div id="panel-transcricao" class="panel">
+        <div
+id="panel-transcricao" class="panel">
           <div id="transcricao-upload-area">
             <div class="card" style="margin-bottom:16px">
               <div class="card-header"><div class="card-title">🎙️ Processar Transcrição de Sessão</div></div>
@@ -1624,7 +1647,8 @@ tr.clickable { cursor: pointer; }
         </div>
 
         <!-- DOCUMENTOS CLÍNICOS -->
-        <div id="panel-documentos" class="panel">
+        <div
+id="panel-documentos" class="panel">
           <div style="margin-bottom:16px">
             <select id="doc-type-select" class="form-input no-print" style="max-width:320px" onchange="loadDocTemplate()">
               <option value="">— Selecione o tipo de documento —</option>
@@ -1645,12 +1669,14 @@ tr.clickable { cursor: pointer; }
         </div>
 
         <!-- CONTRATO -->
-        <div id="panel-contrato" class="panel">
+        <div
+id="panel-contrato" class="panel">
           <div id="contrato-area"><!-- built by JS --></div>
         </div>
 
         <!-- SUPERVISOR IA -->
-        <div id="panel-supervisor" class="panel">
+        <div
+id="panel-supervisor" class="panel">
           <div class="ai-chat-wrap">
             <div class="ai-chat-header">
               <span style="font-size:24px">🧠</span>
@@ -1682,7 +1708,8 @@ tr.clickable { cursor: pointer; }
         </div>
 
         <!-- SETTINGS -->
-        <div id="panel-settings" class="panel">
+        <div
+id="panel-settings" class="panel">
           <div class="settings-grid">
             <div class="settings-nav">
               <div class="settings-nav-item active" onclick="showSettingsPanel('profile')" data-sp="profile">👤 Perfil do Psicólogo</div>
@@ -1869,13 +1896,15 @@ tr.clickable { cursor: pointer; }
           </div>
         </div>
 
-      </div><!-- /content-area -->
-    </div><!-- /main-content -->
+      </div>
+
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- MODALS -->
-<div id="modal-overlay" class="modal-overlay" style="display:none" onclick="closeModal(event)">
+<div id="modal-overlay" class="modal-overlay" style="display:none"
+     onclick="closeModal(event)">
   <div id="modal-box" class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <div class="modal-title" id="modal-title">Modal</div>
@@ -1886,21 +1915,24 @@ tr.clickable { cursor: pointer; }
   </div>
 </div>
 
-<!-- TOAST -->
-<!-- MARCA D'ÁGUA — aparece apenas na impressão -->
+<!-- Marca d'água — visível apenas na impressão -->
 <div class="watermark-overlay" id="watermark-overlay">
-  <img id="watermark-img" class="watermark-img" src="" alt="Marca d'água">
+  <img id="watermark-img" class="watermark-img" src="" alt="">
 </div>
 
 <div class="toast-container" id="toast-container"></div>
 
-<!-- mammoth.js for docx reading -->
+<!-- Mammoth.js — leitura de arquivos .docx -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
 <script>
 // ============================================================
-//  GLOBAL STATE
+//  PsicoTCC — Sistema Clínico
+//  Gerado automaticamente em 21/06/2026 15:14
+//  Modelo IA: claude-sonnet-4-6
 // ============================================================
+
+// ── ESTADO GLOBAL ────────────────────────────────────────────
 const APP = {
   patients: [],
   activePatient: null,
@@ -1914,9 +1946,7 @@ const APP = {
   unsaved: false
 };
 
-// ============================================================
-//  CRYPTO / AUTH HELPERS
-// ============================================================
+// ── AUTENTICAÇÃO ─────────────────────────────────────────────
 async function hashStr(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -1925,14 +1955,12 @@ async function hashStr(str) {
 function getConfig() {
   try { return JSON.parse(localStorage.getItem('psicotcc_config') || '{}'); } catch { return {}; }
 }
+
 function setConfig(obj) {
   const cur = getConfig();
   localStorage.setItem('psicotcc_config', JSON.stringify({...cur, ...obj}));
 }
 
-// ============================================================
-//  AUTH
-// ============================================================
 function showAuthPanel(p) {
   document.querySelectorAll('.auth-panel').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.auth-tab').forEach(el => el.classList.remove('active'));
@@ -2012,9 +2040,6 @@ function doLogout() {
   location.reload();
 }
 
-// ============================================================
-//  APP INIT
-// ============================================================
 function initApp() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -2090,41 +2115,7 @@ function updateSidebarUser() {
   document.getElementById('dash-name').textContent = (cfg.name || 'Psicólogo').split(' ')[0];
 }
 
-function updateDashboard() {
-  document.getElementById('dash-total-pac').textContent = APP.patients.length;
-  const evos = APP.patients.reduce((a, p) => a + (p.evolutions || []).length, 0);
-  const docs = APP.patients.reduce((a, p) => a + (p.docs || []).length, 0);
-  const trans = APP.patients.reduce((a, p) => a + (p.transcriptions || []).length, 0);
-  document.getElementById('dash-total-evo').textContent = evos;
-  document.getElementById('dash-total-docs').textContent = docs;
-  document.getElementById('dash-total-trans').textContent = trans;
-
-  // Activity
-  const acts = [];
-  APP.patients.forEach(p => {
-    (p.evolutions || []).forEach(e => acts.push({ date: e.date, text: `Evolução — ${p.name}`, icon: '📈' }));
-    (p.transcriptions || []).forEach(t => acts.push({ date: t.date, text: `Transcrição — ${p.name}`, icon: '🎙️' }));
-  });
-  acts.sort((a, b) => new Date(b.date) - new Date(a.date));
-  const list = document.getElementById('dash-activity-list');
-  if (acts.length === 0) {
-    list.innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-state-icon">📋</div><h3>Sem atividades</h3><p>Comece criando um paciente</p></div>';
-  } else {
-    list.innerHTML = acts.slice(0, 8).map(a => `
-      <div class="history-item">
-        <div class="history-dot"></div>
-        <div>
-          <div class="history-title">${a.icon} ${a.text}</div>
-          <div class="history-date">${a.date ? new Date(a.date + 'T00:00').toLocaleDateString('pt-BR') : ''}</div>
-        </div>
-      </div>`).join('');
-  }
-}
-
-// ============================================================
-//  NAVIGATION
-// ============================================================
-// Botões contextuais por painel
+// ── DASHBOARD E NAVEGAÇÃO ────────────────────────────────────
 const TOPBAR_BUTTONS = {
   dashboard:    [],
   patients:     [
@@ -2200,9 +2191,38 @@ function showPanel(p) {
   if (p === 'dashboard') updateDashboard();
 }
 
-// ============================================================
-//  PATIENTS
-// ============================================================
+function updateDashboard() {
+  document.getElementById('dash-total-pac').textContent = APP.patients.length;
+  const evos = APP.patients.reduce((a, p) => a + (p.evolutions || []).length, 0);
+  const docs = APP.patients.reduce((a, p) => a + (p.docs || []).length, 0);
+  const trans = APP.patients.reduce((a, p) => a + (p.transcriptions || []).length, 0);
+  document.getElementById('dash-total-evo').textContent = evos;
+  document.getElementById('dash-total-docs').textContent = docs;
+  document.getElementById('dash-total-trans').textContent = trans;
+
+  // Activity
+  const acts = [];
+  APP.patients.forEach(p => {
+    (p.evolutions || []).forEach(e => acts.push({ date: e.date, text: `Evolução — ${p.name}`, icon: '📈' }));
+    (p.transcriptions || []).forEach(t => acts.push({ date: t.date, text: `Transcrição — ${p.name}`, icon: '🎙️' }));
+  });
+  acts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const list = document.getElementById('dash-activity-list');
+  if (acts.length === 0) {
+    list.innerHTML = '<div class="empty-state" style="padding:30px"><div class="empty-state-icon">📋</div><h3>Sem atividades</h3><p>Comece criando um paciente</p></div>';
+  } else {
+    list.innerHTML = acts.slice(0, 8).map(a => `
+      <div class="history-item">
+        <div class="history-dot"></div>
+        <div>
+          <div class="history-title">${a.icon} ${a.text}</div>
+          <div class="history-date">${a.date ? new Date(a.date + 'T00:00').toLocaleDateString('pt-BR') : ''}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ── PACIENTES ────────────────────────────────────────────────
 function renderPatients() {
   const grid = document.getElementById('patient-grid');
   const q = (document.getElementById('patient-search')?.value || '').toLowerCase();
@@ -2292,9 +2312,7 @@ function savePatients() {
   autoSyncGDrive();
 }
 
-// ============================================================
-//  ANAMNESE FORM
-// ============================================================
+// ── ANAMNESE ─────────────────────────────────────────────────
 const ANAMNESE_SECTIONS = [
   { title: '👤 Dados Sociodemográficos', fields: [
     ['Nome Completo', 'an-nome', 'text', ''],
@@ -2480,9 +2498,7 @@ function loadAnamnese() {
   }
 }
 
-// ============================================================
-//  PRONTUARIO
-// ============================================================
+// ── PRONTUÁRIO ───────────────────────────────────────────────
 function renderProntuario() {
   const list = document.getElementById('prontuario-list');
   if (!APP.activePatient) {
@@ -2554,9 +2570,11 @@ function deleteProntuarioEntry(i) {
   toast('Registro removido.', 'info');
 }
 
-// ============================================================
-//  EVOLUÇÃO
-// ============================================================
+// ── EVOLUÇÃO ─────────────────────────────────────────────────
+['evo-date','evo-duration','evo-modality'].forEach(id => {
+  document.addEventListener('change', e => { if (e.target.id === id) updateEvoMeta(); });
+});
+
 function updateEvoHeader() {
   const cfg = getConfig();
   const p = APP.activePatient;
@@ -2573,10 +2591,6 @@ function updateEvoMeta() {
   document.getElementById('evo-meta-duration').textContent = (document.getElementById('evo-duration')?.value || '—') + ' minutos';
   document.getElementById('evo-meta-modality').textContent = document.getElementById('evo-modality')?.value || '—';
 }
-
-['evo-date','evo-duration','evo-modality'].forEach(id => {
-  document.addEventListener('change', e => { if (e.target.id === id) updateEvoMeta(); });
-});
 
 async function genEvolution() {
   if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
@@ -2670,25 +2684,28 @@ function loadEvolutionList() {
     </div>`, [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
 }
 
-function loadEvolution(i) {
-  const e = APP.activePatient.evolutions[i];
-  if (!e) return;
-  document.getElementById('evo-date').value = e.date || '';
-  document.getElementById('evo-duration').value = e.duration || 50;
-  document.getElementById('evo-modality').value = e.modality || '';
-  document.getElementById('evo-risk').value = e.risk || 'baixo';
-  document.getElementById('evo-risk-obs').value = e.riskObs || '';
-  document.getElementById('evo-session-num').value = e.sessionNum || 1;
-  ['s1','s2','s3','s4','s5','s6','s7'].forEach(k => {
-    const el = document.getElementById('evo-' + k);
-    if (el) el.innerHTML = e[k] || '';
-  });
-  updateEvoMeta();
+function loadEvolutionList() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const evos = APP.activePatient.evolutions || [];
+  if (!evos.length) return toast('Nenhuma evolução registrada ainda.', 'info');
+  showModal('Histórico de Evoluções', `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Data</th><th>Sessão</th><th>Duração</th><th>Risco</th><th></th></tr></thead>
+        <tbody>${evos.map((e,i) => `
+          <tr>
+            <td>${e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : '—'}</td>
+            <td>#${e.sessionNum || i+1}</td>
+            <td>${e.duration || '—'}min</td>
+            <td><span class="risk-badge risk-${e.risk || 'baixo'}">${e.risk || '—'}</span></td>
+            <td><button class="btn btn-sm btn-secondary" onclick="loadEvolution(${i}); closeModal()">Abrir</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`, [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
 }
 
-// ============================================================
-//  TRANSCRICAO
-// ============================================================
+// ── TRANSCRIÇÃO ──────────────────────────────────────────────
 let transFileData = null;
 
 function handleTransDrop(e) {
@@ -2820,9 +2837,7 @@ function loadSavedTranscription(i) {
   if (t) { document.getElementById('trans-date').value = t.date; renderTranscription(t.blocks); }
 }
 
-// ============================================================
-//  DOCUMENTOS CLÍNICOS
-// ============================================================
+// ── DOCUMENTOS CLÍNICOS ──────────────────────────────────────
 const DOC_TEMPLATES = {
   laudo: { title: 'LAUDO PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Identificação do Solicitante', 'Demanda e Finalidade', 'Procedimentos Utilizados', 'Análise e Resultados', 'Conclusão'] },
   relatorio: { title: 'RELATÓRIO PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Identificação', 'Finalidade do Relatório', 'Informações Gerais', 'Análise Psicológica', 'Considerações Finais'] },
@@ -2940,9 +2955,7 @@ function saveDoc() {
   toast('Documento salvo!', 'success');
 }
 
-// ============================================================
-//  CONTRATO
-// ============================================================
+// ── CONTRATO ─────────────────────────────────────────────────
 function buildContrato() {
   const cfg = getConfig();
   document.getElementById('contrato-area').innerHTML = `
@@ -3045,9 +3058,7 @@ function saveContract() {
   toast('Contrato salvo!', 'success');
 }
 
-// ============================================================
-//  AI SUPERVISOR
-// ============================================================
+// ── SUPERVISOR TCC (IA) ──────────────────────────────────────
 const TCC_SYSTEM_PROMPT = `Você é um Supervisor Clínico Especialista em Terapia Cognitivo-Comportamental (TCC), Psicopatologia, Formulação Cognitiva de Casos e Psicologia Baseada em Evidências.
 
 ⚠️ AVISO ÉTICO: Este sistema é uma ferramenta de apoio ao raciocínio clínico. Não substitui julgamento profissional.
@@ -3192,9 +3203,7 @@ function clearAIChat() {
   msgs.innerHTML = `<div class="ai-msg ai"><div class="ai-msg-avatar">🧠</div><div class="ai-msg-bubble"><strong>Supervisor Clínico TCC ativo.</strong><br>Chat reiniciado. Selecione o modo e compartilhe os dados do caso.<br><br><em>⚠️ Este sistema é uma ferramenta de apoio. Nunca substitui julgamento profissional.</em></div></div>`;
 }
 
-// ============================================================
-//  SETTINGS
-// ============================================================
+// ── CONFIGURAÇÕES ────────────────────────────────────────────
 function showSettingsPanel(p) {
   document.querySelectorAll('.settings-panel').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
@@ -3256,9 +3265,58 @@ async function testApiKey() {
   } catch(e) { toast('Erro: ' + e.message, 'error'); }
 }
 
-// ============================================================
-//  GOOGLE DRIVE INTEGRATION (real OAuth2 + API)
-// ============================================================
+async function changePwd() {
+  const old = document.getElementById('sec-old-pwd').value;
+  const n1 = document.getElementById('sec-new-pwd').value;
+  const n2 = document.getElementById('sec-new-pwd2').value;
+  const cfg = getConfig();
+  const oh = await hashStr(old);
+  if (oh !== cfg.pwdHash) return toast('Senha atual incorreta.', 'error');
+  if (n1.length < 8) return toast('Nova senha deve ter ao menos 8 caracteres.', 'error');
+  if (n1 !== n2) return toast('Senhas não coincidem.', 'error');
+  const pwdHash = await hashStr(n1);
+  setConfig({ pwdHash });
+  document.getElementById('sec-old-pwd').value = '';
+  document.getElementById('sec-new-pwd').value = '';
+  document.getElementById('sec-new-pwd2').value = '';
+  toast('Senha alterada com sucesso!', 'success');
+}
+
+async function updateRecovery() {
+  const code = document.getElementById('sec-recovery').value.trim();
+  if (!code) return toast('Informe o novo código.', 'error');
+  const recHash = await hashStr(code.toLowerCase().trim());
+  setConfig({ recHash });
+  document.getElementById('sec-recovery').value = '';
+  toast('Código de recuperação atualizado!', 'success');
+}
+
+function exportData() {
+  const data = {
+    config: getConfig(),
+    patients: APP.patients,
+    exportedAt: new Date().toISOString()
+  };
+  delete data.config.pwdHash;
+  delete data.config.recHash;
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `psicotcc_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  toast('Dados exportados!', 'success');
+}
+
+function clearAllData() {
+  localStorage.removeItem('psicotcc_patients');
+  APP.patients = [];
+  APP.activePatient = null;
+  updateDashboard();
+  renderPatients();
+  toast('Dados locais apagados.', 'info');
+}
+
+// ── GOOGLE DRIVE ─────────────────────────────────────────────
 const GDRIVE_CLIENT_ID = 'SEU_CLIENT_ID_AQUI.apps.googleusercontent.com';
 const GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
 const GDRIVE_FOLDER_NAME_DEFAULT = 'PsicoTCC';
@@ -3696,62 +3754,7 @@ async function syncToGDrive() {
   }
 }
 
-// ---- Security ----
-async function changePwd() {
-  const old = document.getElementById('sec-old-pwd').value;
-  const n1 = document.getElementById('sec-new-pwd').value;
-  const n2 = document.getElementById('sec-new-pwd2').value;
-  const cfg = getConfig();
-  const oh = await hashStr(old);
-  if (oh !== cfg.pwdHash) return toast('Senha atual incorreta.', 'error');
-  if (n1.length < 8) return toast('Nova senha deve ter ao menos 8 caracteres.', 'error');
-  if (n1 !== n2) return toast('Senhas não coincidem.', 'error');
-  const pwdHash = await hashStr(n1);
-  setConfig({ pwdHash });
-  document.getElementById('sec-old-pwd').value = '';
-  document.getElementById('sec-new-pwd').value = '';
-  document.getElementById('sec-new-pwd2').value = '';
-  toast('Senha alterada com sucesso!', 'success');
-}
-
-async function updateRecovery() {
-  const code = document.getElementById('sec-recovery').value.trim();
-  if (!code) return toast('Informe o novo código.', 'error');
-  const recHash = await hashStr(code.toLowerCase().trim());
-  setConfig({ recHash });
-  document.getElementById('sec-recovery').value = '';
-  toast('Código de recuperação atualizado!', 'success');
-}
-
-function exportData() {
-  const data = {
-    config: getConfig(),
-    patients: APP.patients,
-    exportedAt: new Date().toISOString()
-  };
-  delete data.config.pwdHash;
-  delete data.config.recHash;
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `psicotcc_backup_${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-  toast('Dados exportados!', 'success');
-}
-
-function clearAllData() {
-  localStorage.removeItem('psicotcc_patients');
-  APP.patients = [];
-  APP.activePatient = null;
-  updateDashboard();
-  renderPatients();
-  toast('Dados locais apagados.', 'info');
-}
-
-// ============================================================
-//  LOGOS
-// ============================================================
-// ── ZOOM DE LOGO ────────────────────────────────────────────
+// ── LOGOS E MARCA D'ÁGUA ─────────────────────────────────────
 function zoomLogo(img) {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;backdrop-filter:blur(4px)';
@@ -3763,7 +3766,6 @@ function zoomLogo(img) {
   document.body.appendChild(overlay);
 }
 
-// -- MARCA DAGUA ------------------------------------------────
 function handleWatermarkUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -3829,7 +3831,6 @@ function previewWatermark() {
   toast('A marca dagua aparecerá na impressão. Use Ctrl+P para visualizar.', 'info');
 }
 
-// ── IMPRESSÃO COM MARCA D'ÁGUA ───────────────────────────────
 function printWithWatermark() {
   applyWatermark();
   window.print();
@@ -3895,9 +3896,7 @@ function restoreLogosInDoc() {
   });
 }
 
-// ============================================================
-//  MODAL
-// ============================================================
+// ── MODAL E TOAST ────────────────────────────────────────────
 function showModal(title, body, buttons = []) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = body;
@@ -3915,9 +3914,6 @@ function closeModal(e) {
   }
 }
 
-// ============================================================
-//  TOAST
-// ============================================================
 function toast(msg, type = 'info', duration = 3500) {
   const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
   const t = document.createElement('div');
@@ -3927,15 +3923,10 @@ function toast(msg, type = 'info', duration = 3500) {
   setTimeout(() => t.remove(), duration);
 }
 
-// ============================================================
-//  BOOTSTRAP
-// ============================================================
+// ── INICIALIZAÇÃO ────────────────────────────────────────────
 window.addEventListener('load', () => {
-  // Handle Google OAuth2 callback (token in URL hash)
   if (window.location.hash && window.location.hash.includes('access_token')) {
-    handleGDriveCallback().then(() => {
-      checkSession();
-    });
+    handleGDriveCallback().then(() => { checkSession(); });
   } else {
     checkSession();
   }

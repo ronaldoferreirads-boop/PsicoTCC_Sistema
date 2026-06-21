@@ -1045,6 +1045,8 @@ tr.clickable { cursor: pointer; }
   body { background: white; font-size: 12px; }
   .doc-template, .evolution-doc, .transcript-output { border: none; box-shadow: none; padding: 10px 20px; }
   .card { border: 1px solid #ccc; box-shadow: none; }
+  /* CABEÇALHO DA EVOLUÇÃO — mostra na impressão no topo */
+  #evo-print-header { display: block !important; }
   /* MARCA D'ÁGUA NA IMPRESSÃO — horizontal, centralizada, sem rotação */
   .watermark-overlay {
     display: flex !important;
@@ -1481,7 +1483,21 @@ tr.clickable { cursor: pointer; }
         <!-- EVOLUCAO -->
         <div id="panel-evolucao" class="panel">
           <div id="evolution-editor">
-            <div class="grid-2" style="margin-bottom:16px">
+
+            <!-- CABEÇALHO COM LOGO — aparece apenas na impressão, no topo da página -->
+            <div id="evo-print-header" class="evolution-doc" style="display:none; margin-bottom:20px; padding:24px 32px 16px 32px">
+              <div class="doc-header" style="margin-bottom:0">
+                <div class="doc-header-left">
+                  <img id="evo-doc-logo" class="doc-logo" src="" alt="" style="max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
+                </div>
+                <div class="doc-header-right">
+                  <div class="doc-psi-name" id="evo-doc-psi">—</div>
+                  <div class="doc-psi-crp" id="evo-doc-crp">—</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid-2 no-print" style="margin-bottom:16px">
               <div class="card">
                 <div class="card-header"><div class="card-title">📋 Dados da Sessão</div></div>
                 <div class="card-body">
@@ -1530,15 +1546,6 @@ tr.clickable { cursor: pointer; }
             </div>
 
             <div class="evolution-doc" id="evolution-doc-preview">
-              <div class="doc-header" style="margin-bottom:16px">
-                <div class="doc-header-left">
-                  <img id="evo-doc-logo" class="doc-logo" src="" alt="" style="max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
-                </div>
-                <div class="doc-header-right">
-                  <div class="doc-psi-name" id="evo-doc-psi">—</div>
-                  <div class="doc-psi-crp" id="evo-doc-crp">—</div>
-                </div>
-              </div>
               <h1>Registro de Evolução — Psicoterapia</h1>
               <table class="evolution-meta-table" id="evo-meta-table">
                 <tr><td>Paciente</td><td id="evo-meta-patient">—</td></tr>

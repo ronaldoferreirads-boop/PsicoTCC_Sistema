@@ -264,27 +264,28 @@ body {
   transition: transform 0.3s;
 }
 .sidebar-header {
-  padding: 20px 20px 16px;
+  padding: 16px 16px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .sidebar-logo {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 .sidebar-logo-img {
-  max-width: 36px;
-  max-height: 36px;
+  max-width: 72px;
+  max-height: 72px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 12px;
   display: none;
 }
 .sidebar-logo-icon {
-  width: 36px; height: 36px;
+  width: 44px; height: 44px;
   background: rgba(255,255,255,0.12);
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
+  font-size: 24px;
 }
 .sidebar-title {
   font-size: 15px;
@@ -393,6 +394,8 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 .topbar-title { font-size: 17px; font-weight: 700; color: var(--text); flex: 1; }
+.topbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn-md { padding: 9px 16px; font-size: 13px; }
 .topbar-badge {
   display: inline-flex;
   align-items: center;
@@ -870,7 +873,7 @@ tr.clickable { cursor: pointer; }
   padding-bottom: 20px;
   border-bottom: 2px solid var(--primary);
 }
-.doc-logo { max-width: 120px; max-height: 60px; object-fit: contain; margin-bottom: 10px; display: none; }
+.doc-logo { max-width: 240px; max-height: 160px; object-fit: contain; margin-bottom: 14px; display: none; border-radius: 16px; }
 .doc-psi-name { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--primary); }
 .doc-psi-crp { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); }
 .doc-title {
@@ -996,6 +999,25 @@ tr.clickable { cursor: pointer; }
 .risk-critico { background: #212121; color: white; }
 
 /* PRINT */
+/* ── MARCA D'ÁGUA ─────────────────────────────────────────── */
+.watermark-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: none; /* oculta na tela — só aparece na impressão */
+}
+.watermark-img {
+  max-width: 55vw;
+  max-height: 55vh;
+  object-fit: contain;
+  border-radius: 32px;
+  transform: rotate(-30deg);
+}
+
 @media print {
   .sidebar, .topbar, .toolbar, .btn, .no-print, .modal-overlay { display: none !important; }
   .main-content { margin-left: 0 !important; }
@@ -1003,6 +1025,14 @@ tr.clickable { cursor: pointer; }
   body { background: white; font-size: 12px; }
   .doc-template, .evolution-doc, .transcript-output { border: none; box-shadow: none; padding: 10px 20px; }
   .card { border: 1px solid #ccc; box-shadow: none; }
+  /* MARCA D'ÁGUA NA IMPRESSÃO */
+  .watermark-overlay {
+    display: flex !important;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 /* SETTINGS */
@@ -1300,11 +1330,12 @@ tr.clickable { cursor: pointer; }
     <div class="main-content">
       <div class="topbar">
         <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <!-- Botões contextuais — trocados dinamicamente por showPanel() -->
+        <div id="topbar-actions" class="topbar-actions"></div>
         <div id="sync-badge" class="topbar-badge badge-sync offline">
           <span>●</span> <span id="sync-text">Desconectado</span>
         </div>
-        <button class="btn btn-sm btn-secondary no-print" onclick="syncToGDrive()">☁️ Sincronizar</button>
-        <button class="btn btn-sm btn-secondary no-print" onclick="window.print()">🖨️ Imprimir / PDF</button>
+        <button class="btn btn-md btn-secondary no-print" onclick="syncToGDrive()">☁️ Sincronizar</button>
       </div>
 
       <div class="content-area">
@@ -1396,11 +1427,6 @@ tr.clickable { cursor: pointer; }
 
         <!-- ANAMNESE -->
         <div id="panel-anamnese" class="panel">
-          <div class="toolbar no-print">
-            <button class="btn btn-secondary btn-sm" onclick="loadAnamnese()">📂 Carregar Existente</button>
-            <button class="btn btn-primary btn-sm" onclick="saveAnamnese()">💾 Salvar Anamnese</button>
-            <button class="btn btn-accent btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
-          </div>
           <div id="anamnese-form">
             <div class="alert alert-info no-print">📋 Selecione um paciente ativo na barra lateral antes de preencher.</div>
             <!-- Sections built by JS -->
@@ -1409,10 +1435,6 @@ tr.clickable { cursor: pointer; }
 
         <!-- PRONTUARIO -->
         <div id="panel-prontuario" class="panel">
-          <div class="toolbar no-print">
-            <button class="btn btn-primary btn-sm" onclick="addProntuarioEntry()">➕ Novo Registro</button>
-            <button class="btn btn-accent btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
-          </div>
           <div class="card">
             <div class="card-header">
               <div class="card-title"><span class="icon">📁</span> Prontuário Eletrônico — <span id="prontuario-patient-name">Selecione um paciente</span></div>
@@ -1423,12 +1445,6 @@ tr.clickable { cursor: pointer; }
 
         <!-- EVOLUCAO -->
         <div id="panel-evolucao" class="panel">
-          <div class="toolbar no-print">
-            <button class="btn btn-secondary btn-sm" onclick="loadEvolutionList()">📂 Histórico</button>
-            <button class="btn btn-accent btn-sm" onclick="genEvolution()">🤖 Gerar com IA</button>
-            <button class="btn btn-primary btn-sm" onclick="saveEvolution()">💾 Salvar Evolução</button>
-            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
-          </div>
           <div id="evolution-editor">
             <div class="grid-2" style="margin-bottom:16px">
               <div class="card">
@@ -1525,12 +1541,6 @@ tr.clickable { cursor: pointer; }
 
         <!-- TRANSCRICAO -->
         <div id="panel-transcricao" class="panel">
-          <div class="toolbar no-print">
-            <button class="btn btn-secondary btn-sm" onclick="loadTranscriptionHistory()">📂 Histórico</button>
-            <button class="btn btn-primary btn-sm" onclick="saveTranscription()">💾 Salvar</button>
-            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
-          </div>
-
           <div id="transcricao-upload-area">
             <div class="card" style="margin-bottom:16px">
               <div class="card-header"><div class="card-title">🎙️ Processar Transcrição de Sessão</div></div>
@@ -1569,8 +1579,8 @@ tr.clickable { cursor: pointer; }
 
         <!-- DOCUMENTOS CLÍNICOS -->
         <div id="panel-documentos" class="panel">
-          <div class="toolbar no-print">
-            <select id="doc-type-select" class="form-input" style="max-width:260px" onchange="loadDocTemplate()">
+          <div style="margin-bottom:16px">
+            <select id="doc-type-select" class="form-input no-print" style="max-width:320px" onchange="loadDocTemplate()">
               <option value="">— Selecione o tipo de documento —</option>
               <option value="laudo">📋 Laudo Psicológico</option>
               <option value="relatorio">📄 Relatório Psicológico</option>
@@ -1578,9 +1588,6 @@ tr.clickable { cursor: pointer; }
               <option value="parecer">🔍 Parecer Psicológico</option>
               <option value="encaminhamento">➡️ Encaminhamento</option>
             </select>
-            <button class="btn btn-accent btn-sm" onclick="genDocWithAI()">🤖 Gerar com IA</button>
-            <button class="btn btn-primary btn-sm" onclick="saveDoc()">💾 Salvar</button>
-            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
           </div>
           <div id="doc-template-area">
             <div class="empty-state">
@@ -1593,10 +1600,6 @@ tr.clickable { cursor: pointer; }
 
         <!-- CONTRATO -->
         <div id="panel-contrato" class="panel">
-          <div class="toolbar no-print">
-            <button class="btn btn-primary btn-sm" onclick="saveContract()">💾 Salvar</button>
-            <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir PDF</button>
-          </div>
           <div id="contrato-area"><!-- built by JS --></div>
         </div>
 
@@ -1665,7 +1668,7 @@ tr.clickable { cursor: pointer; }
                   <div class="form-row" style="margin-bottom:16px">
                     <label>Logo Principal</label>
                     <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
-                      <img id="preview-logo" style="max-width:120px;max-height:60px;object-fit:contain;border:1px solid var(--border);border-radius:6px;padding:4px;display:none" src="" alt="Logo">
+                      <img id="preview-logo" style="max-width:200px;max-height:140px;object-fit:contain;border:1.5px solid var(--border);border-radius:12px;padding:6px;display:none;cursor:zoom-in;transition:transform 0.2s" src="" alt="Logo" onclick="zoomLogo(this)" title="Clique para ampliar">
                       <button class="btn btn-secondary btn-sm" onclick="document.getElementById('upload-logo').click()">📁 Escolher Imagem</button>
                       <button class="btn btn-ghost btn-sm" onclick="removeLogo('main')">✕ Remover</button>
                     </div>
@@ -1674,13 +1677,39 @@ tr.clickable { cursor: pointer; }
                   <div class="form-row" style="margin-bottom:16px">
                     <label>Submarca / Logo Secundário</label>
                     <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
-                      <img id="preview-logo2" style="max-width:120px;max-height:60px;object-fit:contain;border:1px solid var(--border);border-radius:6px;padding:4px;display:none" src="" alt="Logo 2">
+                      <img id="preview-logo2" style="max-width:200px;max-height:140px;object-fit:contain;border:1.5px solid var(--border);border-radius:12px;padding:6px;display:none;cursor:zoom-in;transition:transform 0.2s" src="" alt="Logo 2" onclick="zoomLogo(this)" title="Clique para ampliar">
                       <button class="btn btn-secondary btn-sm" onclick="document.getElementById('upload-logo2').click()">📁 Escolher Imagem</button>
                       <button class="btn btn-ghost btn-sm" onclick="removeLogo('sub')">✕ Remover</button>
                     </div>
                     <input type="file" id="upload-logo2" accept="image/*" style="display:none" onchange="handleLogoUpload(event,'sub')">
                   </div>
                   <div class="alert alert-info">As logos aparecem automaticamente em todos os documentos impressos e no cabeçalho do sistema.</div>
+
+                  <div class="separator"></div>
+                  <h4 style="font-size:14px;font-weight:700;margin-bottom:12px">💧 Marca d'Água nos PDFs</h4>
+                  <div class="form-row" style="margin-bottom:14px">
+                    <label>Imagem da Marca d'Água</label>
+                    <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
+                      <img id="preview-watermark" style="max-width:180px;max-height:120px;object-fit:contain;border:1.5px solid var(--border);border-radius:12px;padding:6px;display:none;cursor:zoom-in;opacity:0.4" src="" alt="Marca d'água" onclick="zoomLogo(this)">
+                      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('upload-watermark').click()">📁 Escolher Imagem</button>
+                      <button class="btn btn-ghost btn-sm" onclick="removeWatermark()">✕ Remover</button>
+                    </div>
+                    <input type="file" id="upload-watermark" accept="image/*" style="display:none" onchange="handleWatermarkUpload(event)">
+                  </div>
+                  <div class="form-row" style="margin-bottom:14px">
+                    <label>Transparência da Marca d'Água: <span id="watermark-opacity-val">30%</span></label>
+                    <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+                      <span style="font-size:11px;color:var(--text-muted)">Mais transparente</span>
+                      <input type="range" id="watermark-opacity" min="5" max="80" value="30" step="5"
+                        style="flex:1;accent-color:var(--primary)"
+                        oninput="updateWatermarkOpacity(this.value)">
+                      <span style="font-size:11px;color:var(--text-muted)">Mais visível</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:10px">
+                    <button class="btn btn-secondary btn-sm" onclick="saveWatermarkSettings()">💾 Salvar Configuração</button>
+                    <button class="btn btn-ghost btn-sm" onclick="previewWatermark()">👁️ Pré-visualizar</button>
+                  </div>
                 </div>
               </div>
 
@@ -1812,6 +1841,11 @@ tr.clickable { cursor: pointer; }
 </div>
 
 <!-- TOAST -->
+<!-- MARCA D'ÁGUA — aparece apenas na impressão -->
+<div class="watermark-overlay" id="watermark-overlay">
+  <img id="watermark-img" class="watermark-img" src="" alt="Marca d'água">
+</div>
+
 <div class="toast-container" id="toast-container"></div>
 
 <!-- mammoth.js for docx reading -->
@@ -1952,6 +1986,7 @@ function initApp() {
   loadProfileSettings();
   checkAlerts();
   restoreLogos();
+  restoreWatermarkSettings();
 
   // Set today's date on forms
   const today = new Date().toISOString().split('T')[0];
@@ -2043,6 +2078,56 @@ function updateDashboard() {
 // ============================================================
 //  NAVIGATION
 // ============================================================
+// Botões contextuais por painel
+const TOPBAR_BUTTONS = {
+  dashboard:    [],
+  patients:     [
+    { label:'➕ Novo Paciente', cls:'btn-primary btn-md', action:'openNewPatient()' }
+  ],
+  anamnese:     [
+    { label:'📂 Carregar',     cls:'btn-secondary btn-md', action:'loadAnamnese()' },
+    { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveAnamnese()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
+  ],
+  prontuario:   [
+    { label:'➕ Novo Registro', cls:'btn-primary btn-md',  action:'addProntuarioEntry()' },
+    { label:'🖨️ PDF',          cls:'btn-accent btn-md',   action:'printWithWatermark()' }
+  ],
+  evolucao:     [
+    { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadEvolutionList()' },
+    { label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'genEvolution()' },
+    { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveEvolution()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
+  ],
+  transcricao:  [
+    { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadTranscriptionHistory()' },
+    { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveTranscription()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
+  ],
+  documentos:   [
+    { label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'genDocWithAI()' },
+    { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveDoc()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
+  ],
+  contrato:     [
+    { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveContract()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
+  ],
+  supervisor:   [
+    { label:'🗑️ Limpar Chat',  cls:'btn-secondary btn-md', action:'clearAIChat()' }
+  ],
+  settings:     []
+};
+
+function updateTopbarActions(p) {
+  const area = document.getElementById('topbar-actions');
+  if (!area) return;
+  const btns = TOPBAR_BUTTONS[p] || [];
+  area.innerHTML = btns.map(b =>
+    `<button class="btn ${b.cls} no-print" onclick="${b.action}">${b.label}</button>`
+  ).join('');
+}
+
 function showPanel(p) {
   document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
@@ -2059,6 +2144,7 @@ function showPanel(p) {
     settings: 'Configurações'
   };
   document.getElementById('topbar-title').textContent = titles[p] || p;
+  updateTopbarActions(p);
 
   if (p === 'anamnese') loadAnamnese();
   if (p === 'prontuario') renderProntuario();
@@ -2251,16 +2337,23 @@ const ANAMNESE_SECTIONS = [
 
 function buildAnamneseForm() {
   const form = document.getElementById('anamnese-form');
+  const cfg = getConfig();
+  const logoSrc = localStorage.getItem('psicotcc_logo') || '';
   let html = `
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-header">
-        <div class="card-title">📋 Ficha de Anamnese Psicológica</div>
-        <div style="font-size:12px;color:var(--text-muted)">Paciente: <strong id="an-patient-display">${APP.activePatient?.name || '— selecione um paciente —'}</strong></div>
+    <div class="doc-template" style="margin-bottom:20px;padding:24px 32px">
+      <div class="doc-header" style="margin-bottom:16px">
+        ${logoSrc ? `<img src="${logoSrc}" style="max-width:240px;max-height:160px;object-fit:contain;border-radius:16px;margin-bottom:12px">` : ''}
+        <div class="doc-psi-name">${cfg.name || ''}</div>
+        <div class="doc-psi-crp">${cfg.crp || ''}${cfg.spec ? ' · '+cfg.spec : ''}</div>
       </div>
-      <div class="card-body" style="padding:12px 22px">
-        <div class="grid-2" style="gap:10px">
-          <div class="form-row"><label>Data da Avaliação</label><input type="date" id="an-data" class="form-input"></div>
-          <div class="form-row"><label>Número de Sessões de Avaliação</label><input type="number" id="an-sessoes-aval" class="form-input" value="1" min="1"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div>
+          <div style="font-size:18px;font-weight:700;color:var(--primary)">📋 Ficha de Anamnese Psicológica</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:4px">Paciente: <strong id="an-patient-display">${APP.activePatient?.name || '— selecione um paciente —'}</strong></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-end">
+          <div class="form-row"><label>Data da Avaliação</label><input type="date" id="an-data" class="form-input" style="width:180px"></div>
+          <div class="form-row"><label>Nº de Sessões</label><input type="number" id="an-sessoes-aval" class="form-input" value="1" min="1" style="width:80px"></div>
         </div>
       </div>
     </div>`;
@@ -3596,6 +3689,90 @@ function clearAllData() {
 // ============================================================
 //  LOGOS
 // ============================================================
+// ── ZOOM DE LOGO ────────────────────────────────────────────
+function zoomLogo(img) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;backdrop-filter:blur(4px)';
+  const zoomed = document.createElement('img');
+  zoomed.src = img.src;
+  zoomed.style.cssText = 'max-width:85vw;max-height:85vh;object-fit:contain;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.5)';
+  overlay.appendChild(zoomed);
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+}
+
+// ── MARCA D'ÁGUA ──────────────────────────────────────────
+function handleWatermarkUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const data = ev.target.result;
+    localStorage.setItem('psicotcc_watermark', data);
+    const el = document.getElementById('preview-watermark');
+    if (el) { el.src = data; el.style.display = 'block'; }
+    applyWatermark();
+    toast('Marca d'água carregada!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeWatermark() {
+  localStorage.removeItem('psicotcc_watermark');
+  const el = document.getElementById('preview-watermark');
+  if (el) { el.src = ''; el.style.display = 'none'; }
+  const wm = document.getElementById('watermark-img');
+  if (wm) wm.src = '';
+  toast('Marca d'água removida.', 'info');
+}
+
+function updateWatermarkOpacity(val) {
+  document.getElementById('watermark-opacity-val').textContent = val + '%';
+  const wm = document.getElementById('watermark-img');
+  if (wm) wm.style.opacity = val / 100;
+  const prev = document.getElementById('preview-watermark');
+  if (prev) prev.style.opacity = val / 100;
+  localStorage.setItem('psicotcc_watermark_opacity', val);
+}
+
+function saveWatermarkSettings() {
+  const opacity = document.getElementById('watermark-opacity')?.value || 30;
+  localStorage.setItem('psicotcc_watermark_opacity', opacity);
+  toast('Configuração da marca d'água salva!', 'success');
+}
+
+function applyWatermark() {
+  const src     = localStorage.getItem('psicotcc_watermark') || '';
+  const opacity = (localStorage.getItem('psicotcc_watermark_opacity') || 30) / 100;
+  const wm = document.getElementById('watermark-img');
+  if (wm) { wm.src = src; wm.style.opacity = opacity; }
+}
+
+function restoreWatermarkSettings() {
+  const src     = localStorage.getItem('psicotcc_watermark') || '';
+  const opacity = parseInt(localStorage.getItem('psicotcc_watermark_opacity') || '30');
+  // Preview no painel de configurações
+  const prev = document.getElementById('preview-watermark');
+  if (prev && src) { prev.src = src; prev.style.display = 'block'; prev.style.opacity = opacity / 100; }
+  // Slider
+  const slider = document.getElementById('watermark-opacity');
+  if (slider) slider.value = opacity;
+  const label = document.getElementById('watermark-opacity-val');
+  if (label) label.textContent = opacity + '%';
+  applyWatermark();
+}
+
+function previewWatermark() {
+  applyWatermark();
+  toast('A marca d'água aparecerá na impressão. Use Ctrl+P para visualizar.', 'info');
+}
+
+// ── IMPRESSÃO COM MARCA D'ÁGUA ───────────────────────────────
+function printWithWatermark() {
+  applyWatermark();
+  window.print();
+}
+
 function handleLogoUpload(e, type) {
   const file = e.target.files[0];
   if (!file) return;

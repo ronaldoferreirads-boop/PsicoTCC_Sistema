@@ -1203,6 +1203,7 @@ tr.clickable { cursor: pointer; }
 </style>
 </head>
 <body>
+
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -1278,8 +1279,10 @@ tr.clickable { cursor: pointer; }
     </div>
   </div>
 </div>
+
 <div id="app">
   <div class="app-layout">
+
 <nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">
@@ -1357,7 +1360,9 @@ tr.clickable { cursor: pointer; }
         </div>
       </div>
 </nav>
+
     <div class="main-content">
+
       <div class="topbar">
         <div class="topbar-title" id="topbar-title">Dashboard</div>
         <div id="topbar-actions" class="topbar-actions"></div>
@@ -1368,7 +1373,9 @@ tr.clickable { cursor: pointer; }
           ☁️ Sincronizar
         </button>
       </div>
+
       <div class="content-area">
+
 <div id="panel-dashboard" class="panel active">
           <div id="dash-welcome" style="margin-bottom:20px">
             <h2 style="font-size:22px; font-weight:700; color:var(--text)">Olá, <span id="dash-name">Psicólogo</span> 👋</h2>
@@ -1444,15 +1451,18 @@ tr.clickable { cursor: pointer; }
         <!-- PATIENTS -->
         <div
 </div>
+
         <div id="panel-patients" class="panel">
           <div class="toolbar no-print">
             <div class="toolbar-search">
               <span class="toolbar-search-icon">🔍</span>
-              <input type="text" id="patient-search" placeholder="Buscar paciente..." onkeyup="filterPatients()">
+              <input type="text" id="patient-search"
+                     placeholder="Buscar paciente..." onkeyup="filterPatients()">
             </div>
           </div>
           <div id="patient-grid" class="patient-grid"></div>
         </div>
+
         <div id="panel-anamnese" class="panel">
           <div id="anamnese-form">
             <div class="alert alert-info no-print">
@@ -1871,11 +1881,14 @@ tr.clickable { cursor: pointer; }
         </div>
 
       </div>
+
       </div>
     </div>
   </div>
 </div>
-<div id="modal-overlay" class="modal-overlay" style="display:none" onclick="closeModal(event)">
+
+<div id="modal-overlay" class="modal-overlay" style="display:none"
+     onclick="closeModal(event)">
   <div id="modal-box" class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <div class="modal-title" id="modal-title">Modal</div>
@@ -1885,17 +1898,39 @@ tr.clickable { cursor: pointer; }
     <div class="modal-footer" id="modal-footer"></div>
   </div>
 </div>
+
+<!-- Marca d'água — visível apenas na impressão -->
 <div class="watermark-overlay" id="watermark-overlay">
   <img id="watermark-img" class="watermark-img" src="" alt="">
 </div>
+
 <div class="toast-container" id="toast-container"></div>
+
+<!-- Mammoth.js — leitura de arquivos .docx -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
 <script>
+// ============================================================
+//  PsicoTCC — Sistema Clínico
+//  Gerado automaticamente em 21/06/2026 16:10
+//  Modelo IA: claude-sonnet-4-6
+// ============================================================
+
+// ── ESTADO GLOBAL ────────────────────────────────────────────
 const APP = {
-  patients: [], activePatient: null, settings: {},
-  gDriveConnected: false, gDriveToken: null, gDriveFolderId: null,
-  currentTranscriptionText: '', aiHistory: [], currentDocType: '', unsaved: false
+  patients: [],
+  activePatient: null,
+  settings: {},
+  gDriveConnected: false,
+  gDriveToken: null,
+  gDriveFolderId: null,
+  currentTranscriptionText: '',
+  aiHistory: [],
+  currentDocType: '',
+  unsaved: false
 };
+
+// ── AUTENTICAÇÃO ─────────────────────────────────────────────
 async function hashStr(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -2063,6 +2098,8 @@ function updateSidebarUser() {
   document.getElementById('sb-avatar').textContent = (cfg.name || 'P')[0].toUpperCase();
   document.getElementById('dash-name').textContent = (cfg.name || 'Psicólogo').split(' ')[0];
 }
+
+// ── DASHBOARD E NAVEGAÇÃO ────────────────────────────────────
 const TOPBAR_BUTTONS = {
   dashboard:    [],
   patients:     [
@@ -2168,6 +2205,8 @@ function updateDashboard() {
       </div>`).join('');
   }
 }
+
+// ── PACIENTES ────────────────────────────────────────────────
 function renderPatients() {
   const grid = document.getElementById('patient-grid');
   const q = (document.getElementById('patient-search')?.value || '').toLowerCase();
@@ -2256,6 +2295,8 @@ function savePatients() {
   updateDashboard();
   autoSyncGDrive();
 }
+
+// ── ANAMNESE ─────────────────────────────────────────────────
 const ANAMNESE_SECTIONS = [
   { title: '👤 Dados Sociodemográficos', fields: [
     ['Nome Completo', 'an-nome', 'text', ''],
@@ -2440,6 +2481,8 @@ function loadAnamnese() {
     setAnamneseData(APP.activePatient.anamnese || {});
   }
 }
+
+// ── PRONTUÁRIO ───────────────────────────────────────────────
 function renderProntuario() {
   const list = document.getElementById('prontuario-list');
   if (!APP.activePatient) {
@@ -2510,6 +2553,8 @@ function deleteProntuarioEntry(i) {
   renderProntuario();
   toast('Registro removido.', 'info');
 }
+
+// ── EVOLUÇÃO ─────────────────────────────────────────────────
 ['evo-date','evo-duration','evo-modality'].forEach(id => {
   document.addEventListener('change', e => { if (e.target.id === id) updateEvoMeta(); });
 });
@@ -2643,6 +2688,8 @@ function loadEvolutionList() {
       </table>
     </div>`, [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
 }
+
+// ── TRANSCRIÇÃO ──────────────────────────────────────────────
 let transFileData = null;
 
 function handleTransDrop(e) {
@@ -2773,6 +2820,8 @@ function loadSavedTranscription(i) {
   const t = APP.activePatient.transcriptions[i];
   if (t) { document.getElementById('trans-date').value = t.date; renderTranscription(t.blocks); }
 }
+
+// ── DOCUMENTOS CLÍNICOS ──────────────────────────────────────
 const DOC_TEMPLATES = {
   laudo: { title: 'LAUDO PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Identificação do Solicitante', 'Demanda e Finalidade', 'Procedimentos Utilizados', 'Análise e Resultados', 'Conclusão'] },
   relatorio: { title: 'RELATÓRIO PSICOLÓGICO', refCFP: 'Resolução CFP nº 09/2018', sections: ['Identificação', 'Finalidade do Relatório', 'Informações Gerais', 'Análise Psicológica', 'Considerações Finais'] },
@@ -2889,6 +2938,8 @@ function saveDoc() {
   savePatients();
   toast('Documento salvo!', 'success');
 }
+
+// ── CONTRATO ─────────────────────────────────────────────────
 function buildContrato() {
   const cfg = getConfig();
   document.getElementById('contrato-area').innerHTML = `
@@ -2990,6 +3041,8 @@ function saveContract() {
   savePatients();
   toast('Contrato salvo!', 'success');
 }
+
+// ── SUPERVISOR TCC (IA) ──────────────────────────────────────
 const TCC_SYSTEM_PROMPT = `Você é um Supervisor Clínico Especialista em Terapia Cognitivo-Comportamental (TCC), Psicopatologia, Formulação Cognitiva de Casos e Psicologia Baseada em Evidências.
 
 ⚠️ AVISO ÉTICO: Este sistema é uma ferramenta de apoio ao raciocínio clínico. Não substitui julgamento profissional.
@@ -3133,6 +3186,8 @@ function clearAIChat() {
   const msgs = document.getElementById('ai-msgs');
   msgs.innerHTML = `<div class="ai-msg ai"><div class="ai-msg-avatar">🧠</div><div class="ai-msg-bubble"><strong>Supervisor Clínico TCC ativo.</strong><br>Chat reiniciado. Selecione o modo e compartilhe os dados do caso.<br><br><em>⚠️ Este sistema é uma ferramenta de apoio. Nunca substitui julgamento profissional.</em></div></div>`;
 }
+
+// ── CONFIGURAÇÕES ────────────────────────────────────────────
 function showSettingsPanel(p) {
   document.querySelectorAll('.settings-panel').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
@@ -3244,6 +3299,8 @@ function clearAllData() {
   renderPatients();
   toast('Dados locais apagados.', 'info');
 }
+
+// ── GOOGLE DRIVE ─────────────────────────────────────────────
 const GDRIVE_CLIENT_ID = 'SEU_CLIENT_ID_AQUI.apps.googleusercontent.com';
 const GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
 const GDRIVE_FOLDER_NAME_DEFAULT = 'PsicoTCC';
@@ -3680,6 +3737,8 @@ async function syncToGDrive() {
     toast('Erro ao sincronizar: ' + e.message, 'error');
   }
 }
+
+// ── LOGOS E MARCA D'ÁGUA ─────────────────────────────────────
 function zoomLogo(img) {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;backdrop-filter:blur(4px)';
@@ -3820,6 +3879,8 @@ function restoreLogosInDoc() {
     if (logo) { el.src = logo; el.style.display = 'block'; }
   });
 }
+
+// ── MODAL E TOAST ────────────────────────────────────────────
 function showModal(title, body, buttons = []) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = body;
@@ -3845,10 +3906,14 @@ function toast(msg, type = 'info', duration = 3500) {
   document.getElementById('toast-container').appendChild(t);
   setTimeout(() => t.remove(), duration);
 }
+
+// ── INICIALIZAÇÃO ────────────────────────────────────────────
 window.addEventListener('load', () => {
   if (window.location.hash && window.location.hash.includes('access_token')) {
     handleGDriveCallback().then(() => { checkSession(); });
-  } else { checkSession(); }
+  } else {
+    checkSession();
+  }
 });
 </script>
 </body>

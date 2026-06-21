@@ -2339,17 +2339,21 @@ function buildAnamneseForm() {
   const form = document.getElementById('anamnese-form');
   const cfg = getConfig();
   const logoSrc = localStorage.getItem('psicotcc_logo') || '';
+  const logoHtml = logoSrc ? '<img src="' + logoSrc + '" style="max-width:240px;max-height:160px;object-fit:contain;border-radius:16px;margin-bottom:12px">' : '';
+  const psiName = cfg.name || '';
+  const psiCrp  = (cfg.crp || '') + (cfg.spec ? ' · ' + cfg.spec : '');
+  const patName = APP.activePatient ? APP.activePatient.name : '— selecione um paciente —';
   let html = `
     <div class="doc-template" style="margin-bottom:20px;padding:24px 32px">
       <div class="doc-header" style="margin-bottom:16px">
-        ${logoSrc ? `<img src="${logoSrc}" style="max-width:240px;max-height:160px;object-fit:contain;border-radius:16px;margin-bottom:12px">` : ''}
-        <div class="doc-psi-name">${cfg.name || ''}</div>
-        <div class="doc-psi-crp">${cfg.crp || ''}${cfg.spec ? ' · '+cfg.spec : ''}</div>
+        ${logoHtml}
+        <div class="doc-psi-name">${psiName}</div>
+        <div class="doc-psi-crp">${psiCrp}</div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
         <div>
           <div style="font-size:18px;font-weight:700;color:var(--primary)">📋 Ficha de Anamnese Psicológica</div>
-          <div style="font-size:13px;color:var(--text-muted);margin-top:4px">Paciente: <strong id="an-patient-display">${APP.activePatient?.name || '— selecione um paciente —'}</strong></div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:4px">Paciente: <strong id="an-patient-display">${patName}</strong></div>
         </div>
         <div style="display:flex;gap:12px;align-items:flex-end">
           <div class="form-row"><label>Data da Avaliação</label><input type="date" id="an-data" class="form-input" style="width:180px"></div>

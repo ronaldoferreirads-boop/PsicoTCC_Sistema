@@ -1311,12 +1311,21 @@ tr.clickable { cursor: pointer; }
         <div class="sidebar-item" onclick="showPanel('patients')" data-panel="patients">
           <span class="sidebar-item-icon">👥</span> Pacientes
         </div>
+        <div class="sidebar-item" onclick="showPanel('agenda')" data-panel="agenda">
+          <span class="sidebar-item-icon">📅</span> Agenda
+        </div>
       </div>
 
       <div class="sidebar-section">
         <div class="sidebar-section-label">Ferramentas Clínicas</div>
         <div class="sidebar-item" onclick="showPanel('anamnese')" data-panel="anamnese">
           <span class="sidebar-item-icon">📋</span> Anamnese
+        </div>
+        <div class="sidebar-item" onclick="showPanel('escalas')" data-panel="escalas">
+          <span class="sidebar-item-icon">📊</span> Escalas Psicológicas
+        </div>
+        <div class="sidebar-item" onclick="showPanel('recursos')" data-panel="recursos">
+          <span class="sidebar-item-icon">🗂️</span> Recursos TCC
         </div>
         <div class="sidebar-item" onclick="showPanel('prontuario')" data-panel="prontuario">
           <span class="sidebar-item-icon">📁</span> Prontuário Eletrônico
@@ -1332,6 +1341,13 @@ tr.clickable { cursor: pointer; }
         </div>
         <div class="sidebar-item" onclick="showPanel('contrato')" data-panel="contrato">
           <span class="sidebar-item-icon">✍️</span> Contrato de Serviços
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Clínico</div>
+        <div class="sidebar-item" onclick="showPanel('formulacao')" data-panel="formulacao">
+          <span class="sidebar-item-icon">🧩</span> Formulação de Caso
         </div>
       </div>
 
@@ -1418,6 +1434,13 @@ tr.clickable { cursor: pointer; }
                 <div class="stat-label">Transcrições</div>
               </div>
             </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#e8f5e9">📅</div>
+              <div>
+                <div class="stat-value" id="dash-total-sess">0</div>
+                <div class="stat-label">Sessões esta semana</div>
+              </div>
+            </div>
           </div>
 
           <div class="grid-2">
@@ -1461,6 +1484,7 @@ tr.clickable { cursor: pointer; }
             </div>
           </div>
           <div id="patient-grid" class="patient-grid"></div>
+          <div id="patient-detail-area"></div>
         </div>
 
         <div id="panel-anamnese" class="panel">
@@ -1555,6 +1579,29 @@ tr.clickable { cursor: pointer; }
                 <tr><td>Modalidade</td><td id="evo-meta-modality">—</td></tr>
               </table>
 
+              <h2>0. Revisão da Tarefa Anterior</h2>
+              <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:8px">
+                <div class="form-row">
+                  <label style="font-weight:600">O paciente realizou a tarefa prescrita?</label>
+                  <select id="evo-task-review-status" class="form-input" style="margin-top:6px">
+                    <option value="nao_havia">— Não havia tarefa prescrita</option>
+                    <option value="sim_completa">✅ Sim — realizou completamente</option>
+                    <option value="sim_parcial">🔶 Sim — realizou parcialmente</option>
+                    <option value="nao_realizou">❌ Não realizou</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+                <div class="form-row">
+                  <label>Relato do paciente sobre a tarefa</label>
+                  <div contenteditable="true" class="form-row" id="evo-task-review-relato" style="min-height:55px;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;margin-top:6px" placeholder="O que o paciente disse sobre a tarefa..."></div>
+                </div>
+                <div class="form-row">
+                  <label>Análise clínica da realização</label>
+                  <div contenteditable="true" class="form-row" id="evo-task-review-analise" style="min-height:55px;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;margin-top:6px" placeholder="Análise clínica da execução da tarefa..."></div>
+                </div>
+              </div>
+
               <h2>1. Estado Emocional e Funcional Relatado</h2>
               <div contenteditable="true" class="form-row" id="evo-s1" style="min-height:60px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none" placeholder="Descreva o estado emocional..."></div>
 
@@ -1575,6 +1622,18 @@ tr.clickable { cursor: pointer; }
 
               <h2>7. Plano para a Próxima Sessão</h2>
               <div contenteditable="true" class="form-row" id="evo-s7" style="min-height:60px; padding:10px; border:1px solid var(--border); border-radius:6px; outline:none"></div>
+
+              <h2>8. Tarefa de Casa Prescrita</h2>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;margin-bottom:8px">
+                <div class="form-row">
+                  <label>Descrição da tarefa prescrita nesta sessão</label>
+                  <div contenteditable="true" class="form-row" id="evo-s8" style="min-height:70px;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;margin-top:6px" placeholder="Descreva a tarefa de casa prescrita para o paciente..."></div>
+                </div>
+                <div class="form-row" style="min-width:160px">
+                  <label>Prazo sugerido</label>
+                  <input type="date" id="evo-task-deadline" class="form-input" style="margin-top:6px">
+                </div>
+              </div>
 
               <div class="doc-sig-line" style="margin-top:30px">
                 <div class="line"></div>
@@ -1718,6 +1777,7 @@ tr.clickable { cursor: pointer; }
               <div class="settings-nav-item" onclick="showSettingsPanel('onedrive')" data-sp="onedrive">☁️ Google Drive</div>
               <div class="settings-nav-item" onclick="showSettingsPanel('apikey')" data-sp="apikey">🤖 API Claude</div>
               <div class="settings-nav-item" onclick="showSettingsPanel('security')" data-sp="security">🔐 Segurança</div>
+              <div class="settings-nav-item" onclick="showSettingsPanel('lgpd');loadLGPDSettingsInfo()" data-sp="lgpd">🔒 LGPD</div>
             </div>
 
             <div>
@@ -1893,11 +1953,154 @@ tr.clickable { cursor: pointer; }
                   <button class="btn btn-danger btn-sm" onclick="if(confirm('Isso apagará TODOS os dados locais. Tem certeza?')) clearAllData()">🗑️ Limpar Dados Locais</button>
                 </div>
               </div>
+
+              <!-- LGPD -->
+              <div id="sp-lgpd" class="settings-panel card">
+                <div class="card-header"><div class="card-title">🔒 LGPD — Privacidade e Dados</div></div>
+                <div class="card-body">
+                  <div class="alert alert-info" style="margin-bottom:18px">
+                    Em conformidade com a Lei Geral de Proteção de Dados (Lei 13.709/2018), você tem direito à exportação e exclusão permanente dos dados de qualquer paciente.
+                  </div>
+                  <div class="form-row" style="margin-bottom:18px">
+                    <label>📅 Status do Aceite dos Termos</label>
+                    <div id="lgpd-aceite-info" style="font-size:14px;margin-top:6px;font-weight:500">Carregando...</div>
+                  </div>
+                  <div style="height:1px;background:var(--border);margin:20px 0"></div>
+                  <h4 style="margin-bottom:12px;font-size:14px;color:var(--text)">👥 Gestão de Dados por Paciente</h4>
+                  <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
+                    Selecione um paciente para exportar todos os seus dados em formato JSON (portabilidade) ou excluí-los permanentemente do sistema (direito ao esquecimento).
+                  </p>
+                  <button class="btn btn-primary" onclick="openLGPDExportDelete()">🔒 Gerenciar Dados do Paciente</button>
+                  <div style="height:1px;background:var(--border);margin:20px 0"></div>
+                  <h4 style="margin-bottom:10px;font-size:14px;color:var(--text)">📜 Reler os Termos</h4>
+                  <button class="btn btn-secondary" onclick="localStorage.removeItem('psicotcc_lgpd_aceite');location.reload()">🔄 Rever e reaceitar os termos</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
       </div>
+<div id="lgpd-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;max-width:680px;width:95%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.4)">
+    <div style="background:var(--primary);color:#fff;padding:24px 28px;border-radius:16px 16px 0 0">
+      <div style="font-size:28px;margin-bottom:6px">🔒 Termos de Uso e Privacidade</div>
+      <div style="opacity:0.9;font-size:14px">Por favor, leia e aceite antes de continuar</div>
+    </div>
+    <div style="padding:28px">
+      <h3 style="color:var(--primary);margin-bottom:12px;font-size:16px">📋 Termo de Consentimento — LGPD (Lei 13.709/2018)</h3>
+      <div style="background:#f8f9fa;border-radius:10px;padding:18px;margin-bottom:18px;font-size:13.5px;line-height:1.7;max-height:280px;overflow-y:auto;border:1px solid #e9ecef">
+        <p><strong>1. Identificador do Controlador de Dados</strong><br>Este sistema (PsicoTCC) é utilizado por um profissional de psicologia devidamente registrado no CFP. O psicólogo é o controlador dos dados tratados nesta aplicação.</p>
+        <p><strong>2. Dados Tratados</strong><br>O sistema armazena exclusivamente dados inseridos pelo próprio profissional: informações de pacientes, evoluções de sessão, anamneses, documentos clínicos e configurações do consultório. Nenhum dado é enviado a servidores de terceiros, exceto quando o Google Drive é configurado voluntariamente pelo profissional para backup.</p>
+        <p><strong>3. Finalidade do Tratamento</strong><br>Os dados são utilizados exclusivamente para apoio ao registro e gestão clínica, em conformidade com o Art. 9 do Código de Ética do Psicólogo e as resoluções vigentes do CFP.</p>
+        <p><strong>4. Armazenamento Local</strong><br>Por padrão, todos os dados ficam armazenados localmente no navegador deste dispositivo (localStorage), sem transmissão pela internet. O profissional é responsável pela segurança e acesso físico ao dispositivo.</p>
+        <p><strong>5. Direitos do Titular</strong><br>Este sistema oferece, em Configurações → LGPD, as funcionalidades de exportação e exclusão definitiva de dados de qualquer paciente, em conformidade com os arts. 18 e 19 da LGPD.</p>
+        <p><strong>6. Sigilo Profissional</strong><br>O uso deste sistema não substitui nem desobriga o psicólogo de cumprir suas obrigações éticas de sigilo profissional (Resolução CFP 010/2005).</p>
+        <p><strong>7. Uso de Inteligência Artificial</strong><br>As funcionalidades de IA utilizam a API Claude da Anthropic. Ao usar essas funções, trechos do registro clínico são enviados à API. O profissional é responsável por garantir que essa prática esteja em conformidade com seus contratos e obrigações éticas.</p>
+        <p><strong>8. Responsabilidade</strong><br>O sistema é uma ferramenta de apoio. O profissional assume integral responsabilidade pelo uso, pela precisão dos registros e pelas decisões clínicas tomadas.</p>
+      </div>
+      <div style="background:#e8f5e9;border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#1b5e20">
+        ✅ Ao clicar em &ldquo;Li e Aceito&rdquo;, você declara que leu os termos acima, que é um profissional de psicologia habilitado e que utilizará este sistema em conformidade com as normas éticas e legais vigentes.
+      </div>
+      <div style="display:flex;gap:12px;justify-content:flex-end">
+        <button onclick="document.getElementById('lgpd-overlay').style.display='none';document.getElementById('auth-screen').style.display='flex';document.getElementById('app').style.display='none'" style="padding:12px 24px;border:2px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font-size:14px;color:#666">❌ Cancelar</button>
+        <button onclick="acceptLGPD()" style="padding:12px 32px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600">🔒 Li e Aceito</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="panel-agenda" class="panel">
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-body" style="display:flex;align-items:center;gap:12px;padding:14px 20px">
+              <button class="btn btn-secondary btn-sm" onclick="goWeek(-1)">&#8592; Anterior</button>
+              <button class="btn btn-secondary btn-sm" onclick="goWeek(0)">&#128197; Hoje</button>
+              <button class="btn btn-secondary btn-sm" onclick="goWeek(1)">Próxima &#8594;</button>
+              <span id="agenda-week-label" style="font-weight:600;font-size:15px;color:var(--text);margin-left:8px"></span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body" style="padding:0;overflow-x:auto">
+              <div id="agenda-grid" style="min-width:700px"></div>
+            </div>
+          </div>
+        </div>
+<div id="panel-escalas" class="panel">
+          <div class="grid-2" style="margin-bottom:16px">
+            <div class="card">
+              <div class="card-header"><div class="card-title">📊 Aplicar Escala</div></div>
+              <div class="card-body">
+                <div class="form-row" style="margin-bottom:12px">
+                  <label>Escala</label>
+                  <select id="scale-select" class="form-input" onchange="renderScaleItems()">
+                    <option value="">— Selecione a escala —</option>
+                    <option value="phq9">PHQ-9 — Depressão (0-27)</option>
+                    <option value="gad7">GAD-7 — Ansiedade Generalizada (0-21)</option>
+                    <option value="bai">BAI — Inventário de Ansiedade de Beck (0-63)</option>
+                    <option value="bdi2">BDI-II — Inventário de Depressão de Beck (0-63)</option>
+                  </select>
+                </div>
+                <div id="scale-items-area"></div>
+                <div id="scale-result-area" style="display:none;margin-top:16px;padding:16px;background:var(--surface-alt);border-radius:10px;border:1px solid var(--border)">
+                  <div style="font-size:22px;font-weight:700;color:var(--primary)" id="scale-score-display"></div>
+                  <div style="font-size:14px;font-weight:600;margin-top:4px" id="scale-class-display"></div>
+                  <div style="font-size:13px;color:var(--text-muted);margin-top:6px" id="scale-interp-display"></div>
+                  <button class="btn btn-primary" style="margin-top:14px" onclick="saveScaleResult()">💾 Salvar no Histórico</button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">📈 Histórico de Escalas</div></div>
+              <div class="card-body">
+                <div id="scale-history-area">
+                  <div class="alert alert-info">Selecione um paciente ativo para ver o histórico.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<div id="panel-recursos" class="panel">
+          <div class="grid-2" style="margin-bottom:16px">
+            <div class="card">
+              <div class="card-header"><div class="card-title">🗂️ Novo Recurso TCC</div></div>
+              <div class="card-body">
+                <div class="form-row" style="margin-bottom:12px">
+                  <label>Tipo de Recurso</label>
+                  <select id="recurso-select" class="form-input" onchange="renderRecursoForm()">
+                    <option value="">— Selecione o recurso —</option>
+                    <option value="rpd">Registro de Pensamentos Disfuncionais (RPD)</option>
+                    <option value="humor">Registro de Humor Diário</option>
+                    <option value="atividades">Planejamento de Atividades Prazerosas</option>
+                    <option value="experimento">Ficha de Experimento Comportamental</option>
+                    <option value="exposicao">Hierarquia de Exposição</option>
+                    <option value="vantagens">Registro de Vantagens e Desvantagens</option>
+                  </select>
+                </div>
+                <div id="recurso-form-area"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">📂 Histórico de Recursos</div></div>
+              <div class="card-body">
+                <div id="recurso-history-area">
+                  <div class="alert alert-info">Selecione um paciente ativo para ver o histórico.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<div id="panel-formulacao" class="panel">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🧩 Formulação de Caso — Modelo Cognitivo de Beck</div>
+            </div>
+            <div class="card-body">
+              <div id="formulacao-patient-alert" class="alert alert-info" style="margin-bottom:16px">
+                Selecione um paciente ativo para editar a formulação.
+              </div>
+              <div id="formulacao-diagram" style="max-width:680px;margin:0 auto"></div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -1929,7 +2132,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 21/06/2026 16:27
+//  Gerado automaticamente em 23/06/2026 15:54
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2066,6 +2269,7 @@ function initApp() {
   ['evo-date', 'trans-date'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
 
   toast('Bem-vindo ao PsicoTCC!', 'success');
+  checkLGPD();
 
   // Check Google Drive
   const gdToken = sessionStorage.getItem('psicotcc_gd_token');
@@ -2155,7 +2359,23 @@ const TOPBAR_BUTTONS = {
   supervisor:   [
     { label:'🗑️ Limpar Chat',  cls:'btn-secondary btn-md', action:'clearAIChat()' }
   ],
-  settings:     []
+  settings:     [],
+  agenda:       [
+    { label:'➕ Nova Sessão', cls:'btn-primary btn-md', action:'openNewSessionModal()' },
+    { label:'📅 Hoje',       cls:'btn-secondary btn-md', action:'goWeek(0)' }
+  ],
+  escalas:      [
+    { label:'📊 Nova Aplicação', cls:'btn-primary btn-md', action:'renderScaleItems()' },
+    { label:'📈 Ver Histórico',  cls:'btn-secondary btn-md', action:'renderEscalas()' }
+  ],
+  recursos:     [
+    { label:'➕ Novo Recurso',   cls:'btn-primary btn-md',   action:'document.getElementById("recurso-select").focus()' },
+    { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'renderRecursoHistory()' }
+  ],
+  formulacao:   [
+    { label:'💾 Salvar',   cls:'btn-primary btn-md',   action:'saveFormulacao()' },
+    { label:'🖨️ PDF',      cls:'btn-accent btn-md',    action:'printFormulacao()' }
+  ]
 };
 
 function updateTopbarActions(p) {
@@ -2180,7 +2400,11 @@ function showPanel(p) {
     prontuario: 'Prontuário Eletrônico', evolucao: 'Evolução de Sessão',
     transcricao: 'Transcrição de Sessão', documentos: 'Documentos Clínicos',
     contrato: 'Contrato de Prestação de Serviços', supervisor: 'Supervisor TCC (IA)',
-    settings: 'Configurações'
+    settings: 'Configurações',
+    agenda: 'Agenda de Sessões',
+    escalas: 'Escalas Psicológicas',
+    recursos: 'Recursos TCC',
+    formulacao: 'Formulação de Caso'
   };
   document.getElementById('topbar-title').textContent = titles[p] || p;
   updateTopbarActions(p);
@@ -2192,6 +2416,10 @@ function showPanel(p) {
   if (p === 'patients') renderPatients();
   if (p === 'dashboard') updateDashboard();
   if (p === 'documentos') renderDocList();
+  if (p === 'agenda') renderAgenda();
+  if (p === 'escalas') renderEscalas();
+  if (p === 'recursos') renderRecursos();
+  if (p === 'formulacao') renderFormulacao();
 }
 
 function updateDashboard() {
@@ -2202,6 +2430,20 @@ function updateDashboard() {
   document.getElementById('dash-total-evo').textContent = evos;
   document.getElementById('dash-total-docs').textContent = docs;
   document.getElementById('dash-total-trans').textContent = trans;
+  // Sessoes esta semana
+  const todayW = new Date(); todayW.setHours(0,0,0,0);
+  const dayW = todayW.getDay();
+  const mondayW = new Date(todayW);
+  mondayW.setDate(todayW.getDate() - (dayW === 0 ? 6 : dayW - 1));
+  const sundayW = new Date(mondayW); sundayW.setDate(mondayW.getDate() + 6);
+  const weekSess = APP.patients.reduce((a, p) =>
+    a + (p.agendaSessions||[]).filter(s => {
+      if (s.status === 'cancelada') return false;
+      const sd = new Date(s.date + 'T00:00');
+      return sd >= mondayW && sd <= sundayW;
+    }).length, 0);
+  const wEl = document.getElementById('dash-total-sess');
+  if (wEl) wEl.textContent = weekSess;
 
   // Activity
   const acts = [];
@@ -2261,6 +2503,7 @@ function selectPatient(id) {
   renderProntuario();
   document.getElementById('prontuario-patient-name').textContent = APP.activePatient.name;
   toast(`Paciente ativo: ${APP.activePatient.name}`, 'success');
+  renderPatientEvolution(APP.activePatient);
 }
 
 function openNewPatient() {
@@ -2313,6 +2556,81 @@ function savePatients() {
   localStorage.setItem('psicotcc_patients', JSON.stringify(APP.patients));
   updateDashboard();
   autoSyncGDrive();
+}
+function renderPatientEvolution(p) {
+  const area = document.getElementById('patient-detail-area');
+  if (!area) return;
+  if (!p) { area.innerHTML = ''; return; }
+
+  const evos = (p.evolutions || []).slice().sort((a,b) => a.date > b.date ? 1 : -1);
+  const scales = (p.scales || []);
+  const agendaSess = (p.agendaSessions || []);
+
+  const totalSess = evos.length;
+  const canceladas = agendaSess.filter(s => s.status === 'cancelada').length;
+  const realizadas = agendaSess.filter(s => s.status === 'realizada').length;
+
+  // Média de intervalo
+  let avgInterval = '—';
+  if (evos.length >= 2) {
+    const diffs = [];
+    for (let i = 1; i < evos.length; i++) {
+      const a = new Date(evos[i-1].date + 'T00:00');
+      const b = new Date(evos[i].date + 'T00:00');
+      diffs.push(Math.abs(b - a) / (1000*60*60*24));
+    }
+    avgInterval = Math.round(diffs.reduce((a,b) => a+b,0) / diffs.length) + ' dias';
+  }
+
+  // Timeline HTML
+  const RISK_COLOR = { baixo: '#27ae60', moderado: '#f39c12', elevado: '#e74c3c', critico: '#2c3e50' };
+  const timelineHtml = evos.length ? evos.map((e, i) => {
+    const rc = RISK_COLOR[e.risk] || '#aaa';
+    const dt = e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : '—';
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;color:var(--text-muted);min-width:75px">' + dt + '</span><span style="width:10px;height:10px;border-radius:50%;background:' + rc + ';flex-shrink:0;display:inline-block" title="Risco: ' + (e.risk||'—') + '"></span><span style="font-size:12px;color:var(--text)">Sessão ' + (i+1) + (e.sessionNum ? ' (#'+e.sessionNum+')' : '') + '</span>' + (e.taskPrescribed ? ' <span style="font-size:11px" title="Tarefa prescrita">\u{1F4DA}</span>' : '') + '</div>';
+  }).join('') : '<div style="color:var(--text-muted);font-size:12px">Nenhuma evolução registrada.</div>';
+
+  // SVG de escalas
+  const scaleGroups = {};
+  scales.forEach(s => {
+    if (!scaleGroups[s.scaleId]) scaleGroups[s.scaleId] = [];
+    scaleGroups[s.scaleId].push(s);
+  });
+  const SCALE_COLORS = ['#4A9B8E','#C96F58','#E8A838','#5B8FCF'];
+  const SCALE_MAXES = { phq9:27, gad7:21, bai:63, bdi2:63 };
+  const SCALE_NAMES = { phq9:'PHQ-9', gad7:'GAD-7', bai:'BAI', bdi2:'BDI-II' };
+  let svgHtml = '';
+  const scaleKeys = Object.keys(scaleGroups);
+  if (scaleKeys.length) {
+    const W = 360, H = 120, PAD = 28;
+    let svgContent = '';
+    let legendHtml = '';
+    scaleKeys.forEach((sid, ci) => {
+      const list = scaleGroups[sid].sort((a,b) => a.date > b.date ? 1 : -1);
+      if (list.length < 2) return;
+      const maxScore = SCALE_MAXES[sid] || 63;
+      const col = SCALE_COLORS[ci % SCALE_COLORS.length];
+      const pts = list.map((s, i) => {
+        const x = PAD + i * (W - PAD*2) / (list.length - 1);
+        const y = H - PAD - (s.score / maxScore * (H - PAD*2));
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      svgContent += '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="2"/>';
+      list.forEach((s, i) => {
+        const x = PAD + i * (W - PAD*2) / (list.length - 1);
+        const y = H - PAD - (s.score / maxScore * (H - PAD*2));
+        svgContent += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3" fill="' + col + '"/>';
+      });
+      legendHtml += '<span style="font-size:11px;color:' + col + '">● ' + (SCALE_NAMES[sid]||sid) + '</span> ';
+    });
+    svgHtml = svgContent
+      ? '<div style="margin-top:8px"><svg width="' + W + '" height="' + H + '" style="background:var(--surface-alt);border-radius:8px;display:block">' + svgContent + '</svg><div style="margin-top:4px">' + legendHtml + '</div></div>'
+      : '<div style="color:var(--text-muted);font-size:12px">Aplique escalas pelo menos 2x para ver o gráfico.</div>';
+  } else {
+    svgHtml = '<div style="color:var(--text-muted);font-size:12px">Nenhuma escala aplicada ainda.</div>';
+  }
+
+  area.innerHTML = '<div class="card" style="margin-top:16px"><div class="card-header"><div class="card-title">\U0001f4ca Evolução Clínica — ' + escHtml(p.name) + '</div></div><div class="card-body"><div class="grid-3" style="margin-bottom:16px"><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + totalSess + '</div><div style="font-size:12px;color:var(--text-muted)">Evoluções</div></div><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + realizadas + '</div><div style="font-size:12px;color:var(--text-muted)">Realizadas</div></div><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + avgInterval + '</div><div style="font-size:12px;color:var(--text-muted)">Intervalo médio</div></div></div><div class="grid-2"><div><div style="font-weight:600;font-size:13px;margin-bottom:8px">\U0001f4cd Linha do Tempo das Sessões <span style="font-size:11px;font-weight:400;margin-left:4px">● verde=baixo ● âmbar=moderado ● vermelho=elevado ● preto=crítico</span></div>' + timelineHtml + '</div><div><div style="font-weight:600;font-size:13px;margin-bottom:8px">\U0001f4c8 Evolução das Escalas</div>' + svgHtml + '</div></div></div></div>';
 }
 
 // ── ANAMNESE ─────────────────────────────────────────────────
@@ -2586,6 +2904,14 @@ function updateEvoHeader() {
   document.getElementById('evo-sig-name').textContent = cfg.name || '—';
   document.getElementById('evo-sig-crp').textContent = cfg.crp ? `${cfg.crp} · ${cfg.spec || 'Psicóloga'}` : '—';
   document.getElementById('evo-meta-patient').textContent = p ? p.name : '—';
+  const trSel = document.getElementById('evo-task-review-status');
+  if (trSel) trSel.value = e.taskReviewStatus || 'nao_havia';
+  const trRelEl = document.getElementById('evo-task-review-relato');
+  if (trRelEl) trRelEl.innerHTML = e.taskReviewRelato || '';
+  const trAnEl = document.getElementById('evo-task-review-analise');
+  if (trAnEl) trAnEl.innerHTML = e.taskReviewAnalise || '';
+  const taskDlEl = document.getElementById('evo-task-deadline');
+  if (taskDlEl) taskDlEl.value = e.taskDeadline || '';
   updateEvoMeta();
 }
 
@@ -2636,7 +2962,7 @@ Responda APENAS com JSON: {"s1":"...","s2":"...","s3":"...","s4":"...","s5":"...
     const resp = await callClaude([{ role: 'user', content: prompt }], 1500);
     const clean = resp.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(clean);
-    ['s1','s2','s3','s4','s5','s6','s7'].forEach(k => {
+    ['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(k => {
       const el = document.getElementById('evo-' + k);
       if (el && parsed[k]) el.innerHTML = parsed[k].replace(/\n/g, '<br>');
     });
@@ -2662,6 +2988,12 @@ function saveEvolution() {
     s5: document.getElementById('evo-s5').innerHTML,
     s6: document.getElementById('evo-s6').innerHTML,
     s7: document.getElementById('evo-s7').innerHTML,
+    s8: document.getElementById('evo-s8')?.innerHTML || '',
+    taskReviewStatus: document.getElementById('evo-task-review-status')?.value || 'nao_havia',
+    taskReviewRelato: document.getElementById('evo-task-review-relato')?.innerHTML || '',
+    taskReviewAnalise: document.getElementById('evo-task-review-analise')?.innerHTML || '',
+    taskDeadline: document.getElementById('evo-task-deadline')?.value || '',
+    taskPrescribed: !!(document.getElementById('evo-s8')?.innerText?.trim()),
   };
   if (!APP.activePatient.evolutions) APP.activePatient.evolutions = [];
   APP.activePatient.evolutions.push(evo);
@@ -2677,10 +3009,11 @@ function loadEvolutionList() {
   showModal('Histórico de Evoluções', `
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Data</th><th>Sessão</th><th>Duração</th><th>Risco</th><th></th></tr></thead>
+        <thead><tr><th>Data</th><th>Tarefa</th><th>Sessão</th><th>Duração</th><th>Risco</th><th></th></tr></thead>
         <tbody>${evos.map((e,i) => `
           <tr>
             <td>${e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : '—'}</td>
+            <td style='text-align:center'>${e.taskPrescribed ? '📚' : ''} ${(!e.taskReviewStatus || e.taskReviewStatus === 'nao_havia') ? '' : e.taskReviewStatus === 'sim_completa' ? '✅' : e.taskReviewStatus === 'sim_parcial' ? '🔶' : '❌'}</td>
             <td>#${e.sessionNum || i+1}</td>
             <td>${e.duration || '—'}min</td>
             <td><span class="risk-badge risk-${e.risk || 'baixo'}">${e.risk || '—'}</span></td>
@@ -3382,6 +3715,820 @@ function clearAllData() {
   toast('Dados locais apagados.', 'info');
 }
 
+// ── LGPD ─────────────────────────────────────────────────────
+function checkLGPD() {
+  const aceite = localStorage.getItem('psicotcc_lgpd_aceite');
+  if (!aceite) {
+    const overlay = document.getElementById('lgpd-overlay');
+    if (overlay) { overlay.style.display = 'flex'; }
+  }
+}
+
+function acceptLGPD() {
+  const ts = new Date().toISOString();
+  localStorage.setItem('psicotcc_lgpd_aceite', JSON.stringify({ ts }));
+  const overlay = document.getElementById('lgpd-overlay');
+  if (overlay) overlay.style.display = 'none';
+  toast('Termos aceitos. Bem-vindo ao PsicoTCC!', 'success');
+  loadLGPDSettingsInfo();
+}
+
+function loadLGPDSettingsInfo() {
+  const el = document.getElementById('lgpd-aceite-info');
+  if (!el) return;
+  const raw = localStorage.getItem('psicotcc_lgpd_aceite');
+  if (raw) {
+    try {
+      const obj = JSON.parse(raw);
+      const dt = new Date(obj.ts);
+      el.textContent = 'Aceito em: ' + dt.toLocaleDateString('pt-BR') + ' às ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      el.style.color = '#27ae60';
+    } catch(e) { el.textContent = 'Data não disponível'; }
+  } else {
+    el.textContent = 'Termo ainda não aceito neste dispositivo.';
+    el.style.color = '#c0392b';
+  }
+}
+
+function exportPatientData(patientId) {
+  const p = APP.patients.find(x => x.id === patientId);
+  if (!p) return toast('Paciente não encontrado.', 'error');
+  const blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'dados_' + (p.name||'paciente').replace(/\s+/g,'_').toLowerCase() + '_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Dados exportados com sucesso!', 'success');
+}
+
+function deletePatientData(patientId) {
+  const p = APP.patients.find(x => x.id === patientId);
+  if (!p) return toast('Paciente não encontrado.', 'error');
+  const input = prompt('EXCLUIR PERMANENTEMENTE todos os dados de "' + p.name + '"?\n\nEsta ação é IRREVERSÍVEL.\n\nDigite o nome do paciente para confirmar:');
+  if (!input || input.trim().toLowerCase() !== p.name.trim().toLowerCase()) {
+    return toast('Nome não confere. Exclusão cancelada.', 'error');
+  }
+  if (!confirm('ÚLTIMA CONFIRMAÇÃO: Excluir permanentemente todos os dados de "' + p.name + '"?')) return;
+  APP.patients = APP.patients.filter(x => x.id !== patientId);
+  if (APP.activePatient && APP.activePatient.id === patientId) APP.activePatient = null;
+  savePatients();
+  closeModal();
+  toast('Dados de "' + p.name + '" excluídos permanentemente.', 'success');
+  renderPatients();
+  updateDashboard();
+}
+
+function openLGPDExportDelete() {
+  if (!APP.patients.length) return toast('Nenhum paciente cadastrado.', 'info');
+  const opts = APP.patients.map(p => '<option value="' + p.id + '">' + escHtml(p.name) + '</option>').join('');
+  showModal('🔒 LGPD — Gestão de Dados', `
+    <div class="form-row" style="margin-bottom:16px">
+      <label>Selecione o Paciente</label>
+      <select id="lgpd-pat-select" class="form-input">${opts}</select>
+    </div>
+    <div style="display:flex;gap:10px;flex-direction:column">
+      <button class="btn btn-secondary" onclick="exportPatientData(document.getElementById('lgpd-pat-select').value)">
+        📥 Exportar todos os dados (JSON)
+      </button>
+      <button class="btn" style="background:#c0392b;color:#fff" onclick="deletePatientData(document.getElementById('lgpd-pat-select').value)">
+        🗑️ Excluir permanentemente todos os dados
+      </button>
+    </div>
+  `);
+}
+
+// ── AGENDA ───────────────────────────────────────────────────
+let agendaWeekOffset = 0;
+const HORA_INICIO = 7;
+const HORA_FIM = 22;
+const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const AGENDA_COLORS = ['#4A9B8E','#C96F58','#E8A838','#5B8FCF','#8B7FD4','#E85858','#58B85A'];
+
+function getWeekDates(offset) {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const sunday = new Date(now);
+  sunday.setDate(now.getDate() - dayOfWeek + offset * 7);
+  sunday.setHours(0,0,0,0);
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function toDateStr(d) { return d.toISOString().split('T')[0]; }
+
+function getAllAgendaSessions() {
+  const all = [];
+  APP.patients.forEach((p, pi) => {
+    (p.agendaSessions || []).forEach(s => {
+      all.push({ ...s, patientName: p.name, patientId: p.id,
+        color: AGENDA_COLORS[pi % AGENDA_COLORS.length] });
+    });
+  });
+  return all;
+}
+
+function renderAgenda() {
+  const days = getWeekDates(agendaWeekOffset);
+  const label = days[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) +
+    ' – ' + days[6].toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+  const lbl = document.getElementById('agenda-week-label');
+  if (lbl) lbl.textContent = label;
+
+  const todayStr = toDateStr(new Date());
+  const allSessions = getAllAgendaSessions();
+
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:13px">';
+  html += '<thead><tr><th style="width:56px;padding:10px 8px;background:var(--surface-alt);border:1px solid var(--border);color:var(--text-muted);font-size:12px">Hora</th>';
+  days.forEach((d, i) => {
+    const ds = toDateStr(d);
+    const isToday = ds === todayStr;
+    const dayNum = d.getDate().toString().padStart(2,'0');
+    const month = (d.getMonth()+1).toString().padStart(2,'0');
+    const dayName = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()];
+    html += '<th style="padding:10px 6px;background:' + (isToday?'var(--primary)':'var(--surface-alt)') + ';border:1px solid var(--border);color:' + (isToday?'#fff':'var(--text)') + ';text-align:center;min-width:90px"><div style="font-weight:600">' + dayName + '</div><div style="font-size:11px;opacity:0.8">' + dayNum + '/' + month + '</div></th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  for (let h = HORA_INICIO; h < HORA_FIM; h++) {
+    const timeStr = h.toString().padStart(2,'0') + ':00';
+    html += '<tr><td style="padding:4px 8px;border:1px solid var(--border);background:var(--surface-alt);color:var(--text-muted);font-size:11px;text-align:right;vertical-align:top;white-space:nowrap">' + timeStr + '</td>';
+    days.forEach(d => {
+      const ds = toDateStr(d);
+      const cellSessions = allSessions.filter(s => {
+        if (s.date !== ds) return false;
+        const sh = parseInt((s.timeStart||'00:00').split(':')[0]);
+        return sh === h;
+      });
+      let cellHtml = '';
+      cellSessions.forEach(s => {
+        const isDone = s.status === 'realizada';
+        const isCanceled = s.status === 'cancelada';
+        cellHtml += '<div onclick="editSession(\'' + escHtml(s.id) + '\')" style="background:' + s.color + ';color:#fff;border-radius:6px;padding:4px 6px;margin-bottom:3px;cursor:pointer;font-size:11px;opacity:' + ((isDone||isCanceled)?'0.55':'1') + ';text-decoration:' + (isCanceled?'line-through':'none') + ';line-height:1.3"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtml(s.patientName) + '</div><div style="opacity:0.9">' + escHtml(s.timeStart||'') + '–' + escHtml(s.timeEnd||'') + ' ' + (isCanceled?'❌':isDone?'✅':'') + '</div></div>';
+      });
+      html += '<td style="padding:4px;border:1px solid var(--border);vertical-align:top;min-height:44px;cursor:pointer" onclick="openNewSessionModal(\'' + ds + '\',\'' + h.toString().padStart(2,'0') + ':00\')">' + cellHtml + '<div style="height:36px"></div></td>';
+    });
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  const grid = document.getElementById('agenda-grid');
+  if (grid) grid.innerHTML = html;
+}
+
+function goWeek(delta) {
+  agendaWeekOffset = (delta === 0) ? 0 : agendaWeekOffset + delta;
+  renderAgenda();
+}
+
+function openNewSessionModal(dateStr, timeStr) {
+  if (!dateStr) dateStr = toDateStr(new Date());
+  if (!timeStr) timeStr = '08:00';
+  const endHour = (parseInt(timeStr.split(':')[0]) + 1) % 24;
+  const endStr = endHour.toString().padStart(2,'0') + ':00';
+  const patOpts = APP.patients.length
+    ? APP.patients.map(p => '<option value="' + p.id + '">' + escHtml(p.name) + '</option>').join('')
+    : '<option value="">Nenhum paciente cadastrado</option>';
+  showModal('\u{1F4C5} Nova Sessão', '<div class="form-row" style="margin-bottom:12px"><label>Paciente</label><select id="ag-patient" class="form-input">' + patOpts + '</select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Data</label><input type="date" id="ag-date" class="form-input" value="' + dateStr + '"></div><div class="form-row"><label>Modalidade</label><select id="ag-modality" class="form-input"><option>Presencial</option><option>Online</option><option>Presencial/Casal</option><option>Online/Casal</option></select></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Início</label><input type="time" id="ag-start" class="form-input" value="' + timeStr + '"></div><div class="form-row"><label>Fim</label><input type="time" id="ag-end" class="form-input" value="' + endStr + '"></div></div><div class="form-row"><label>Observação (opcional)</label><textarea id="ag-notes" class="form-input" rows="2"></textarea></div>', [{ label: '\u{1F4BE} Salvar Sessão', cls: 'btn-primary', action: 'saveNewSession()' }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
+}
+
+function saveNewSession() {
+  const patientId = document.getElementById('ag-patient')?.value;
+  const p = APP.patients.find(x => x.id === patientId);
+  if (!p) return toast('Selecione um paciente.', 'error');
+  const date = document.getElementById('ag-date')?.value;
+  if (!date) return toast('Informe a data da sessao.', 'error');
+  if (!p.agendaSessions) p.agendaSessions = [];
+  p.agendaSessions.push({
+    id: Date.now().toString(),
+    date,
+    timeStart: document.getElementById('ag-start')?.value || '',
+    timeEnd: document.getElementById('ag-end')?.value || '',
+    modality: document.getElementById('ag-modality')?.value || 'Presencial',
+    notes: document.getElementById('ag-notes')?.value || '',
+    status: 'agendada'
+  });
+  savePatients();
+  closeModal();
+  toast('Sessao agendada!', 'success');
+  renderAgenda();
+}
+
+function editSession(sessionId) {
+  let session = null, patient = null;
+  APP.patients.forEach(p => {
+    const s = (p.agendaSessions||[]).find(x => x.id === sessionId);
+    if (s) { session = s; patient = p; }
+  });
+  if (!session || !patient) return;
+  const statusLabel = { agendada: '\u{1F5D3}️ Agendada', realizada: '✅ Realizada', cancelada: '❌ Cancelada' };
+  showModal('\u{1F4C5} Sessao — ' + escHtml(patient.name), '<div style="background:var(--surface-alt);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px"><div><strong>Paciente:</strong> ' + escHtml(patient.name) + '</div><div><strong>Data:</strong> ' + (session.date ? new Date(session.date+'T00:00').toLocaleDateString('pt-BR') : '—') + '</div><div><strong>Horário:</strong> ' + escHtml(session.timeStart||'—') + ' – ' + escHtml(session.timeEnd||'—') + '</div><div><strong>Modalidade:</strong> ' + escHtml(session.modality||'—') + '</div><div><strong>Status:</strong> ' + (statusLabel[session.status]||session.status) + '</div>' + (session.notes ? '<div><strong>Obs:</strong> ' + escHtml(session.notes) + '</div>' : '') + '</div><div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-primary" onclick="markSessionStatus(\'' + sessionId + '\',\'realizada\')">✅ Marcar como Realizada</button><button class="btn btn-secondary" onclick="markSessionStatus(\'' + sessionId + '\',\'cancelada\')">❌ Cancelar Sessão</button><button class="btn btn-secondary" onclick="editSessionModal(\'' + sessionId + '\')">✏️ Editar</button><button class="btn" style="background:#c0392b;color:#fff" onclick="deleteSession(\'' + sessionId + '\')">\u{1F5D1}️ Excluir</button></div>');
+}
+
+function markSessionStatus(sessionId, status) {
+  APP.patients.forEach(p => {
+    const s = (p.agendaSessions||[]).find(x => x.id === sessionId);
+    if (s) s.status = status;
+  });
+  savePatients();
+  closeModal();
+  toast(status === 'realizada' ? 'Sessão realizada!' : 'Sessão cancelada.', 'success');
+  renderAgenda();
+}
+
+function editSessionModal(sessionId) {
+  let session = null;
+  APP.patients.forEach(p => { const s = (p.agendaSessions||[]).find(x => x.id === sessionId); if (s) session = s; });
+  if (!session) return;
+  closeModal();
+  setTimeout(() => {
+    showModal('✏️ Editar Sessão', '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Data</label><input type="date" id="edag-date" class="form-input" value="' + escHtml(session.date||'') + '"></div><div class="form-row"><label>Modalidade</label><select id="edag-modality" class="form-input">' + ['Presencial','Online','Presencial/Casal','Online/Casal'].map(m=>'<option'+(session.modality===m?' selected':'')+'>'+m+'</option>').join('') + '</select></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Início</label><input type="time" id="edag-start" class="form-input" value="' + escHtml(session.timeStart||'') + '"></div><div class="form-row"><label>Fim</label><input type="time" id="edag-end" class="form-input" value="' + escHtml(session.timeEnd||'') + '"></div></div><div class="form-row"><label>Observação</label><textarea id="edag-notes" class="form-input" rows="2">' + escHtml(session.notes||'') + '</textarea></div>', [{ label: '\u{1F4BE} Salvar', cls: 'btn-primary', action: "saveEditSession('" + sessionId + "')" }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
+  }, 100);
+}
+
+function saveEditSession(sessionId) {
+  APP.patients.forEach(p => {
+    const s = (p.agendaSessions||[]).find(x => x.id === sessionId);
+    if (s) {
+      s.date = document.getElementById('edag-date')?.value || s.date;
+      s.timeStart = document.getElementById('edag-start')?.value || s.timeStart;
+      s.timeEnd = document.getElementById('edag-end')?.value || s.timeEnd;
+      s.modality = document.getElementById('edag-modality')?.value || s.modality;
+      s.notes = document.getElementById('edag-notes')?.value || '';
+    }
+  });
+  savePatients();
+  closeModal();
+  toast('Sessão atualizada!', 'success');
+  renderAgenda();
+}
+
+function deleteSession(sessionId) {
+  if (!confirm('Excluir esta sessão da agenda?')) return;
+  APP.patients.forEach(p => { p.agendaSessions = (p.agendaSessions||[]).filter(x => x.id !== sessionId); });
+  savePatients();
+  closeModal();
+  toast('Sessão excluída.', 'success');
+  renderAgenda();
+}
+
+// ── ESCALAS CLÍNICAS ─────────────────────────────────────────
+const SCALES_DEF = {
+  phq9: {
+    name: 'PHQ-9 — Escala de Depressão do Paciente',
+    options: ['Nenhuma vez (0)','Vários dias (1)','Mais da metade dos dias (2)','Quase todos os dias (3)'],
+    items: [
+      'Pouco interesse ou prazer em fazer as coisas',
+      'Sentir-se para baixo, deprimido(a) ou sem esperança',
+      'Dificuldade para adormecer ou permanecer dormindo, ou dormir mais do que de costume',
+      'Sentir-se cansado(a) ou com pouca energia',
+      'Falta de apetite ou comer demais',
+      'Sentir-se mal consigo mesmo(a) — ou achar que é um fracasso ou que decepcionou a si mesmo(a) ou sua família',
+      'Dificuldade para se concentrar nas coisas, como ler o jornal ou ver televisão',
+      'Mover-se ou falar tão lentamente que outras pessoas poderiam notar — ou o oposto, ficar tão agitado(a) ou inquieto(a) que você fica andando de um lado para o outro mais do que de costume',
+      'Pensar em se machucar de alguma forma ou que seria melhor estar morto(a)'
+    ],
+    ranges: [
+      { max: 4,  cls: 'Mínima',             color: '#27ae60', interp: 'Sem evidências de depressão clinicamente significativa.' },
+      { max: 9,  cls: 'Leve',               color: '#f39c12', interp: 'Sintomas leves. Monitoramento e psicoeducação indicados.' },
+      { max: 14, cls: 'Moderada',           color: '#e67e22', interp: 'Depressão moderada. Avaliação clínica detalhada recomendada.' },
+      { max: 19, cls: 'Moderadamente Grave',color: '#e74c3c', interp: 'Depressão moderadamente grave. Tratamento ativo indicado.' },
+      { max: 27, cls: 'Grave',              color: '#c0392b', interp: 'Depressão grave. Intervenção imediata necessária.' }
+    ]
+  },
+  gad7: {
+    name: 'GAD-7 — Transtorno de Ansiedade Generalizada',
+    options: ['Nenhuma vez (0)','Vários dias (1)','Mais da metade dos dias (2)','Quase todos os dias (3)'],
+    items: [
+      'Sentir-se nervoso(a), ansioso(a) ou no limite',
+      'Não conseguir parar ou controlar as preocupações',
+      'Preocupar-se muito com diferentes coisas',
+      'Dificuldade para relaxar',
+      'Ficar tão agitado(a) que fica difícil de ficar parado(a)',
+      'Ficar facilmente irritado(a) ou irritável',
+      'Sentir medo como se algo terrível pudesse acontecer'
+    ],
+    ranges: [
+      { max: 4,  cls: 'Mínima', color: '#27ae60', interp: 'Ansiedade mínima ou sem ansiedade clínica significativa.' },
+      { max: 9,  cls: 'Leve',   color: '#f39c12', interp: 'Ansiedade leve. Psicoeducação e monitoramento recomendados.' },
+      { max: 14, cls: 'Moderada',color:'#e67e22', interp: 'Ansiedade moderada. Avaliação e intervenção clínica indicadas.' },
+      { max: 21, cls: 'Grave',  color: '#c0392b', interp: 'Ansiedade grave. Intervenção terapêutica ativa necessária.' }
+    ]
+  },
+  bai: {
+    name: 'BAI — Inventário de Ansiedade de Beck',
+    options: ['Absolutamente não (0)','Levemente (1)','Moderadamente (2)','Gravemente (3)'],
+    items: [
+      'Dormência ou formigamento','Sensação de calor','Tremor das pernas','Incapacidade de relaxar',
+      'Medo que aconteça o pior','Atordoamento ou tontura','Palpitações ou aceleração do coração',
+      'Sem equilíbrio','Aterrorizado(a)','Nervosismo','Sensação de sufocamento','Tremor das mãos',
+      'Tremor do corpo','Medo de perder o controle','Dificuldade de respirar','Medo de morrer',
+      'Estar assustado(a)','Indigestão ou desconforto no abdômen','Sensação de desmaio',
+      'Rubor facial','Suor (não devido ao calor)'
+    ],
+    ranges: [
+      { max: 10, cls: 'Mínima',   color: '#27ae60', interp: 'Nível mínimo de ansiedade.' },
+      { max: 19, cls: 'Leve',     color: '#f39c12', interp: 'Ansiedade leve.' },
+      { max: 30, cls: 'Moderada', color: '#e67e22', interp: 'Ansiedade moderada. Avaliação clínica recomendada.' },
+      { max: 63, cls: 'Grave',    color: '#c0392b', interp: 'Ansiedade grave. Intervenção terapêutica indicada.' }
+    ]
+  },
+  bdi2: {
+    name: 'BDI-II — Inventário de Depressão de Beck',
+    options: ['Não me sinto triste (0)','Sinto-me triste (1)','Estou sempre triste (2)','Estou tão triste que não consigo suportar (3)'],
+    items: [
+      'Tristeza','Pessimismo','Sentimento de fracasso passado','Perda de prazer',
+      'Sentimentos de culpa','Sentimento de punição','Autodescrição negativa','Autocritismo',
+      'Pensamentos ou desejos suicidas','Choro','Agitação','Perda de interesse',
+      'Indecisão','Desvalorização','Perda de energia','Mudanças nos padrões de sono',
+      'Irritabilidade','Mudança no apetite','Dificuldade de concentração',
+      'Cansaço ou fadiga','Perda de interesse em sexo'
+    ],
+    ranges: [
+      { max: 13, cls: 'Mínima',   color: '#27ae60', interp: 'Sem depressão ou depressão mínima.' },
+      { max: 19, cls: 'Leve',     color: '#f39c12', interp: 'Depressão leve.' },
+      { max: 28, cls: 'Moderada', color: '#e67e22', interp: 'Depressão moderada. Avaliação clínica recomendada.' },
+      { max: 63, cls: 'Grave',    color: '#c0392b', interp: 'Depressão grave. Intervenção imediata indicada.' }
+    ]
+  }
+};
+
+let scaleCurrentResult = null;
+
+function renderScaleItems() {
+  const scaleId = document.getElementById('scale-select')?.value;
+  const area = document.getElementById('scale-items-area');
+  const resultArea = document.getElementById('scale-result-area');
+  if (resultArea) resultArea.style.display = 'none';
+  scaleCurrentResult = null;
+  if (!scaleId || !area) return;
+  const def = SCALES_DEF[scaleId];
+  if (!def) return;
+  let html = '<div style="margin-bottom:14px;font-weight:600;color:var(--text)">' + def.name + '</div>';
+  html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Para cada item, selecione a frequência nos últimos 14 dias:</div>';
+  def.items.forEach((item, i) => {
+    html += '<div style="margin-bottom:10px;padding:10px;background:var(--surface-alt);border-radius:8px">';
+    html += '<div style="font-size:13px;font-weight:500;margin-bottom:7px">' + (i+1) + '. ' + item + '</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    def.options.forEach((opt, v) => {
+      const optId = 'sc-' + scaleId + '-' + i + '-' + v;
+      // Use first option label for BDI-II (different per item)
+      const label = (scaleId === 'bdi2') ? v : opt;
+      html += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:4px 8px"><input type="radio" name="sc-' + scaleId + '-' + i + '" value="' + v + '"> ' + (scaleId === 'bdi2' ? v : opt) + '</label>';
+    });
+    html += '</div></div>';
+  });
+  html += '<button class="btn btn-primary" style="margin-top:10px" onclick="calcScaleScore()">📊 Calcular Pontuação</button>';
+  area.innerHTML = html;
+}
+
+function calcScaleScore() {
+  const scaleId = document.getElementById('scale-select')?.value;
+  if (!scaleId) return;
+  const def = SCALES_DEF[scaleId];
+  const answers = [];
+  let score = 0;
+  let complete = true;
+  def.items.forEach((item, i) => {
+    const radios = document.querySelectorAll('input[name="sc-' + scaleId + '-' + i + '"]');
+    let val = null;
+    radios.forEach(r => { if (r.checked) val = parseInt(r.value); });
+    if (val === null) { complete = false; }
+    else { answers.push(val); score += val; }
+  });
+  if (!complete) return toast('Responda todos os itens antes de calcular.', 'error');
+
+  let classification = def.ranges[def.ranges.length-1];
+  for (const r of def.ranges) { if (score <= r.max) { classification = r; break; } }
+
+  scaleCurrentResult = { scaleId, score, answers, classification: classification.cls, interp: classification.interp, date: new Date().toISOString().split('T')[0] };
+
+  const resultArea = document.getElementById('scale-result-area');
+  document.getElementById('scale-score-display').textContent = 'Pontuação: ' + score + ' / ' + def.ranges[def.ranges.length-1].max;
+  document.getElementById('scale-class-display').innerHTML = '<span style="color:' + classification.color + '">● ' + classification.cls + '</span>';
+  document.getElementById('scale-interp-display').textContent = classification.interp;
+  if (resultArea) resultArea.style.display = 'block';
+}
+
+function saveScaleResult() {
+  if (!APP.activePatient) return toast('Selecione um paciente ativo.', 'error');
+  if (!scaleCurrentResult) return toast('Calcule a pontuação primeiro.', 'error');
+  if (!APP.activePatient.scales) APP.activePatient.scales = [];
+  APP.activePatient.scales.push({ ...scaleCurrentResult });
+  savePatients();
+  toast('Resultado salvo no histórico!', 'success');
+  scaleCurrentResult = null;
+  const resultArea = document.getElementById('scale-result-area');
+  if (resultArea) resultArea.style.display = 'none';
+  renderScaleHistory();
+}
+
+function renderScaleHistory() {
+  const area = document.getElementById('scale-history-area');
+  if (!area) return;
+  if (!APP.activePatient) {
+    area.innerHTML = '<div class="alert alert-info">Selecione um paciente ativo para ver o histórico.</div>';
+    return;
+  }
+  const scales = APP.activePatient.scales || [];
+  if (!scales.length) {
+    area.innerHTML = '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">📊</div><h3>Sem aplicações</h3><p>Nenhuma escala aplicada ainda.</p></div>';
+    return;
+  }
+  // Group by scaleId
+  const groups = {};
+  scales.forEach(s => { if (!groups[s.scaleId]) groups[s.scaleId] = []; groups[s.scaleId].push(s); });
+  let html = '';
+  Object.entries(groups).forEach(([sid, list]) => {
+    const def = SCALES_DEF[sid];
+    if (!def) return;
+    const sorted = [...list].sort((a,b) => a.date > b.date ? 1 : -1);
+    html += '<div style="margin-bottom:20px"><div style="font-weight:600;font-size:13px;margin-bottom:8px">' + def.name + '</div>';
+    // Mini SVG chart
+    html += buildScaleSVG(sorted, def);
+    // Table
+    html += '<div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Data</th><th>Pontuação</th><th>Classificação</th></tr></thead><tbody>';
+    sorted.forEach(s => {
+      const r = def.ranges.find(x => s.score <= x.max) || def.ranges[def.ranges.length-1];
+      const dt = s.date ? new Date(s.date+'T00:00').toLocaleDateString('pt-BR') : s.date;
+      html += '<tr><td>' + dt + '</td><td><strong>' + s.score + '</strong></td><td><span style="color:' + r.color + '">● ' + s.classification + '</span></td></tr>';
+    });
+    html += '</tbody></table></div></div>';
+  });
+  area.innerHTML = html;
+}
+
+function buildScaleSVG(sorted, def) {
+  if (sorted.length < 2) return '<div style="font-size:12px;color:var(--text-muted)">Aplique pelo menos 2x para ver o gráfico de evolução.</div>';
+  const W = 320, H = 80, PAD = 20;
+  const maxScore = def.ranges[def.ranges.length-1].max;
+  const scores = sorted.map(s => s.score);
+  const xStep = (W - PAD*2) / (scores.length - 1);
+  const points = scores.map((s, i) => {
+    const x = PAD + i * xStep;
+    const y = H - PAD - ((s / maxScore) * (H - PAD*2));
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  const dots = scores.map((s, i) => {
+    const x = PAD + i * xStep;
+    const y = H - PAD - ((s / maxScore) * (H - PAD*2));
+    const r = def.ranges.find(x2 => s <= x2.max) || def.ranges[def.ranges.length-1];
+    return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4" fill="' + r.color + '" title="' + s + '"/><text x="' + x.toFixed(1) + '" y="' + (y-7).toFixed(1) + '" text-anchor="middle" font-size="9" fill="' + r.color + '">' + s + '</text>';
+  }).join('');
+  return '<svg width="' + W + '" height="' + H + '" style="background:var(--surface-alt);border-radius:8px;display:block"><polyline points="' + points + '" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round"/>' + dots + '</svg>';
+}
+
+function renderEscalas() {
+  renderScaleHistory();
+}
+
+// ── RECURSOS TCC ─────────────────────────────────────────────
+const RECURSO_LABELS = {
+  rpd: 'Registro de Pensamentos Disfuncionais',
+  humor: 'Registro de Humor Diário',
+  atividades: 'Planejamento de Atividades',
+  experimento: 'Experimento Comportamental',
+  exposicao: 'Hierarquia de Exposição',
+  vantagens: 'Vantagens e Desvantagens'
+};
+
+function renderRecursoForm() {
+  const type = document.getElementById('recurso-select')?.value;
+  const area = document.getElementById('recurso-form-area');
+  if (!area || !type) { if (area) area.innerHTML = ''; return; }
+
+  let html = '';
+  if (type === 'rpd') {
+    html = '<div style="overflow-x:auto;margin-bottom:10px"><table id="rpd-table" style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>' +
+      ['Situação','Emoção (%)','Pensamento Automático','Distorção Cognitiva','Resposta Racional','Resultado'].map(h =>
+        '<th style="padding:6px;background:var(--primary);color:#fff;border:1px solid var(--border);white-space:nowrap">' + h + '</th>'
+      ).join('') + '</tr></thead><tbody id="rpd-body">' + buildRpdRow() + '</tbody></table></div>' +
+      '<button class="btn btn-secondary btn-sm" onclick="addRpdRow()">➕ Linha</button>';
+  } else if (type === 'humor') {
+    const dias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+    const emocoes = ['Ansiedade','Tristeza','Raiva','Alegria','Medo','Culpa','Vergonha'];
+    html = '<div style="overflow-x:auto;margin-bottom:10px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="padding:6px;background:var(--primary);color:#fff;border:1px solid var(--border)">Emoção</th>' +
+      dias.map(d => '<th style="padding:6px;background:var(--primary);color:#fff;border:1px solid var(--border);text-align:center">' + d + '</th>').join('') + '</tr></thead><tbody>' +
+      emocoes.map(em => '<tr><td style="padding:6px;border:1px solid var(--border);font-weight:500">' + em + '</td>' +
+        dias.map((_, i) => '<td style="padding:4px;border:1px solid var(--border);text-align:center"><input type="number" min="0" max="100" class="form-input" id="humor-' + em + '-' + i + '" style="width:52px;text-align:center;padding:4px" placeholder="0-100"></td>').join('') +
+        '</tr>').join('') + '</tbody></table></div>';
+  } else if (type === 'atividades') {
+    const diasAct = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+    const periods = ['Manhã','Tarde','Noite'];
+    html = '<div style="overflow-x:auto;margin-bottom:10px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="padding:6px;background:var(--primary);color:#fff;border:1px solid var(--border)">Período</th>' +
+      diasAct.map(d => '<th style="padding:6px;background:var(--primary);color:#fff;border:1px solid var(--border);text-align:center">' + d + '</th>').join('') + '</tr></thead><tbody>' +
+      periods.map(p => '<tr><td style="padding:6px;border:1px solid var(--border);font-weight:500">' + p + '</td>' +
+        diasAct.map((_, i) => '<td style="padding:4px;border:1px solid var(--border)"><input type="text" class="form-input" id="act-' + p + '-' + i + '" style="width:100%;padding:4px;font-size:11px" placeholder="Atividade..."></td>').join('') +
+        '</tr>').join('') + '</tbody></table></div>';
+  } else if (type === 'experimento') {
+    const campos = [
+      ['Situação temida', 'exp-situacao'],
+      ['Predição catastrófica (O que você acha que vai acontecer?)', 'exp-predicao'],
+      ['Descrição do experimento realizado', 'exp-experimento'],
+      ['Resultado real (O que realmente aconteceu?)', 'exp-resultado'],
+      ['Conclusão / Aprendizado', 'exp-conclusao']
+    ];
+    html = campos.map(([label, id]) =>
+      '<div class="form-row" style="margin-bottom:10px"><label style="font-size:13px">' + label + '</label>' +
+      '<textarea id="' + id + '" class="form-input" rows="2" style="margin-top:4px" placeholder="..."></textarea></div>'
+    ).join('');
+  } else if (type === 'exposicao') {
+    html = '<div id="exposicao-list" style="margin-bottom:10px"></div>' +
+      '<button class="btn btn-secondary btn-sm" onclick="addExposicaoItem()">➕ Adicionar Situação</button>';
+    // Will be populated dynamically
+  } else if (type === 'vantagens') {
+    html = '<div style="font-weight:600;font-size:13px;margin-bottom:8px">Decisão / Situação a avaliar:</div>' +
+      '<input type="text" id="vd-titulo" class="form-input" style="margin-bottom:12px" placeholder="Ex: Sair de casa para trabalhar">' +
+      '<div style="overflow-x:auto;margin-bottom:10px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>' +
+      '<th style="padding:8px;background:#27ae60;color:#fff;border:1px solid var(--border);width:50%">✅ Vantagens</th>' +
+      '<th style="padding:8px;background:#c0392b;color:#fff;border:1px solid var(--border);width:50%">❌ Desvantagens</th>' +
+      '</tr></thead><tbody id="vd-body">' + buildVdRow() + buildVdRow() + buildVdRow() + '</tbody></table></div>' +
+      '<button class="btn btn-secondary btn-sm" onclick="addVdRow()">➕ Linha</button>';
+  }
+
+  html += '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-primary" onclick="saveRecurso()">💾 Salvar no Prontuário</button><button class="btn btn-accent" onclick="printRecurso()">🖨️ Imprimir PDF</button></div>';
+  area.innerHTML = html;
+
+  if (type === 'exposicao') renderExposicaoList();
+}
+
+function buildRpdRow() {
+  return '<tr>' + Array(6).fill(0).map((_, i) =>
+    '<td style="padding:4px;border:1px solid var(--border)"><textarea class="form-input rpd-cell" rows="2" style="width:100%;font-size:11px;resize:vertical" placeholder="..."></textarea></td>'
+  ).join('') + '</tr>';
+}
+
+function addRpdRow() {
+  const tbody = document.getElementById('rpd-body');
+  if (tbody) tbody.insertAdjacentHTML('beforeend', buildRpdRow());
+}
+
+function buildVdRow() {
+  return '<tr><td style="padding:4px;border:1px solid var(--border)"><input type="text" class="form-input vd-pro" style="width:100%;font-size:12px" placeholder="Vantagem..."></td><td style="padding:4px;border:1px solid var(--border)"><input type="text" class="form-input vd-con" style="width:100%;font-size:12px" placeholder="Desvantagem..."></td></tr>';
+}
+
+function addVdRow() {
+  const tbody = document.getElementById('vd-body');
+  if (tbody) tbody.insertAdjacentHTML('beforeend', buildVdRow());
+}
+
+let exposicaoItems = [];
+
+function renderExposicaoList() {
+  const list = document.getElementById('exposicao-list');
+  if (!list) return;
+  if (!exposicaoItems.length) { list.innerHTML = '<p style="color:var(--text-muted);font-size:12px">Adicione situações abaixo.</p>'; return; }
+  const sorted = [...exposicaoItems].sort((a,b) => b.nivel - a.nivel);
+  list.innerHTML = sorted.map((item, i) => '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:8px;background:var(--surface-alt);border-radius:6px"><span style="font-size:11px;color:var(--text-muted);min-width:20px">' + (i+1) + '.</span><div style="flex:1;font-size:13px">' + escHtml(item.text) + '</div><span style="font-size:13px;font-weight:700;color:var(--primary);min-width:35px">' + item.nivel + '</span><button class="btn btn-secondary btn-sm" onclick="removeExposicaoItem(' + i + ')">✕</button></div>').join('');
+}
+
+function addExposicaoItem() {
+  showModal('Adicionar Situação', '<div class="form-row" style="margin-bottom:12px"><label>Descrição da situação</label><input type="text" id="exp-sit-text" class="form-input" placeholder="Ex: Entrar em elevador"></div><div class="form-row"><label>Nível de ansiedade (0-100 SUDs)</label><input type="range" id="exp-sit-nivel" min="0" max="100" value="50" oninput="document.getElementById(\'exp-sit-nivel-val\').textContent=this.value" style="width:100%;margin-top:6px"><span id="exp-sit-nivel-val" style="font-size:14px;font-weight:700;color:var(--primary)">50</span></div>', [{ label: 'Adicionar', cls: 'btn-primary', action: 'confirmAddExposicao()' }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
+}
+
+function confirmAddExposicao() {
+  const text = document.getElementById('exp-sit-text')?.value?.trim();
+  const nivel = parseInt(document.getElementById('exp-sit-nivel')?.value || '50');
+  if (!text) return toast('Descreva a situação.', 'error');
+  exposicaoItems.push({ text, nivel });
+  closeModal();
+  renderExposicaoList();
+}
+
+function removeExposicaoItem(i) {
+  const sorted = [...exposicaoItems].sort((a,b) => b.nivel - a.nivel);
+  const item = sorted[i];
+  exposicaoItems = exposicaoItems.filter(x => x !== item);
+  renderExposicaoList();
+}
+
+function getRecursoData(type) {
+  if (type === 'rpd') {
+    const rows = [];
+    document.querySelectorAll('#rpd-body tr').forEach(tr => {
+      const cells = [...tr.querySelectorAll('.rpd-cell')].map(c => c.value);
+      if (cells.some(c => c.trim())) rows.push(cells);
+    });
+    return { rows };
+  } else if (type === 'humor') {
+    const dias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+    const emocoes = ['Ansiedade','Tristeza','Raiva','Alegria','Medo','Culpa','Vergonha'];
+    const data = {};
+    emocoes.forEach(em => { data[em] = dias.map((_, i) => document.getElementById('humor-' + em + '-' + i)?.value || ''); });
+    return { data };
+  } else if (type === 'atividades') {
+    const diasAct = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+    const periods = ['Manhã','Tarde','Noite'];
+    const data = {};
+    periods.forEach(p => { data[p] = diasAct.map((_, i) => document.getElementById('act-' + p + '-' + i)?.value || ''); });
+    return { data };
+  } else if (type === 'experimento') {
+    return {
+      situacao: document.getElementById('exp-situacao')?.value || '',
+      predicao: document.getElementById('exp-predicao')?.value || '',
+      experimento: document.getElementById('exp-experimento')?.value || '',
+      resultado: document.getElementById('exp-resultado')?.value || '',
+      conclusao: document.getElementById('exp-conclusao')?.value || ''
+    };
+  } else if (type === 'exposicao') {
+    return { items: [...exposicaoItems].sort((a,b) => b.nivel - a.nivel) };
+  } else if (type === 'vantagens') {
+    const pros = [...document.querySelectorAll('.vd-pro')].map(i => i.value).filter(Boolean);
+    const cons = [...document.querySelectorAll('.vd-con')].map(i => i.value).filter(Boolean);
+    return { titulo: document.getElementById('vd-titulo')?.value || '', pros, cons };
+  }
+  return {};
+}
+
+function saveRecurso() {
+  if (!APP.activePatient) return toast('Selecione um paciente ativo.', 'error');
+  const type = document.getElementById('recurso-select')?.value;
+  if (!type) return toast('Selecione o tipo de recurso.', 'error');
+  if (!APP.activePatient.resources) APP.activePatient.resources = [];
+  APP.activePatient.resources.push({
+    id: Date.now().toString(),
+    type,
+    label: RECURSO_LABELS[type] || type,
+    date: new Date().toISOString().split('T')[0],
+    data: getRecursoData(type)
+  });
+  savePatients();
+  toast('Recurso salvo no histórico!', 'success');
+  renderRecursoHistory();
+}
+
+function printRecurso() {
+  const type = document.getElementById('recurso-select')?.value;
+  if (!type) return toast('Selecione um recurso primeiro.', 'error');
+  const patName = APP.activePatient?.name || 'Paciente';
+  const label = RECURSO_LABELS[type] || type;
+  const w = window.open('', '_blank');
+  w.document.write('<html><head><title>' + label + '</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#222}h1{font-size:18px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:8px;font-size:12px}th{background:#eee}@media print{button{display:none}}</style></head><body>');
+  w.document.write('<h1>' + label + '</h1><p><strong>Paciente:</strong> ' + patName + ' &nbsp; <strong>Data:</strong> ' + new Date().toLocaleDateString('pt-BR') + '</p>');
+  w.document.write(document.getElementById('recurso-form-area')?.innerHTML || '');
+  w.document.write('<br><button onclick="window.print()">Imprimir</button></body></html>');
+  w.document.close();
+}
+
+function renderRecursoHistory() {
+  const area = document.getElementById('recurso-history-area');
+  if (!area) return;
+  if (!APP.activePatient) {
+    area.innerHTML = '<div class="alert alert-info">Selecione um paciente ativo.</div>';
+    return;
+  }
+  const resources = (APP.activePatient.resources || []).slice().reverse();
+  if (!resources.length) {
+    area.innerHTML = '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">\U0001f5c2️</div><h3>Sem recursos</h3><p>Nenhum recurso aplicado ainda.</p></div>';
+    return;
+  }
+  area.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Data</th><th>Recurso</th><th>Ação</th></tr></thead><tbody>' +
+    resources.map(r => {
+      const dt = r.date ? new Date(r.date + 'T00:00').toLocaleDateString('pt-BR') : r.date;
+      return '<tr><td>' + dt + '</td><td>' + escHtml(r.label || r.type) + '</td><td><button class="btn btn-secondary btn-sm" onclick="viewRecurso(\'' + r.id + '\')">Ver</button></td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+
+function viewRecurso(resourceId) {
+  const r = (APP.activePatient?.resources || []).find(x => x.id === resourceId);
+  if (!r) return;
+  const dt = r.date ? new Date(r.date + 'T00:00').toLocaleDateString('pt-BR') : r.date;
+  let body = '<div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">' + escHtml(r.label) + ' — ' + dt + '</div>';
+  if (r.type === 'rpd' && r.data?.rows) {
+    const cols = ['Situação','Emoção (%)','Pensamento Automático','Distorção','Resposta Racional','Resultado'];
+    body += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>' + cols.map(c => '<th style="padding:6px;background:var(--primary);color:#fff;border:1px solid var(--border)">' + c + '</th>').join('') + '</tr></thead><tbody>' + r.data.rows.map(row => '<tr>' + row.map(c => '<td style="padding:6px;border:1px solid var(--border)">' + escHtml(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+  } else if (r.type === 'vantagens' && r.data) {
+    body += '<div style="font-weight:600;margin-bottom:8px">' + escHtml(r.data.titulo || '') + '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><div style="color:#27ae60;font-weight:600">✅ Vantagens</div><ul>' + (r.data.pros||[]).map(p => '<li>' + escHtml(p) + '</li>').join('') + '</ul></div><div><div style="color:#c0392b;font-weight:600">❌ Desvantagens</div><ul>' + (r.data.cons||[]).map(c => '<li>' + escHtml(c) + '</li>').join('') + '</ul></div></div>';
+  } else if (r.type === 'experimento' && r.data) {
+    const labels = {situacao:'Situação temida',predicao:'Predição catastrófica',experimento:'Experimento',resultado:'Resultado real',conclusao:'Conclusão'};
+    body += Object.entries(labels).map(([k,lbl]) => r.data[k] ? '<div style="margin-bottom:8px"><strong>' + lbl + ':</strong><br>' + escHtml(r.data[k]) + '</div>' : '').join('');
+  } else if (r.type === 'exposicao' && r.data?.items) {
+    body += '<div class="table-wrap"><table style="font-size:12px"><thead><tr><th>Nível</th><th>Situação</th></tr></thead><tbody>' + r.data.items.map(i => '<tr><td style="font-weight:700;color:var(--primary)">' + i.nivel + '</td><td>' + escHtml(i.text) + '</td></tr>').join('') + '</tbody></table></div>';
+  } else {
+    body += '<pre style="font-size:11px;background:var(--surface-alt);padding:12px;border-radius:6px;overflow-x:auto">' + escHtml(JSON.stringify(r.data, null, 2)) + '</pre>';
+  }
+  showModal('\U0001f5c2️ ' + escHtml(r.label), body);
+}
+
+function renderRecursos() {
+  exposicaoItems = [];
+  renderRecursoHistory();
+}
+
+// ── FORMULAÇÃO DE CASO ───────────────────────────────────────
+const FORMULACAO_BLOCKS = [
+  { id: 'block1', label: 'Experiências Formativas', desc: 'Experiências na infância e desenvolvimento', icon: '\U0001f9b8', color: '#5B8FCF' },
+  { id: 'block2', label: 'Crenças Centrais', desc: '"Sou...", "Os outros são...", "O mundo é..."', icon: '\U0001f9e0', color: '#8B7FD4' },
+  { id: 'block3', label: 'Crenças Intermediárias', desc: 'Regras, pressupostos e atitudes condicionais', icon: '\U0001f517', color: '#8B7FD4' },
+  { id: 'block4', label: 'Situação Gatilho', desc: 'Situação atual que ativou os esquemas', icon: '\U0001f4a5', color: '#C96F58' },
+  { id: 'block5', label: 'Pensamentos Automáticos', desc: 'O que passou pela sua cabeça?', icon: '\U0001f4ad', color: '#E8A838' },
+  { id: 'block6a', label: 'Emoção', desc: 'Que emoção sentiu? Intensidade (0-100%)', icon: '\U0001f62d', color: '#E85858' },
+  { id: 'block6b', label: 'Reação Fisiológica', desc: 'Sintomas físicos (tensão, sudorese...)', icon: '\U0001f493', color: '#E85858' },
+  { id: 'block6c', label: 'Comportamento', desc: 'O que fez? O que evitou?', icon: '\U0001f6b6', color: '#E85858' },
+  { id: 'block7', label: 'Mecanismos de Manutenção', desc: 'O que mantém o problema ativo?', icon: '\U0001f504', color: '#4A9B8E' }
+];
+
+function renderFormulacao() {
+  const diag = document.getElementById('formulacao-diagram');
+  const alert = document.getElementById('formulacao-patient-alert');
+  if (!diag) return;
+
+  const p = APP.activePatient;
+  if (alert) alert.style.display = p ? 'none' : 'block';
+  if (!p) { diag.innerHTML = ''; return; }
+
+  const cf = p.caseFormulation || {};
+
+  const blockStyle = (color) =>
+    'border:2px solid ' + color + ';border-radius:12px;padding:14px 16px;cursor:pointer;' +
+    'background:#fff;transition:box-shadow 0.2s;margin-bottom:0';
+
+  const blockHtml = (b) => {
+    const val = cf[b.id] || '';
+    const preview = val ? val.substring(0, 80) + (val.length > 80 ? '...' : '') : '<span style="color:#aaa;font-style:italic">Clique para editar...</span>';
+    return '<div style="' + blockStyle(b.color) + '" onclick="openBlockEditor(\'' + b.id + '\')" title="Clique para editar">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<span style="font-size:18px">' + b.icon + '</span>' +
+      '<span style="font-weight:700;font-size:13px;color:' + b.color + '">' + b.label + '</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">' + b.desc + '</div>' +
+      '<div style="font-size:12px;color:var(--text);line-height:1.5">' + preview + '</div>' +
+      '</div>';
+  };
+
+  const arrow = '<div style="text-align:center;font-size:20px;color:var(--primary);line-height:1;margin:4px 0">↓</div>';
+  const arrowRight = '<div style="text-align:center;font-size:20px;color:#8B7FD4;line-height:1;margin:0 4px">→</div>';
+
+  diag.innerHTML =
+    // Block 1
+    blockHtml(FORMULACAO_BLOCKS[0]) + arrow +
+    // Blocks 2 + 3 (side by side)
+    '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:4px">' +
+      blockHtml(FORMULACAO_BLOCKS[1]) + arrowRight + blockHtml(FORMULACAO_BLOCKS[2]) +
+    '</div>' + arrow +
+    // Block 4
+    blockHtml(FORMULACAO_BLOCKS[3]) + arrow +
+    // Block 5
+    blockHtml(FORMULACAO_BLOCKS[4]) + arrow +
+    // Blocks 6a, 6b, 6c (side by side)
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px">' +
+      blockHtml(FORMULACAO_BLOCKS[5]) + blockHtml(FORMULACAO_BLOCKS[6]) + blockHtml(FORMULACAO_BLOCKS[7]) +
+    '</div>' + arrow +
+    // Block 7
+    blockHtml(FORMULACAO_BLOCKS[8]) +
+    // Buttons
+    '<div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">' +
+      '<button class="btn btn-primary" onclick="saveFormulacao()">\U0001f4be Salvar Formulação</button>' +
+      '<button class="btn btn-accent" onclick="printFormulacao()">\U0001f5a8️ Imprimir PDF</button>' +
+    '</div>';
+}
+
+function openBlockEditor(blockId) {
+  if (!APP.activePatient) return toast('Selecione um paciente ativo.', 'error');
+  const block = FORMULACAO_BLOCKS.find(b => b.id === blockId);
+  if (!block) return;
+  const cf = APP.activePatient.caseFormulation || {};
+  showModal(block.icon + ' ' + block.label, '<div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">' + block.desc + '</div><textarea id="block-editor-text" class="form-input" rows="6" style="width:100%" placeholder="' + block.desc + '...">' + escHtml(cf[blockId] || '') + '</textarea>', [{ label: '\U0001f4be Salvar bloco', cls: 'btn-primary', action: 'saveBlock(\'' + blockId + '\')' }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
+}
+
+function saveBlock(blockId) {
+  if (!APP.activePatient) return;
+  if (!APP.activePatient.caseFormulation) APP.activePatient.caseFormulation = {};
+  APP.activePatient.caseFormulation[blockId] = document.getElementById('block-editor-text')?.value || '';
+  closeModal();
+  renderFormulacao();
+}
+
+function saveFormulacao() {
+  if (!APP.activePatient) return toast('Selecione um paciente ativo.', 'error');
+  if (!APP.activePatient.caseFormulation) APP.activePatient.caseFormulation = {};
+  APP.activePatient.caseFormulation.updatedAt = new Date().toISOString();
+  savePatients();
+  toast('Formulação salva!', 'success');
+}
+
+function printFormulacao() {
+  if (!APP.activePatient) return toast('Selecione um paciente ativo.', 'error');
+  const p = APP.activePatient;
+  const cf = p.caseFormulation || {};
+  const cfg = getConfig();
+  const w = window.open('', '_blank');
+  let body = '<h2 style="text-align:center;color:#2c3e50">\U0001f9e9 Formulação de Caso</h2>';
+  body += '<p style="text-align:center"><strong>Paciente:</strong> ' + escHtml(p.name) + ' &nbsp; <strong>Data:</strong> ' + new Date().toLocaleDateString('pt-BR') + '</p>';
+  body += '<p style="text-align:center;color:#777"><strong>Psicólogo(a):</strong> ' + escHtml(cfg.name || '') + ' &nbsp; ' + escHtml(cfg.crp || '') + '</p><hr>';
+  FORMULACAO_BLOCKS.forEach(b => {
+    const val = cf[b.id] || '—';
+    body += '<div style="margin-bottom:16px;border-left:4px solid #2c3e50;padding:10px 14px;background:#f8f9fa"><strong>' + b.icon + ' ' + b.label + '</strong><br><span style="color:#555;font-size:13px">' + escHtml(b.desc) + '</span><p style="margin:8px 0 0 0;white-space:pre-wrap">' + escHtml(val) + '</p></div>';
+  });
+  w.document.write('<html><head><title>Formulação — ' + escHtml(p.name) + '</title><style>body{font-family:Georgia,serif;padding:28px;color:#222;max-width:720px;margin:0 auto}@media print{button{display:none}}</style></head><body>' + body + '<br><button onclick="window.print()">Imprimir</button></body></html>');
+  w.document.close();
+}
+
 // ── GOOGLE DRIVE ─────────────────────────────────────────────
 const GDRIVE_CLIENT_ID = 'SEU_CLIENT_ID_AQUI.apps.googleusercontent.com';
 const GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
@@ -3770,19 +4917,31 @@ function updateGDriveStatus(connected, email) {
 }
 
 function autoSyncGDrive() {
-  if (!APP.gDriveConnected || !APP.gDriveToken) return;
   const badge = document.getElementById('sync-badge');
   const syncText = document.getElementById('sync-text');
+  if (!APP.gDriveConnected || !APP.gDriveToken) {
+    // Drive não conectado — dados já foram salvos localmente por savePatients()
+    if (badge && !badge.className.includes('offline')) {
+      badge.className = 'topbar-badge badge-sync offline';
+      if (syncText) syncText.textContent = 'Sem Drive';
+    }
+    return;
+  }
   if (badge) badge.className = 'topbar-badge badge-sync syncing';
-  if (syncText) syncText.textContent = 'Sincronizando...';
+  if (syncText) syncText.textContent = 'Salvando...';
 
   Promise.all([
     saveToGDrive('psicotcc_patients.json', APP.patients),
-    saveToGDrive('psicotcc_config.json', (() => { const c = {...getConfig()}; delete c.pwdHash; delete c.recHash; return c; })())
+    saveToGDrive('psicotcc_config.json', (() => { const c = {...getConfig()}; delete c.pwdHash; delete c.recHash; return c; })()),
+    saveToGDrive('psicotcc_logos.json', {
+      logo: localStorage.getItem('psicotcc_logo') || '',
+      logo2: localStorage.getItem('psicotcc_logo2') || ''
+    })
   ]).then(() => {
     if (badge) badge.className = 'topbar-badge badge-sync';
-    if (syncText) syncText.textContent = 'Salvo no Drive';
-    setTimeout(() => { if (syncText) syncText.textContent = 'Drive ativo'; }, 2000);
+    const hm = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    if (syncText) syncText.textContent = 'Salvo às ' + hm;
+    setTimeout(() => { if (syncText && syncText.textContent.startsWith('Salvo')) syncText.textContent = 'Drive ativo'; }, 4000);
   }).catch(e => {
     if (badge) badge.className = 'topbar-badge badge-sync offline';
     if (syncText) syncText.textContent = 'Erro no sync';

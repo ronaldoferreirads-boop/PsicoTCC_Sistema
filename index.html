@@ -2132,7 +2132,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 23/06/2026 15:54
+//  Gerado automaticamente em 23/06/2026 17:05
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2323,59 +2323,49 @@ function updateSidebarUser() {
 
 // ── DASHBOARD E NAVEGAÇÃO ────────────────────────────────────
 const TOPBAR_BUTTONS = {
-  dashboard:    [],
-  patients:     [
-    { label:'➕ Novo Paciente', cls:'btn-primary btn-md', action:'openNewPatient()' }
+  dashboard:    [
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("dashboard")' }
   ],
-  anamnese:     [
-    { label:'📂 Carregar',     cls:'btn-secondary btn-md', action:'loadAnamnese()' },
+  patients:     [{ label:'➕ Novo Paciente', cls:'btn-primary btn-md', action:'openNewPatient()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("patients")' }],
+  anamnese:     [{ label:'📂 Carregar',     cls:'btn-secondary btn-md', action:'loadAnamnese()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveAnamnese()' },
-    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
-  ],
-  prontuario:   [
-    { label:'➕ Novo Registro', cls:'btn-primary btn-md',  action:'addProntuarioEntry()' },
-    { label:'🖨️ PDF',          cls:'btn-accent btn-md',   action:'printWithWatermark()' }
-  ],
-  evolucao:     [
-    { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadEvolutionList()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("anamnese")' }],
+  prontuario:   [{ label:'➕ Novo Registro', cls:'btn-primary btn-md',  action:'addProntuarioEntry()' },
+    { label:'🖨️ PDF',          cls:'btn-accent btn-md',   action:'printWithWatermark()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("prontuario")' }],
+  evolucao:     [{ label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadEvolutionList()' },
     { label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'genEvolution()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveEvolution()' },
-    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
-  ],
-  transcricao:  [
-    { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadTranscriptionHistory()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("evolucao")' }],
+  transcricao:  [{ label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadTranscriptionHistory()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveTranscription()' },
-    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
-  ],
-  documentos:   [
-    { label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'genDocWithAI()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("transcricao")' }],
+  documentos:   [{ label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'genDocWithAI()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveDoc()' },
-    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
-  ],
-  contrato:     [
-    { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveContract()' },
-    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' }
-  ],
-  supervisor:   [
-    { label:'🗑️ Limpar Chat',  cls:'btn-secondary btn-md', action:'clearAIChat()' }
-  ],
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("documentos")' }],
+  contrato:     [{ label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveContract()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("contrato")' }],
+  supervisor:   [{ label:'🗑️ Limpar Chat',  cls:'btn-secondary btn-md', action:'clearAIChat()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("supervisor")' }],
   settings:     [],
-  agenda:       [
-    { label:'➕ Nova Sessão', cls:'btn-primary btn-md', action:'openNewSessionModal()' },
-    { label:'📅 Hoje',       cls:'btn-secondary btn-md', action:'goWeek(0)' }
-  ],
-  escalas:      [
-    { label:'📊 Nova Aplicação', cls:'btn-primary btn-md', action:'renderScaleItems()' },
-    { label:'📈 Ver Histórico',  cls:'btn-secondary btn-md', action:'renderEscalas()' }
-  ],
-  recursos:     [
-    { label:'➕ Novo Recurso',   cls:'btn-primary btn-md',   action:'document.getElementById("recurso-select").focus()' },
-    { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'renderRecursoHistory()' }
-  ],
-  formulacao:   [
-    { label:'💾 Salvar',   cls:'btn-primary btn-md',   action:'saveFormulacao()' },
-    { label:'🖨️ PDF',      cls:'btn-accent btn-md',    action:'printFormulacao()' }
-  ]
+  agenda:       [{ label:'➕ Nova Sessão', cls:'btn-primary btn-md', action:'openNewSessionModal()' },
+    { label:'📅 Hoje',       cls:'btn-secondary btn-md', action:'goWeek(0)' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("agenda")' }],
+  escalas:      [{ label:'📊 Nova Aplicação', cls:'btn-primary btn-md', action:'renderScaleItems()' },
+    { label:'📈 Ver Histórico',  cls:'btn-secondary btn-md', action:'renderEscalas()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("escalas")' }],
+  recursos:     [{ label:'➕ Novo Recurso',   cls:'btn-primary btn-md',   action:'document.getElementById("recurso-select").focus()' },
+    { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'renderRecursoHistory()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("recursos")' }],
+  formulacao:   [{ label:'💾 Salvar',   cls:'btn-primary btn-md',   action:'saveFormulacao()' },
+    { label:'🖨️ PDF',      cls:'btn-accent btn-md',    action:'printFormulacao()' },
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("formulacao")' }]
 };
 
 function updateTopbarActions(p) {
@@ -2478,15 +2468,21 @@ function renderPatients() {
     return;
   }
   grid.innerHTML = filtered.map(p => `
-    <div class="patient-card ${APP.activePatient?.id === p.id ? 'active-patient' : ''}" onclick="selectPatient('${p.id}')">
-      <div class="patient-avatar">${p.name[0].toUpperCase()}</div>
-      <div class="patient-name">${p.name}</div>
-      <div class="patient-info">${p.age ? p.age + ' anos · ' : ''}${p.modality || 'Individual'}</div>
-      <div class="patient-info" style="margin-top:2px">${p.complaint ? p.complaint.substring(0, 60) + (p.complaint.length > 60 ? '...' : '') : '—'}</div>
-      <div class="patient-tags">
-        ${p.sessions ? `<span class="tag tag-blue">${p.sessions} sessões</span>` : ''}
-        ${p.risk ? `<span class="tag tag-${p.risk === 'baixo' ? 'green' : p.risk === 'moderado' ? 'amber' : 'red'}">${p.risk}</span>` : ''}
-        ${APP.activePatient?.id === p.id ? '<span class="tag tag-green">✓ Ativo</span>' : ''}
+    <div class="patient-card ${APP.activePatient?.id === p.id ? 'active-patient' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div onclick="selectPatient('${p.id}')" style="flex:1;cursor:pointer">
+          <div class="patient-avatar">${p.name[0].toUpperCase()}</div>
+          <div class="patient-name">${p.name}</div>
+          <div class="patient-info">${p.age ? p.age + ' anos · ' : ''}${p.modality || 'Individual'}</div>
+          <div class="patient-info" style="margin-top:2px">${p.complaint ? p.complaint.substring(0, 60) + (p.complaint.length > 60 ? '...' : '') : '—'}</div>
+          <div class="patient-tags">
+            ${p.sessions ? `<span class="tag tag-blue">${p.sessions} sessões</span>` : ''}
+            ${p.risk ? `<span class="tag tag-${p.risk === 'baixo' ? 'green' : p.risk === 'moderado' ? 'amber' : 'red'}">${p.risk}</span>` : ''}
+            ${APP.activePatient?.id === p.id ? '<span class="tag tag-green">✓ Ativo</span>' : ''}
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); deletePatient('${p.id}')" 
+          title="Excluir paciente" style="color:var(--danger);padding:4px 8px;font-size:16px">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -2587,7 +2583,7 @@ function renderPatientEvolution(p) {
   const timelineHtml = evos.length ? evos.map((e, i) => {
     const rc = RISK_COLOR[e.risk] || '#aaa';
     const dt = e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : '—';
-    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;color:var(--text-muted);min-width:75px">' + dt + '</span><span style="width:10px;height:10px;border-radius:50%;background:' + rc + ';flex-shrink:0;display:inline-block" title="Risco: ' + (e.risk||'—') + '"></span><span style="font-size:12px;color:var(--text)">Sessão ' + (i+1) + (e.sessionNum ? ' (#'+e.sessionNum+')' : '') + '</span>' + (e.taskPrescribed ? ' <span style="font-size:11px" title="Tarefa prescrita">\u{1F4DA}</span>' : '') + '</div>';
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;color:var(--text-muted);min-width:75px">' + dt + '</span><span style="width:10px;height:10px;border-radius:50%;background:' + rc + ';flex-shrink:0;display:inline-block" title="Risco: ' + (e.risk||'—') + '"></span><span style="font-size:12px;color:var(--text)">Sessão ' + (i+1) + (e.sessionNum ? ' (#'+e.sessionNum+')' : '') + '</span>' + (e.taskPrescribed ? ' <span style="font-size:11px" title="Tarefa prescrita">📚</span>' : '') + '</div>';
   }).join('') : '<div style="color:var(--text-muted);font-size:12px">Nenhuma evolução registrada.</div>';
 
   // SVG de escalas
@@ -2630,7 +2626,22 @@ function renderPatientEvolution(p) {
     svgHtml = '<div style="color:var(--text-muted);font-size:12px">Nenhuma escala aplicada ainda.</div>';
   }
 
-  area.innerHTML = '<div class="card" style="margin-top:16px"><div class="card-header"><div class="card-title">\U0001f4ca Evolução Clínica — ' + escHtml(p.name) + '</div></div><div class="card-body"><div class="grid-3" style="margin-bottom:16px"><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + totalSess + '</div><div style="font-size:12px;color:var(--text-muted)">Evoluções</div></div><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + realizadas + '</div><div style="font-size:12px;color:var(--text-muted)">Realizadas</div></div><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + avgInterval + '</div><div style="font-size:12px;color:var(--text-muted)">Intervalo médio</div></div></div><div class="grid-2"><div><div style="font-weight:600;font-size:13px;margin-bottom:8px">\U0001f4cd Linha do Tempo das Sessões <span style="font-size:11px;font-weight:400;margin-left:4px">● verde=baixo ● âmbar=moderado ● vermelho=elevado ● preto=crítico</span></div>' + timelineHtml + '</div><div><div style="font-weight:600;font-size:13px;margin-bottom:8px">\U0001f4c8 Evolução das Escalas</div>' + svgHtml + '</div></div></div></div>';
+  area.innerHTML = '<div class="card" style="margin-top:16px"><div class="card-header"><div class="card-title">📊 Evolução Clínica — ' + escHtml(p.name) + '</div></div><div class="card-body"><div class="grid-3" style="margin-bottom:16px"><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + totalSess + '</div><div style="font-size:12px;color:var(--text-muted)">Evoluções</div></div><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + realizadas + '</div><div style="font-size:12px;color:var(--text-muted)">Realizadas</div></div><div style="text-align:center;padding:12px;background:var(--surface-alt);border-radius:8px"><div style="font-size:22px;font-weight:700;color:var(--primary)">' + avgInterval + '</div><div style="font-size:12px;color:var(--text-muted)">Intervalo médio</div></div></div><div class="grid-2"><div><div style="font-weight:600;font-size:13px;margin-bottom:8px">📍 Linha do Tempo das Sessões <span style="font-size:11px;font-weight:400;margin-left:4px">● verde=baixo ● âmbar=moderado ● vermelho=elevado ● preto=crítico</span></div>' + timelineHtml + '</div><div><div style="font-weight:600;font-size:13px;margin-bottom:8px">📈 Evolução das Escalas</div>' + svgHtml + '</div></div></div></div>';
+}
+function deletePatient(id) {
+  const p = APP.patients.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm(`Excluir permanentemente o paciente "${p.name}"?\n\nEsta ação não pode ser desfeita e removerá todos os dados clínicos deste paciente.`)) return;
+  // Se era o paciente ativo, limpa
+  if (APP.activePatient?.id === id) {
+    APP.activePatient = null;
+    document.getElementById('sb-patient-box').style.display = 'none';
+  }
+  APP.patients = APP.patients.filter(x => x.id !== id);
+  savePatients();
+  renderPatients();
+  updateDashboard();
+  toast(`Paciente "${p.name}" excluído.`, 'info');
 }
 
 // ── ANAMNESE ─────────────────────────────────────────────────
@@ -2813,9 +2824,21 @@ function saveAnamnese() {
 }
 
 function loadAnamnese() {
-  if (APP.activePatient) {
-    document.getElementById('an-patient-display') && (document.getElementById('an-patient-display').textContent = APP.activePatient.name);
-    setAnamneseData(APP.activePatient.anamnese || {});
+  if (!APP.activePatient) {
+    toast('Selecione um paciente ativo antes de carregar a anamnese.', 'error');
+    return;
+  }
+  const an = APP.activePatient.anamnese || {};
+  const temDados = Object.values(an).some(v => v && v.toString().trim() !== '');
+  document.getElementById('an-patient-display') && 
+    (document.getElementById('an-patient-display').textContent = APP.activePatient.name);
+  setAnamneseData(an);
+  buildAnamneseForm();
+  setAnamneseData(an);
+  if (temDados) {
+    toast('Anamnese de ' + APP.activePatient.name + ' carregada com sucesso!', 'success');
+  } else {
+    toast('Nenhuma anamnese salva ainda para ' + APP.activePatient.name + '. Preencha e salve.', 'info');
   }
 }
 
@@ -3017,7 +3040,10 @@ function loadEvolutionList() {
             <td>#${e.sessionNum || i+1}</td>
             <td>${e.duration || '—'}min</td>
             <td><span class="risk-badge risk-${e.risk || 'baixo'}">${e.risk || '—'}</span></td>
-            <td><button class="btn btn-sm btn-secondary" onclick="loadEvolution(${i}); closeModal()">Abrir</button></td>
+            <td style="white-space:nowrap">
+              <button class="btn btn-sm btn-secondary" onclick="loadEvolution(${i}); closeModal()">📂 Abrir</button>
+              <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="deleteEvolution(${i})">✕</button>
+            </td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -3038,6 +3064,22 @@ function loadEvolution(i) {
     if (el) el.innerHTML = e[k] || '';
   });
   updateEvoMeta();
+}
+
+function deleteEvolution(i) {
+  const evos = APP.activePatient ? APP.activePatient.evolutions || [] : [];
+  const e = evos[i];
+  if (!e) return;
+  const dt = e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : 'sem data';
+  if (!confirm('Excluir a evolução da sessão ' + dt + '?\nEsta ação não pode ser desfeita.')) return;
+  APP.activePatient.evolutions.splice(i, 1);
+  APP.activePatient.sessions = APP.activePatient.evolutions.length;
+  savePatients();
+  closeModal();
+  toast('Evolução excluída.', 'info');
+  setTimeout(() => {
+    if ((APP.activePatient.evolutions || []).length > 0) loadEvolutionList();
+  }, 150);
 }
 
 // ── TRANSCRIÇÃO ──────────────────────────────────────────────
@@ -3157,14 +3199,32 @@ function loadTranscriptionHistory() {
   if (!trans.length) return toast('Nenhuma transcrição salva ainda.', 'info');
   showModal('Histórico de Transcrições', `
     <div>${trans.map((t,i) => `
-      <div class="history-item" onclick="loadSavedTranscription(${i}); closeModal()">
+      <div class="history-item" style="cursor:default">
         <div class="history-dot"></div>
-        <div>
+        <div style="flex:1" onclick="loadSavedTranscription(${i}); closeModal()" style="cursor:pointer">
           <div class="history-title">📝 Sessão de ${t.date ? new Date(t.date+'T00:00').toLocaleDateString('pt-BR') : '—'}</div>
           <div class="history-preview">${(t.blocks?.length || 0)} blocos de fala</div>
         </div>
+        <div style="display:flex;gap:6px;margin-left:10px">
+          <button class="btn btn-sm btn-secondary" onclick="loadSavedTranscription(${i}); closeModal()">📂 Abrir</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteTranscription(${i})">✕</button>
+        </div>
       </div>`).join('')}</div>`,
-    [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
+    [{ label: '✕ Fechar', cls: 'btn-secondary', action: () => closeModal() }]);
+}
+
+function deleteTranscription(i) {
+  const t = (APP.activePatient.transcriptions || [])[i];
+  if (!t) return;
+  const dt = t.date ? new Date(t.date+'T00:00').toLocaleDateString('pt-BR') : 'sem data';
+  if (!confirm('Excluir a transcrição da sessão de ' + dt + '?')) return;
+  APP.activePatient.transcriptions.splice(i, 1);
+  savePatients();
+  closeModal();
+  toast('Transcrição excluída.', 'info');
+  if ((APP.activePatient.transcriptions || []).length > 0) {
+    setTimeout(() => loadTranscriptionHistory(), 100);
+  }
 }
 
 function loadSavedTranscription(i) {
@@ -3894,7 +3954,7 @@ function openNewSessionModal(dateStr, timeStr) {
   const patOpts = APP.patients.length
     ? APP.patients.map(p => '<option value="' + p.id + '">' + escHtml(p.name) + '</option>').join('')
     : '<option value="">Nenhum paciente cadastrado</option>';
-  showModal('\u{1F4C5} Nova Sessão', '<div class="form-row" style="margin-bottom:12px"><label>Paciente</label><select id="ag-patient" class="form-input">' + patOpts + '</select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Data</label><input type="date" id="ag-date" class="form-input" value="' + dateStr + '"></div><div class="form-row"><label>Modalidade</label><select id="ag-modality" class="form-input"><option>Presencial</option><option>Online</option><option>Presencial/Casal</option><option>Online/Casal</option></select></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Início</label><input type="time" id="ag-start" class="form-input" value="' + timeStr + '"></div><div class="form-row"><label>Fim</label><input type="time" id="ag-end" class="form-input" value="' + endStr + '"></div></div><div class="form-row"><label>Observação (opcional)</label><textarea id="ag-notes" class="form-input" rows="2"></textarea></div>', [{ label: '\u{1F4BE} Salvar Sessão', cls: 'btn-primary', action: 'saveNewSession()' }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
+  showModal('📅 Nova Sessão', '<div class="form-row" style="margin-bottom:12px"><label>Paciente</label><select id="ag-patient" class="form-input">' + patOpts + '</select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Data</label><input type="date" id="ag-date" class="form-input" value="' + dateStr + '"></div><div class="form-row"><label>Modalidade</label><select id="ag-modality" class="form-input"><option>Presencial</option><option>Online</option><option>Presencial/Casal</option><option>Online/Casal</option></select></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Início</label><input type="time" id="ag-start" class="form-input" value="' + timeStr + '"></div><div class="form-row"><label>Fim</label><input type="time" id="ag-end" class="form-input" value="' + endStr + '"></div></div><div class="form-row"><label>Observação (opcional)</label><textarea id="ag-notes" class="form-input" rows="2"></textarea></div>', [{ label: '💾 Salvar Sessão', cls: 'btn-primary', action: 'saveNewSession()' }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
 }
 
 function saveNewSession() {
@@ -3926,8 +3986,8 @@ function editSession(sessionId) {
     if (s) { session = s; patient = p; }
   });
   if (!session || !patient) return;
-  const statusLabel = { agendada: '\u{1F5D3}️ Agendada', realizada: '✅ Realizada', cancelada: '❌ Cancelada' };
-  showModal('\u{1F4C5} Sessao — ' + escHtml(patient.name), '<div style="background:var(--surface-alt);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px"><div><strong>Paciente:</strong> ' + escHtml(patient.name) + '</div><div><strong>Data:</strong> ' + (session.date ? new Date(session.date+'T00:00').toLocaleDateString('pt-BR') : '—') + '</div><div><strong>Horário:</strong> ' + escHtml(session.timeStart||'—') + ' – ' + escHtml(session.timeEnd||'—') + '</div><div><strong>Modalidade:</strong> ' + escHtml(session.modality||'—') + '</div><div><strong>Status:</strong> ' + (statusLabel[session.status]||session.status) + '</div>' + (session.notes ? '<div><strong>Obs:</strong> ' + escHtml(session.notes) + '</div>' : '') + '</div><div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-primary" onclick="markSessionStatus(\'' + sessionId + '\',\'realizada\')">✅ Marcar como Realizada</button><button class="btn btn-secondary" onclick="markSessionStatus(\'' + sessionId + '\',\'cancelada\')">❌ Cancelar Sessão</button><button class="btn btn-secondary" onclick="editSessionModal(\'' + sessionId + '\')">✏️ Editar</button><button class="btn" style="background:#c0392b;color:#fff" onclick="deleteSession(\'' + sessionId + '\')">\u{1F5D1}️ Excluir</button></div>');
+  const statusLabel = { agendada: '🗓️ Agendada', realizada: '✅ Realizada', cancelada: '❌ Cancelada' };
+  showModal('📅 Sessao — ' + escHtml(patient.name), '<div style="background:var(--surface-alt);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px"><div><strong>Paciente:</strong> ' + escHtml(patient.name) + '</div><div><strong>Data:</strong> ' + (session.date ? new Date(session.date+'T00:00').toLocaleDateString('pt-BR') : '—') + '</div><div><strong>Horário:</strong> ' + escHtml(session.timeStart||'—') + ' – ' + escHtml(session.timeEnd||'—') + '</div><div><strong>Modalidade:</strong> ' + escHtml(session.modality||'—') + '</div><div><strong>Status:</strong> ' + (statusLabel[session.status]||session.status) + '</div>' + (session.notes ? '<div><strong>Obs:</strong> ' + escHtml(session.notes) + '</div>' : '') + '</div><div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-primary" onclick="markSessionStatus(\'' + sessionId + '\',\'realizada\')">✅ Marcar como Realizada</button><button class="btn btn-secondary" onclick="markSessionStatus(\'' + sessionId + '\',\'cancelada\')">❌ Cancelar Sessão</button><button class="btn btn-secondary" onclick="editSessionModal(\'' + sessionId + '\')">✏️ Editar</button><button class="btn" style="background:#c0392b;color:#fff" onclick="deleteSession(\'' + sessionId + '\')">🗑️ Excluir</button></div>');
 }
 
 function markSessionStatus(sessionId, status) {
@@ -3947,7 +4007,7 @@ function editSessionModal(sessionId) {
   if (!session) return;
   closeModal();
   setTimeout(() => {
-    showModal('✏️ Editar Sessão', '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Data</label><input type="date" id="edag-date" class="form-input" value="' + escHtml(session.date||'') + '"></div><div class="form-row"><label>Modalidade</label><select id="edag-modality" class="form-input">' + ['Presencial','Online','Presencial/Casal','Online/Casal'].map(m=>'<option'+(session.modality===m?' selected':'')+'>'+m+'</option>').join('') + '</select></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Início</label><input type="time" id="edag-start" class="form-input" value="' + escHtml(session.timeStart||'') + '"></div><div class="form-row"><label>Fim</label><input type="time" id="edag-end" class="form-input" value="' + escHtml(session.timeEnd||'') + '"></div></div><div class="form-row"><label>Observação</label><textarea id="edag-notes" class="form-input" rows="2">' + escHtml(session.notes||'') + '</textarea></div>', [{ label: '\u{1F4BE} Salvar', cls: 'btn-primary', action: "saveEditSession('" + sessionId + "')" }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
+    showModal('✏️ Editar Sessão', '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Data</label><input type="date" id="edag-date" class="form-input" value="' + escHtml(session.date||'') + '"></div><div class="form-row"><label>Modalidade</label><select id="edag-modality" class="form-input">' + ['Presencial','Online','Presencial/Casal','Online/Casal'].map(m=>'<option'+(session.modality===m?' selected':'')+'>'+m+'</option>').join('') + '</select></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="form-row"><label>Início</label><input type="time" id="edag-start" class="form-input" value="' + escHtml(session.timeStart||'') + '"></div><div class="form-row"><label>Fim</label><input type="time" id="edag-end" class="form-input" value="' + escHtml(session.timeEnd||'') + '"></div></div><div class="form-row"><label>Observação</label><textarea id="edag-notes" class="form-input" rows="2">' + escHtml(session.notes||'') + '</textarea></div>', [{ label: '💾 Salvar', cls: 'btn-primary', action: "saveEditSession('" + sessionId + "')" }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
   }, 100);
 }
 
@@ -4140,27 +4200,64 @@ function renderScaleHistory() {
     area.innerHTML = '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">📊</div><h3>Sem aplicações</h3><p>Nenhuma escala aplicada ainda.</p></div>';
     return;
   }
-  // Group by scaleId
   const groups = {};
-  scales.forEach(s => { if (!groups[s.scaleId]) groups[s.scaleId] = []; groups[s.scaleId].push(s); });
+  scales.forEach((s, idx) => {
+    if (!groups[s.scaleId]) groups[s.scaleId] = [];
+    groups[s.scaleId].push({...s, _origIdx: idx});
+  });
   let html = '';
   Object.entries(groups).forEach(([sid, list]) => {
     const def = SCALES_DEF[sid];
     if (!def) return;
     const sorted = [...list].sort((a,b) => a.date > b.date ? 1 : -1);
-    html += '<div style="margin-bottom:20px"><div style="font-weight:600;font-size:13px;margin-bottom:8px">' + def.name + '</div>';
-    // Mini SVG chart
+    html += '<div style="margin-bottom:24px"><div style="font-weight:700;font-size:14px;margin-bottom:8px;color:var(--primary)">' + def.name + '</div>';
     html += buildScaleSVG(sorted, def);
-    // Table
-    html += '<div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Data</th><th>Pontuação</th><th>Classificação</th></tr></thead><tbody>';
+    html += '<div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Data</th><th>Pontuação</th><th>Classificação</th><th style="width:120px">Ações</th></tr></thead><tbody>';
     sorted.forEach(s => {
       const r = def.ranges.find(x => s.score <= x.max) || def.ranges[def.ranges.length-1];
       const dt = s.date ? new Date(s.date+'T00:00').toLocaleDateString('pt-BR') : s.date;
-      html += '<tr><td>' + dt + '</td><td><strong>' + s.score + '</strong></td><td><span style="color:' + r.color + '">● ' + s.classification + '</span></td></tr>';
+      html += '<tr><td>' + dt + '</td><td><strong>' + s.score + '/' + def.maxScore + '</strong></td>' +
+        '<td><span style="color:' + r.color + ';font-weight:600">● ' + s.classification + '</span></td>' +
+        '<td><div style="display:flex;gap:4px">' +
+        '<button class="btn btn-sm btn-secondary" onclick="openSavedScale(' + s._origIdx + ')">📂 Abrir</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="deleteScaleResult(' + s._origIdx + ')">✕</button>' +
+        '</div></td></tr>';
     });
     html += '</tbody></table></div></div>';
   });
   area.innerHTML = html;
+}
+
+function openSavedScale(idx) {
+  const s = (APP.activePatient.scales || [])[idx];
+  if (!s) return;
+  const def = SCALES_DEF[s.scaleId];
+  if (!def) return;
+  // Seleciona a escala no select
+  const sel = document.getElementById('scale-select');
+  if (sel) { sel.value = s.scaleId; renderScaleItems(); }
+  // Preenche as respostas salvas
+  setTimeout(() => {
+    if (s.answers) {
+      s.answers.forEach((val, i) => {
+        const el = document.querySelector('input[name="scale_item_' + i + '"][value="' + val + '"]');
+        if (el) el.checked = true;
+      });
+    }
+    toast('Aplicação de ' + new Date(s.date+'T00:00').toLocaleDateString('pt-BR') + ' carregada. Pontuação: ' + s.score + ' — ' + s.classification, 'info');
+  }, 200);
+}
+
+function deleteScaleResult(idx) {
+  const s = (APP.activePatient.scales || [])[idx];
+  if (!s) return;
+  const def = SCALES_DEF[s.scaleId];
+  const dt = s.date ? new Date(s.date+'T00:00').toLocaleDateString('pt-BR') : '';
+  if (!confirm('Excluir aplicação de ' + (def ? def.name : s.scaleId) + ' (' + dt + ')?')) return;
+  APP.activePatient.scales.splice(idx, 1);
+  savePatients();
+  renderScaleHistory();
+  toast('Aplicação excluída.', 'info');
 }
 
 function buildScaleSVG(sorted, def) {
@@ -4346,20 +4443,21 @@ function getRecursoData(type) {
 }
 
 function saveRecurso() {
-  if (!APP.activePatient) return toast('Selecione um paciente ativo.', 'error');
+  if (!APP.activePatient) return toast('Selecione um paciente ativo na barra lateral.', 'error');
   const type = document.getElementById('recurso-select')?.value;
-  if (!type) return toast('Selecione o tipo de recurso.', 'error');
+  if (!type) return toast('Selecione o tipo de recurso primeiro.', 'error');
+  const data = getRecursoData(type);
   if (!APP.activePatient.resources) APP.activePatient.resources = [];
   APP.activePatient.resources.push({
     id: Date.now().toString(),
     type,
     label: RECURSO_LABELS[type] || type,
     date: new Date().toISOString().split('T')[0],
-    data: getRecursoData(type)
+    data
   });
   savePatients();
-  toast('Recurso salvo no histórico!', 'success');
   renderRecursoHistory();
+  toast('✅ Recurso salvo no prontuário de ' + APP.activePatient.name + '!', 'success');
 }
 
 function printRecurso() {
@@ -4371,7 +4469,7 @@ function printRecurso() {
   w.document.write('<html><head><title>' + label + '</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#222}h1{font-size:18px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:8px;font-size:12px}th{background:#eee}@media print{button{display:none}}</style></head><body>');
   w.document.write('<h1>' + label + '</h1><p><strong>Paciente:</strong> ' + patName + ' &nbsp; <strong>Data:</strong> ' + new Date().toLocaleDateString('pt-BR') + '</p>');
   w.document.write(document.getElementById('recurso-form-area')?.innerHTML || '');
-  w.document.write('<br><button onclick="window.print()">Imprimir</button></body></html>');
+  w.document.write('<script>window.onload=function(){window.print();}<\/script></body></html>');
   w.document.close();
 }
 
@@ -4384,7 +4482,7 @@ function renderRecursoHistory() {
   }
   const resources = (APP.activePatient.resources || []).slice().reverse();
   if (!resources.length) {
-    area.innerHTML = '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">\U0001f5c2️</div><h3>Sem recursos</h3><p>Nenhum recurso aplicado ainda.</p></div>';
+    area.innerHTML = '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">🗂️</div><h3>Sem recursos</h3><p>Nenhum recurso aplicado ainda.</p></div>';
     return;
   }
   area.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Data</th><th>Recurso</th><th>Ação</th></tr></thead><tbody>' +
@@ -4412,25 +4510,35 @@ function viewRecurso(resourceId) {
   } else {
     body += '<pre style="font-size:11px;background:var(--surface-alt);padding:12px;border-radius:6px;overflow-x:auto">' + escHtml(JSON.stringify(r.data, null, 2)) + '</pre>';
   }
-  showModal('\U0001f5c2️ ' + escHtml(r.label), body);
+  showModal('🗂️ ' + escHtml(r.label), body);
 }
 
 function renderRecursos() {
   exposicaoItems = [];
   renderRecursoHistory();
 }
+function deleteRecurso(id) {
+  if (!APP.activePatient || !APP.activePatient.resources) return;
+  const r = APP.activePatient.resources.find(x => x.id === id);
+  if (!r) return;
+  if (!confirm('Excluir o recurso "' + r.label + '" de ' + new Date(r.date+'T00:00').toLocaleDateString('pt-BR') + '?')) return;
+  APP.activePatient.resources = APP.activePatient.resources.filter(x => x.id !== id);
+  savePatients();
+  renderRecursoHistory();
+  toast('Recurso excluído.', 'info');
+}
 
 // ── FORMULAÇÃO DE CASO ───────────────────────────────────────
 const FORMULACAO_BLOCKS = [
-  { id: 'block1', label: 'Experiências Formativas', desc: 'Experiências na infância e desenvolvimento', icon: '\U0001f9b8', color: '#5B8FCF' },
-  { id: 'block2', label: 'Crenças Centrais', desc: '"Sou...", "Os outros são...", "O mundo é..."', icon: '\U0001f9e0', color: '#8B7FD4' },
-  { id: 'block3', label: 'Crenças Intermediárias', desc: 'Regras, pressupostos e atitudes condicionais', icon: '\U0001f517', color: '#8B7FD4' },
-  { id: 'block4', label: 'Situação Gatilho', desc: 'Situação atual que ativou os esquemas', icon: '\U0001f4a5', color: '#C96F58' },
-  { id: 'block5', label: 'Pensamentos Automáticos', desc: 'O que passou pela sua cabeça?', icon: '\U0001f4ad', color: '#E8A838' },
-  { id: 'block6a', label: 'Emoção', desc: 'Que emoção sentiu? Intensidade (0-100%)', icon: '\U0001f62d', color: '#E85858' },
-  { id: 'block6b', label: 'Reação Fisiológica', desc: 'Sintomas físicos (tensão, sudorese...)', icon: '\U0001f493', color: '#E85858' },
-  { id: 'block6c', label: 'Comportamento', desc: 'O que fez? O que evitou?', icon: '\U0001f6b6', color: '#E85858' },
-  { id: 'block7', label: 'Mecanismos de Manutenção', desc: 'O que mantém o problema ativo?', icon: '\U0001f504', color: '#4A9B8E' }
+  { id: 'block1', label: 'Experiências Formativas', desc: 'Experiências na infância e desenvolvimento', icon: '🦸', color: '#5B8FCF' },
+  { id: 'block2', label: 'Crenças Centrais', desc: '"Sou...", "Os outros são...", "O mundo é..."', icon: '🧠', color: '#8B7FD4' },
+  { id: 'block3', label: 'Crenças Intermediárias', desc: 'Regras, pressupostos e atitudes condicionais', icon: '🔗', color: '#8B7FD4' },
+  { id: 'block4', label: 'Situação Gatilho', desc: 'Situação atual que ativou os esquemas', icon: '💥', color: '#C96F58' },
+  { id: 'block5', label: 'Pensamentos Automáticos', desc: 'O que passou pela sua cabeça?', icon: '💭', color: '#E8A838' },
+  { id: 'block6a', label: 'Emoção', desc: 'Que emoção sentiu? Intensidade (0-100%)', icon: '😭', color: '#E85858' },
+  { id: 'block6b', label: 'Reação Fisiológica', desc: 'Sintomas físicos (tensão, sudorese...)', icon: '💓', color: '#E85858' },
+  { id: 'block6c', label: 'Comportamento', desc: 'O que fez? O que evitou?', icon: '🚶', color: '#E85858' },
+  { id: 'block7', label: 'Mecanismos de Manutenção', desc: 'O que mantém o problema ativo?', icon: '🔄', color: '#4A9B8E' }
 ];
 
 function renderFormulacao() {
@@ -4483,8 +4591,8 @@ function renderFormulacao() {
     blockHtml(FORMULACAO_BLOCKS[8]) +
     // Buttons
     '<div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">' +
-      '<button class="btn btn-primary" onclick="saveFormulacao()">\U0001f4be Salvar Formulação</button>' +
-      '<button class="btn btn-accent" onclick="printFormulacao()">\U0001f5a8️ Imprimir PDF</button>' +
+      '<button class="btn btn-primary" onclick="saveFormulacao()">💾 Salvar Formulação</button>' +
+      '<button class="btn btn-accent" onclick="printFormulacao()">🖨️ Imprimir PDF</button>' +
     '</div>';
 }
 
@@ -4493,7 +4601,13 @@ function openBlockEditor(blockId) {
   const block = FORMULACAO_BLOCKS.find(b => b.id === blockId);
   if (!block) return;
   const cf = APP.activePatient.caseFormulation || {};
-  showModal(block.icon + ' ' + block.label, '<div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">' + block.desc + '</div><textarea id="block-editor-text" class="form-input" rows="6" style="width:100%" placeholder="' + block.desc + '...">' + escHtml(cf[blockId] || '') + '</textarea>', [{ label: '\U0001f4be Salvar bloco', cls: 'btn-primary', action: 'saveBlock(\'' + blockId + '\')' }, { label: 'Cancelar', cls: 'btn-secondary', action: 'closeModal()' }]);
+  showModal(block.icon + ' ' + block.label,
+    '<div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">' + block.desc + '</div>' +
+    '<textarea id="block-editor-text" class="form-input" rows="8" style="width:100%;min-height:140px" placeholder="' + block.desc + '...">' + escHtml(cf[blockId] || '') + '</textarea>',
+    [
+      { label: '💾 Salvar bloco', cls: 'btn-primary', action: function() { saveBlock(blockId); } },
+      { label: 'Cancelar', cls: 'btn-secondary', action: closeModal }
+    ]);
 }
 
 function saveBlock(blockId) {
@@ -4518,7 +4632,7 @@ function printFormulacao() {
   const cf = p.caseFormulation || {};
   const cfg = getConfig();
   const w = window.open('', '_blank');
-  let body = '<h2 style="text-align:center;color:#2c3e50">\U0001f9e9 Formulação de Caso</h2>';
+  let body = '<h2 style="text-align:center;color:#2c3e50">🧩 Formulação de Caso</h2>';
   body += '<p style="text-align:center"><strong>Paciente:</strong> ' + escHtml(p.name) + ' &nbsp; <strong>Data:</strong> ' + new Date().toLocaleDateString('pt-BR') + '</p>';
   body += '<p style="text-align:center;color:#777"><strong>Psicólogo(a):</strong> ' + escHtml(cfg.name || '') + ' &nbsp; ' + escHtml(cfg.crp || '') + '</p><hr>';
   FORMULACAO_BLOCKS.forEach(b => {
@@ -5146,6 +5260,32 @@ function toast(msg, type = 'info', duration = 3500) {
   t.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
   document.getElementById('toast-container').appendChild(t);
   setTimeout(() => t.remove(), duration);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MENU DE AJUDA — todos os painéis
+// ══════════════════════════════════════════════════════════════
+const HELP_CONTENT = JSON.parse(`{"dashboard": {"titulo": "🏠 Dashboard — Como usar", "texto": "O Dashboard é a tela inicial do PsicoTCC.\\n\\n📊 Estatísticas gerais: total de pacientes, evoluções registradas, documentos gerados e transcrições processadas.\\n\\n⚡ Acesso Rápido: botões para as ações mais comuns — criar paciente, registrar evolução, processar transcrição e abrir o Supervisor TCC.\\n\\n🕐 Últimas Atividades: histórico das ações mais recentes no sistema.\\n\\nDICA: Sempre selecione um paciente ativo na barra lateral antes de usar as ferramentas clínicas. O nome do paciente ativo aparece no topo da sidebar."}, "patients": {"titulo": "👥 Pacientes — Como usar", "texto": "O módulo de Pacientes centraliza o cadastro clínico.\\n\\n➕ Novo Paciente: clique no botão para cadastrar nome, idade, gênero, queixa principal, modalidade e data de início.\\n\\n🖱️ Selecionar paciente ativo: clique no card do paciente. O nome aparecerá no topo da sidebar e todas as ferramentas clínicas passarão a operar para ele.\\n\\n🗑️ Excluir paciente: clique no ícone de lixeira no canto do card. Atenção: esta ação é permanente e remove todos os dados clínicos do paciente.\\n\\n🔍 Buscar: use o campo de busca para filtrar por nome."}, "anamnese": {"titulo": "📋 Anamnese — Como usar", "texto": "A Anamnese coleta dados estruturados do paciente em 8 seções colapsáveis.\\n\\n📂 Carregar: carrega os dados salvos do paciente ativo. Se não houver dados, o formulário ficará em branco para preenchimento.\\n\\n💾 Salvar: salva todos os campos preenchidos no prontuário do paciente ativo.\\n\\n🖨️ PDF: imprime a anamnese completa com cabeçalho do consultório e logo.\\n\\n▼ Seções: clique no cabeçalho de cada seção para expandir ou recolher.\\n\\nIMPORTANTE: Selecione o paciente ativo antes de carregar ou salvar."}, "prontuario": {"titulo": "📁 Prontuário Eletrônico — Como usar", "texto": "O Prontuário registra anotações clínicas cronológicas do paciente.\\n\\n➕ Novo Registro: abre um formulário para selecionar o tipo de registro, informar a data e descrever o conteúdo.\\n\\n📋 Listagem: os registros aparecem em ordem cronológica reversa (mais recentes primeiro).\\n\\n✕ Excluir: clique no X ao lado do registro para removê-lo.\\n\\n🖨️ PDF: imprime o prontuário completo do paciente.\\n\\nDICA: Use o prontuário para registrar qualquer informação relevante que não se enquadre nas evoluções formais."}, "evolucao": {"titulo": "📈 Evolução de Sessão — Como usar", "texto": "A Evolução registra formalmente cada sessão realizada, seguindo o modelo TCC.\\n\\n📝 Preenchimento: informe os dados da sessão (data, duração, modalidade) e preencha as 7 seções clínicas mais revisão e tarefa de casa.\\n\\n🤖 Gerar com IA: o sistema usa os dados do paciente para sugerir o conteúdo das seções. Revise antes de salvar.\\n\\n💾 Salvar: salva a evolução no histórico do paciente.\\n\\n📂 Histórico: lista todas as evoluções salvas. Use Abrir para carregar e X para excluir.\\n\\n📚 Tarefa de casa: registre a tarefa prescrita e a revisão da tarefa anterior."}, "transcricao": {"titulo": "🎙️ Transcrição — Como usar", "texto": "O módulo de Transcrição processa gravações de sessão em texto estruturado.\\n\\n📎 Upload: arraste ou selecione um arquivo .docx com a transcrição bruta da sessão.\\n\\n🤖 Processar com IA: a IA identifica as falas da Psicóloga e do Paciente e reorganiza o texto profissionalmente.\\n\\n💾 Salvar: salva a transcrição processada no histórico do paciente.\\n\\n📂 Histórico: lista todas as transcrições salvas. Use Abrir para visualizar ou X para excluir.\\n\\n🖨️ PDF: imprime a transcrição formatada com cabeçalho do consultório.\\n\\nDICA: Quanto mais completa a transcrição bruta, melhor será o resultado da IA."}, "documentos": {"titulo": "📄 Documentos Clínicos — Como usar", "texto": "O módulo gera documentos clínicos formais seguindo as resoluções do CFP.\\n\\n📋 Tipos disponíveis: Laudo Psicológico, Relatório Psicológico, Atestado Psicológico, Parecer Psicológico e Encaminhamento.\\n\\n🤖 Gerar com IA: selecione o tipo de documento e clique em Gerar com IA. O sistema preenche automaticamente com base nos dados do paciente. Revise antes de salvar.\\n\\n✏️ Edição: clique em qualquer seção do documento para editar o texto diretamente.\\n\\n💾 Salvar: salva o documento no histórico do paciente ativo.\\n\\n📂 Documentos Salvos: painel com todos os documentos do paciente. Use Abrir para recarregar ou X para excluir.\\n\\n🖨️ PDF: imprime o documento com cabeçalho, logo e assinatura."}, "contrato": {"titulo": "✍️ Contrato de Serviços — Como usar", "texto": "O Contrato de Prestação de Serviços Psicológicos é um modelo jurídico completo.\\n\\n✏️ Edição: clique em qualquer campo em destaque para editar diretamente — valores, prazos, datas e dados do contratante.\\n\\nAs cláusulas cobertas são: objeto do contrato, duração das sessões, honorários, faltas e cancelamentos, sigilo profissional, rescisão e situações de emergência.\\n\\n💾 Salvar: salva o contrato preenchido no prontuário do paciente.\\n\\n🖨️ PDF: imprime o contrato formatado para assinatura física.\\n\\nIMPORTANTE: Revise todos os valores e prazos antes de imprimir. O contrato segue o Código de Ética do Psicólogo (Resolução CFP nº 10/2005)."}, "supervisor": {"titulo": "🤖 Supervisor TCC (IA) — Como usar", "texto": "O Supervisor TCC é um assistente de raciocínio clínico especializado em TCC.\\n\\n🔵 MODOS DE OPERAÇÃO:\\n• Anamnese Inicial: análise de primeiros dados do paciente\\n• Sessão Clínica: modelo ABC+, distorções, intervenções\\n• Supervisão de Caso: revisão crítica, pontos cegos, vieses\\n• Crise/Risco: avaliação de risco com prioridade máxima\\n• Livre: perguntas técnicas e conceituais\\n\\n📝 COMO USAR: selecione o modo, descreva o caso e envie. O sistema responderá marcando [FATO], [INFERÊNCIA] e [HIPÓTESE].\\n\\n🗑️ Limpar Chat: reinicia a conversa.\\n\\n⚠️ AVISO: Este sistema é uma ferramenta de apoio. Nunca substitui julgamento profissional ou supervisão clínica humana."}, "agenda": {"titulo": "📅 Agenda — Como usar", "texto": "A Agenda organiza seus horários de atendimento de forma visual.\\n\\n📅 Visualização semanal: navegue pelas semanas usando as setas. O botão Hoje retorna à semana atual.\\n\\n➕ Nova Sessão: clique no botão ou em qualquer célula da grade para agendar. Informe paciente, data, horário de início e fim, modalidade e observações.\\n\\n🎨 Cards coloridos: cada sessão aparece como um card na grade. Clique no card para editar, marcar como realizada, cancelada ou excluir.\\n\\n✅ Status:\\n• Normal: sessão agendada\\n• Realizada: visual esmaecido\\n• Cancelada: borda vermelha\\n\\nDICA: Lembre de registrar a evolução após cada atendimento realizado."}, "escalas": {"titulo": "📊 Escalas Psicológicas — Como usar", "texto": "O módulo aplica escalas psicológicas validadas e acompanha a evolução dos escores.\\n\\n📋 ESCALAS DISPONÍVEIS:\\n• PHQ-9: Depressão (0-27)\\n• GAD-7: Ansiedade Generalizada (0-21)\\n• BAI: Beck Anxiety Inventory (0-63)\\n• BDI-II: Beck Depression Inventory (0-63)\\n\\n▶ COMO APLICAR: selecione a escala, responda os itens com o paciente e clique em Calcular e Salvar. O sistema calcula a pontuação e classificação automaticamente.\\n\\n📈 HISTÓRICO: mostra todas as aplicações com gráfico de evolução. Use Abrir para visualizar as respostas ou X para excluir.\\n\\nDICA: Aplique as escalas no início e ao longo do acompanhamento para monitorar o progresso."}, "recursos": {"titulo": "🗂️ Recursos TCC — Como usar", "texto": "A Biblioteca de Recursos TCC disponibiliza formulários terapêuticos estruturados.\\n\\n📋 RECURSOS DISPONÍVEIS:\\n• Registro de Pensamentos Disfuncionais (RPD)\\n• Registro de Humor Diário\\n• Planejamento de Atividades Prazerosas\\n• Ficha de Experimento Comportamental\\n• Hierarquia de Exposição (0-100)\\n• Vantagens e Desvantagens\\n\\n▶ COMO USAR: selecione o tipo de recurso, preencha os campos com o paciente e clique em Salvar no Prontuário.\\n\\n📂 HISTÓRICO: lista os recursos salvos. Use Abrir para visualizar ou X para excluir.\\n\\n🖨️ IMPRIMIR: gera versão imprimível do recurso para entregar ao paciente."}, "formulacao": {"titulo": "🧩 Formulação de Caso — Como usar", "texto": "A Formulação de Caso organiza visualmente o modelo cognitivo do paciente.\\n\\n🧱 BLOCOS DO DIAGRAMA:\\n1. Experiências Formativas: infância, desenvolvimento e eventos que moldaram as crenças\\n2. Crenças Centrais: nucloes de crença sobre si mesmo e os outros\\n3. Crenças Intermediárias: regras condicionais e pressupostos\\n4. Situação Gatilho: evento atual que ativou o sistema de crenças\\n5. Pensamentos Automáticos: cognições imediatas e involuntárias\\n6. Reações: respostas emocionais, fisiológicas e comportamentais\\n7. Mecanismos de Manutenção: fatores que perpetuam o problema\\n\\n✏️ EDITAR BLOCO: clique em qualquer bloco do diagrama para abrir o editor.\\n\\n💾 SALVAR: salva todos os blocos no prontuário do paciente.\\n\\n🖨️ IMPRIMIR: gera PDF da formulação completa.\\n\\nDICA: A formulação é um documento vivo — atualize-a à medida que o tratamento avança."}}`);
+
+function showHelp(panelId) {
+  const h = HELP_CONTENT[panelId];
+  if (!h) return;
+  const linhas = h.texto.split('\n').filter(l => l.trim());
+  let html = '<div style="max-height:420px;overflow-y:auto;line-height:1.8;font-size:13px;padding-right:4px">';
+  linhas.forEach(linha => {
+    if (linha.match(/^[📊📋▶🔵🧱📈🎨✅📂⚡🕐🔍🎙️📎✏️🗑️📅➕📝💾🖨️📚]/u)) {
+      html += '<div style="font-weight:700;color:var(--primary);margin-top:14px;margin-bottom:4px">' + linha + '</div>';
+    } else if (linha.startsWith('•')) {
+      html += '<div style="padding-left:18px;margin-bottom:3px;color:var(--text-secondary)">' + linha + '</div>';
+    } else if (linha.match(/^(IMPORTANTE|DICA|⚠️|1\.|2\.|3\.|4\.|5\.|6\.|7\.)/)) {
+      const isTip = linha.startsWith('DICA');
+      html += '<div style="background:' + (isTip ? '#fff8e1' : 'var(--surface-alt)') + ';border-left:3px solid ' + (isTip ? 'var(--accent)' : 'var(--primary)') + ';padding:8px 12px;border-radius:0 6px 6px 0;margin-top:10px;font-size:12px">' + linha + '</div>';
+    } else if (linha.trim()) {
+      html += '<div style="margin-bottom:4px;color:var(--text)">' + linha + '</div>';
+    }
+  });
+  html += '</div>';
+  showModal(h.titulo, html, [{ label: '✓ Entendido', cls: 'btn-primary', action: closeModal }]);
 }
 
 // ── INICIALIZAÇÃO ────────────────────────────────────────────

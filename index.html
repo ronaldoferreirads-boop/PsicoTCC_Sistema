@@ -2132,7 +2132,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 24/06/2026 09:34
+//  Gerado automaticamente em 24/06/2026 10:43
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2324,48 +2324,48 @@ function updateSidebarUser() {
 // ── DASHBOARD E NAVEGAÇÃO ────────────────────────────────────
 const TOPBAR_BUTTONS = {
   dashboard:    [
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("dashboard")' }
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('dashboard')" }
   ],
   patients:     [{ label:'➕ Novo Paciente', cls:'btn-primary btn-md', action:'openNewPatient()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("patients")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('patients')" }],
   anamnese:     [{ label:'📂 Carregar',     cls:'btn-secondary btn-md', action:'loadAnamnese()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveAnamnese()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("anamnese")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('anamnese')" }],
   prontuario:   [{ label:'➕ Novo Registro', cls:'btn-primary btn-md',  action:'addProntuarioEntry()' },
     { label:'🖨️ PDF',          cls:'btn-accent btn-md',   action:'printWithWatermark()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("prontuario")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('prontuario')" }],
   evolucao:     [{ label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadEvolutionList()' },
     { label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'genEvolution()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveEvolution()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("evolucao")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('evolucao')" }],
   transcricao:  [{ label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadTranscriptionHistory()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveTranscription()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("transcricao")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('transcricao')" }],
   documentos:   [{ label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'genDocWithAI()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveDoc()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("documentos")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('documentos')" }],
   contrato:     [{ label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveContract()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("contrato")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('contrato')" }],
   supervisor:   [{ label:'🗑️ Limpar Chat',  cls:'btn-secondary btn-md', action:'clearAIChat()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("supervisor")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('supervisor')" }],
   settings:     [],
   agenda:       [{ label:'➕ Nova Sessão', cls:'btn-primary btn-md', action:'openNewSessionModal()' },
     { label:'📅 Hoje',       cls:'btn-secondary btn-md', action:'goWeek(0)' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("agenda")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('agenda')" }],
   escalas:      [{ label:'📊 Nova Aplicação', cls:'btn-primary btn-md', action:'renderScaleItems()' },
     { label:'📈 Ver Histórico',  cls:'btn-secondary btn-md', action:'renderEscalas()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("escalas")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('escalas')" }],
   recursos:     [{ label:'➕ Novo Recurso',   cls:'btn-primary btn-md',   action:'document.getElementById("recurso-select").focus()' },
     { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'renderRecursoHistory()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("recursos")' }],
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('recursos')" }],
   formulacao:   [{ label:'💾 Salvar',   cls:'btn-primary btn-md',   action:'saveFormulacao()' },
     { label:'🖨️ PDF',      cls:'btn-accent btn-md',    action:'printFormulacao()' },
-    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:'showHelp("formulacao")' }]
+    { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('formulacao')" }]
 };
 
 function updateTopbarActions(p) {
@@ -5260,6 +5260,33 @@ function toast(msg, type = 'info', duration = 3500) {
   t.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
   document.getElementById('toast-container').appendChild(t);
   setTimeout(() => t.remove(), duration);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MENU DE AJUDA — todos os painéis
+// ══════════════════════════════════════════════════════════════
+const HELP_CONTENT = {"dashboard": {"titulo": "🏠 Dashboard — Como usar", "texto": "O Dashboard é a tela inicial do PsicoTCC. Aqui você encontra:\n\n📊 Estatísticas gerais: total de pacientes, evoluções registradas, documentos gerados e transcrições processadas.\n\n⚡ Acesso Rápido: botões para as ações mais comuns — criar paciente, registrar evolução, processar transcrição e abrir o Supervisor TCC.\n\n🕐 Últimas Atividades: histórico das ações mais recentes no sistema.\n\nDICA: Sempre selecione um paciente ativo na barra lateral antes de usar as ferramentas clínicas. O nome do paciente ativo aparece no topo da sidebar."}, "patients": {"titulo": "👥 Pacientes — Como usar", "texto": "O módulo de Pacientes centraliza o cadastro clínico. \n\n➕ Novo Paciente: clique no botão para cadastrar nome, idade, gênero, queixa principal, modalidade e data de início.\n\n🖱️ Selecionar paciente ativo: clique no card do paciente. O nome aparecerá no topo da sidebar e todas as ferramentas clínicas passarão a operar para ele.\n\n🗑️ Excluir paciente: clique no ícone de lixeira no canto do card. Atenção: esta ação é permanente e remove todos os dados clínicos do paciente.\n\n🔍 Buscar: use o campo de busca para filtrar por nome ou queixa."}, "anamnese": {"titulo": "📋 Anamnese — Como usar", "texto": "A Anamnese coleta dados estruturados do paciente em 8 seções colapsáveis.\n\n📂 Carregar: carrega os dados salvos do paciente ativo. Se não houver dados salvos, o formulário ficará em branco para preenchimento.\n\n💾 Salvar: salva todos os campos preenchidos no prontuário do paciente ativo.\n\n🖨️ PDF: imprime a anamnese completa com cabeçalho do consultório e logo.\n\n▼ Seções: clique no cabeçalho de cada seção para expandir ou recolher. \n\nIMPORTANTE: Selecione o paciente ativo antes de carregar ou salvar."}, "prontuario": {"titulo": "📁 Prontuário Eletrônico — Como usar", "texto": "O Prontuário registra anotações clínicas cronológicas do paciente.\n\n➕ Novo Registro: abre um formulário para selecionar o tipo de registro (anotação clínica, contato entre sessões, intercorrência, avaliação de risco, etc.), informar a data e descrever o conteúdo.\n\n📋 Listagem: os registros aparecem em ordem cronológica reversa (mais recentes primeiro).\n\n✕ Excluir: clique no X ao lado do registro para removê-lo.\n\n🖨️ PDF: imprime o prontuário completo do paciente.\n\nDICA: Use o prontuário para registrar qualquer informação relevante que não se enquadre nas evoluções de sessão formais."}, "evolucao": {"titulo": "📈 Evolução de Sessão — Como usar", "texto": "A Evolução registra formalmente cada sessão realizada, seguindo o modelo TCC.\n\n📝 Preenchimento: informe os dados da sessão (data, duração, modalidade) e preencha as 7 seções clínicas + revisão e tarefa de casa.\n\n🤖 Gerar com IA: o sistema usa os dados do paciente para sugerir automaticamente o conteúdo das seções. Revise e ajuste antes de salvar.\n\n💾 Salvar: salva a evolução no histórico do paciente.\n\n📂 Histórico: lista todas as evoluções salvas. Clique em "Abrir" para carregar uma evolução anterior. Clique em "✕" para excluir.\n\n📚 Tarefa de casa: registre a tarefa prescrita e a revisão da tarefa da sessão anterior para acompanhamento."}, "transcricao": {"titulo": "🎙️ Transcrição — Como usar", "texto": "O módulo de Transcrição processa gravações de sessão em texto estruturado.\n\n📎 Upload: arraste ou selecione um arquivo .docx contendo a transcrição bruta da sessão (gerada por qualquer aplicativo de transcrição automática).\n\n🤖 Processar com IA: a IA identifica automaticamente as falas da Psicóloga e do Paciente, corrige erros e reorganiza o texto de forma profissional.\n\n💾 Salvar: salva a transcrição processada no histórico do paciente.\n\n📂 Histórico: lista todas as transcrições salvas. Clique em "Abrir" para visualizar ou "✕" para excluir.\n\n🖨️ PDF: imprime a transcrição formatada com cabeçalho do consultório.\n\nDICA: Quanto mais completa a transcrição bruta, melhor será o resultado da IA."}, "documentos": {"titulo": "📄 Documentos Clínicos — Como usar", "texto": "O módulo gera documentos clínicos formais seguindo as resoluções do CFP.\n\n📋 Tipos disponíveis: Laudo Psicológico, Relatório Psicológico, Atestado Psicológico, Parecer Psicológico e Encaminhamento.\n\n🤖 Gerar com IA: selecione o tipo de documento e clique em "Gerar com IA". O sistema preenche automaticamente com base nos dados do paciente ativo. Revise e edite o conteúdo antes de salvar.\n\n✏️ Edição: clique em qualquer seção do documento para editar o texto diretamente.\n\n💾 Salvar: salva o documento no histórico do paciente ativo.\n\n📂 Documentos Salvos: painel lateral com todos os documentos do paciente. Clique em "Abrir" para recarregar ou "✕" para excluir.\n\n🖨️ PDF: imprime o documento com cabeçalho, logo e assinatura."}, "contrato": {"titulo": "✍️ Contrato de Serviços — Como usar", "texto": "O Contrato de Prestação de Serviços Psicológicos é um modelo jurídico completo.\n\n✏️ Edição: clique em qualquer campo em destaque (sublinhado) para editar diretamente — valores, prazos, datas e dados do contratante.\n\nAs cláusulas cobertas são: objeto do contrato, duração das sessões, honorários, faltas e cancelamentos, sigilo profissional, rescisão, contato entre sessões e situações de emergência.\n\n💾 Salvar: salva o contrato preenchido no prontuário do paciente.\n\n🖨️ PDF: imprime o contrato formatado para assinatura física.\n\nIMPORTANTE: Revise todos os valores e prazos antes de imprimir. O contrato segue o Código de Ética do Psicólogo (Resolução CFP nº 10/2005)."}, "supervisor": {"titulo": "🤖 Supervisor TCC (IA) — Como usar", "texto": "O Supervisor TCC é um assistente de raciocínio clínico especializado em TCC.\n\n🔵 MODOS DE OPERAÇÃO:\n• Anamnese Inicial: análise de primeiros dados do paciente\n• Sessão Clínica: modelo ABC+, distorções, intervenções\n• Supervisão de Caso: revisão crítica, pontos cegos, vieses\n• Crise/Risco: avaliação de risco com prioridade máxima\n• Livre: perguntas técnicas e conceituais\n\n📝 COMO USAR: selecione o modo, descreva o caso ou a situação clínica e envie. O sistema responderá marcando [FATO], [INFERÊNCIA] e [HIPÓTESE].\n\n🗑️ Limpar Chat: reinicia a conversa (histórico clínico não é apagado).\n\n⚠️ AVISO: Este sistema é uma ferramenta de apoio. Nunca substitui julgamento profissional ou supervisão clínica humana. Hipóteses diagnósticas são sempre baseadas no DSM-5 e apresentadas com nível de confiança.\n\nDICA: Inclua o contexto do paciente ativo — o sistema o captura automaticamente quando um paciente está selecionado."}, "agenda": {"titulo": "📅 Agenda — Como usar", "texto": "A Agenda organiza seus horários de atendimento de forma visual.\n\n📅 Visualização semanal: navegue pelas semanas usando as setas ← →. O botão "Hoje" retorna à semana atual.\n\n➕ Nova Sessão: clique no botão ou em qualquer célula da grade para agendar. Informe paciente, data, horário de início e fim, modalidade (presencial/online) e observações.\n\n🎨 Cards coloridos: cada sessão aparece como um card colorido na grade. Clique no card para editar, marcar como realizada ou cancelada, ou excluir.\n\n✅ Status das sessões:\n• Normal: sessão agendada\n• Realizada: marcada com visual esmaecido\n• Cancelada: marcada com borda vermelha\n\nDICA: As sessões da agenda são vinculadas ao paciente mas independentes das evoluções de sessão — lembre de registrar a evolução após cada atendimento."}, "escalas": {"titulo": "📊 Escalas Psicológicas — Como usar", "texto": "O módulo aplica escalas psicológicas validadas e acompanha a evolução dos escores.\n\n📋 ESCALAS DISPONÍVEIS:\n• PHQ-9: Depressão (0-27) — mínima, leve, moderada, moderadamente grave, grave\n• GAD-7: Ansiedade Generalizada (0-21)\n• BAI: Beck Anxiety Inventory (0-63)\n• BDI-II: Beck Depression Inventory (0-63)\n\n▶ COMO APLICAR: selecione a escala, responda os itens com o paciente, clique em "Calcular e Salvar". O sistema calcula automaticamente a pontuação e classificação.\n\n📈 HISTÓRICO: mostra todas as aplicações anteriores com gráfico de evolução, pontuação e classificação. Use "📂 Abrir" para visualizar as respostas de uma aplicação e "✕" para excluir.\n\nDICA: Aplique as escalas no início e ao longo do acompanhamento para monitorar objetivamente o progresso do tratamento."}, "recursos": {"titulo": "🗂️ Recursos TCC — Como usar", "texto": "A Biblioteca de Recursos TCC disponibiliza formulários terapêuticos estruturados.\n\n📋 RECURSOS DISPONÍVEIS:\n• Registro de Pensamentos Disfuncionais (RPD): situação, emoção, pensamento automático, distorção, resposta racional\n• Registro de Humor Diário: tabela semanal com emoções e intensidade\n• Planejamento de Atividades Prazerosas: grade semanal de atividades\n• Ficha de Experimento Comportamental: predição, resultado real, conclusão\n• Hierarquia de Exposição: lista de situações por nível de ansiedade (0-100)\n• Vantagens e Desvantagens: tabela comparativa para tomada de decisão\n\n▶ COMO USAR: selecione o tipo de recurso, preencha os campos com o paciente, clique em "💾 Salvar no Prontuário".\n\n📂 HISTÓRICO: lista os recursos salvos. Clique em "📂 Abrir" para visualizar ou "✕" para excluir.\n\n🖨️ IMPRIMIR: gera uma versão imprimível do recurso preenchido para entregar ao paciente."}, "formulacao": {"titulo": "🧩 Formulação de Caso — Como usar", "texto": "A Formulação de Caso organiza visualmente o modelo cognitivo do paciente.\n\n🧱 BLOCOS DO DIAGRAMA:\n1. Experiências Formativas: infância, desenvolvimento e eventos que moldaram as crenças\n2. Crenças Centrais: núcleos de crença sobre si mesmo, os outros e o mundo ("Sou...", "Os outros são...")\n3. Crenças Intermediárias: regras condicionais e pressupostos ("Se... então...", "Devo...")\n4. Situação Gatilho: evento atual que ativou o sistema de crenças\n5. Pensamentos Automáticos: cognições imediatas e involuntárias na situação gatilho\n6. Reações: respostas emocionais, fisiológicas e comportamentais\n7. Mecanismos de Manutenção: fatores que perpetuam o problema (evitação, ruminação, etc.)\n\n✏️ EDITAR BLOCO: clique em qualquer bloco do diagrama para abrir o editor. Digite o conteúdo e clique em "💾 Salvar bloco".\n\n💾 SALVAR FORMULAÇÃO: salva todos os blocos no prontuário do paciente.\n\n🖨️ IMPRIMIR: gera PDF da formulação completa com cabeçalho do consultório.\n\nDICA: A formulação é um documento vivo — atualize-a à medida que o tratamento avança e novas informações surgem."}};
+
+function showHelp(panelId) {
+  const h = HELP_CONTENT[panelId];
+  if (!h) return;
+  const linhas = h.texto.split('\n').filter(l => l.trim());
+  let html = '<div style="max-height:420px;overflow-y:auto;line-height:1.7;font-size:13px">';
+  linhas.forEach(linha => {
+    if (linha.startsWith('📊') || linha.startsWith('📋') || linha.startsWith('▶') ||
+        linha.startsWith('🔵') || linha.startsWith('🧱') || linha.startsWith('📈') ||
+        linha.startsWith('🎨') || linha.startsWith('✅') || linha.startsWith('📂')) {
+      html += '<div style="font-weight:700;color:var(--primary);margin-top:12px;margin-bottom:4px">' + linha + '</div>';
+    } else if (linha.startsWith('•')) {
+      html += '<div style="padding-left:16px;margin-bottom:2px">' + linha + '</div>';
+    } else if (linha.startsWith('IMPORTANTE') || linha.startsWith('DICA') || linha.startsWith('⚠️')) {
+      html += '<div style="background:var(--surface-alt);border-left:3px solid var(--accent);padding:8px 12px;border-radius:4px;margin-top:10px;font-size:12px">' + linha + '</div>';
+    } else if (linha.trim()) {
+      html += '<div style="margin-bottom:4px">' + linha + '</div>';
+    }
+  });
+  html += '</div>';
+  showModal(h.titulo, html, [{ label: 'Entendido', cls: 'btn-primary', action: closeModal }]);
 }
 
 

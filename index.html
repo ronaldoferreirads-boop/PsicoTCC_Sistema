@@ -2090,8 +2090,9 @@ tr.clickable { cursor: pointer; }
         </div>
 <div id="panel-formulacao" class="panel">
           <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
               <div class="card-title">🧩 Formulação de Caso — Modelo Cognitivo de Beck</div>
+              <button class="btn btn-primary" onclick="gerarFormulacaoIA()" id="btn-gerar-form-ia" style="font-size:13px;padding:7px 16px">🤖 Gerar com IA</button>
             </div>
             <div class="card-body">
               <div id="formulacao-patient-alert" class="alert alert-info" style="margin-bottom:16px">
@@ -2132,7 +2133,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 24/06/2026 12:46
+//  Gerado automaticamente em 25/06/2026 15:07
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -3518,40 +3519,7 @@ function saveContract() {
 }
 
 // ── SUPERVISOR TCC (IA) ──────────────────────────────────────
-const TCC_SYSTEM_PROMPT = `Você é um Supervisor Clínico Especialista em Terapia Cognitivo-Comportamental (TCC), Psicopatologia, Formulação Cognitiva de Casos e Psicologia Baseada em Evidências.
-
-⚠️ AVISO ÉTICO: Este sistema é uma ferramenta de apoio ao raciocínio clínico. Não substitui julgamento profissional.
-
-PRINCÍPIO DE EPISTEMOLOGIA CLÍNICA — Marque SEMPRE:
-- [FATO] — Informação objetivamente relatada
-- [INFERÊNCIA] — Conclusão plausível derivada dos fatos  
-- [HIPÓTESE] — Possibilidade clínica que requer confirmação
-
-REGRA DE DIAGNÓSTICO: Use SEMPRE o DSM-5 como referência. NUNCA afirme diagnóstico definitivo.
-
-MODOS DE OPERAÇÃO:
-🔵 ANAMNESE INICIAL: Etapas 1, 2, 5, 8, 9
-🟢 SESSÃO CLÍNICA: Etapas 3, 4, 6, 11, 12
-🟠 SUPERVISÃO: Etapas 13, 2, 7
-🔴 CRISE/RISCO: Etapa 8 (prioridade absoluta)
-⚪ LIVRE: Resposta direta
-
-ETAPAS DISPONÍVEIS:
-01 — Resumo Clínico Estruturado
-02 — Mapa de Lacunas (informações ausentes priorizadas)
-03 — Modelo Cognitivo ABC+
-04 — Análise de Distorções Cognitivas
-05 — Hierarquia de Crenças (Central/Intermediária/Pressupostos)
-06 — Fatores de Manutenção
-07 — Hipóteses Diagnósticas (DSM-5, com nível de confiança)
-08 — Avaliação de Risco
-09 — Formulação Cognitiva Integrativa
-10 — Plano Terapêutico
-11 — Intervenções TCC Indicadas
-12 — Plano de Sessão
-13 — Supervisão Reflexiva (pontos cegos, vieses, hipóteses alternativas)
-
-Responda como um colega supervisor experiente: linguagem técnica e precisa, perguntas reflexivas, reconheça quando dados são insuficientes.`;
+const TCC_SYSTEM_PROMPT = JSON.parse("\"Voc\\u00ea atuar\\u00e1 como um Supervisor Cl\\u00ednico Especialista em Terapia Cognitivo-Comportamental (TCC), Psicopatologia, Formula\\u00e7\\u00e3o Cognitiva de Casos e Psicologia Baseada em Evid\\u00eancias.\\n\\n\\u26a0\\ufe0f AVISO \\u00c9TICO: Este sistema \\u00e9 uma ferramenta de apoio ao racioc\\u00ednio cl\\u00ednico. N\\u00e3o substitui julgamento profissional, supervis\\u00e3o humana ou responsabilidade do psic\\u00f3logo. Nunca tome decis\\u00f5es cl\\u00ednicas baseadas exclusivamente nas sa\\u00eddas deste sistema. Em situa\\u00e7\\u00f5es de risco, acione protocolos de seguran\\u00e7a imediatamente.\\n\\nPRINC\\u00cdPIO DE EPISTEMOLOGIA CL\\u00cdNICA \\u2014 Marque SEMPRE cada afirma\\u00e7\\u00e3o:\\n- [FATO] \\u2014 Informa\\u00e7\\u00e3o objetivamente relatada, sem interpreta\\u00e7\\u00e3o adicional.\\n- [INFER\\u00caNCIA] \\u2014 Conclus\\u00e3o plaus\\u00edvel derivada dos fatos, claramente sinalizada como tal.\\n- [HIP\\u00d3TESE] \\u2014 Possibilidade cl\\u00ednica que requer confirma\\u00e7\\u00e3o \\u2014 nunca afirmada como certeza.\\n\\nREGRA DE DIAGN\\u00d3STICO: Use SEMPRE o DSM-5 como refer\\u00eancia prim\\u00e1ria. NUNCA afirme diagn\\u00f3stico definitivo \\u2014 apenas hip\\u00f3teses com grau de confian\\u00e7a. Use linguagem como \\\"Hip\\u00f3tese compat\\u00edvel com...\\\", \\\"Dados sugerem poss\\u00edvel...\\\", \\\"N\\u00e3o \\u00e9 poss\\u00edvel descartar...\\\". Sempre apresente diagn\\u00f3sticos diferenciais.\\n\\nMODOS DE OPERA\\u00c7\\u00c3O:\\n\\ud83d\\udd35 ANAMNESE INICIAL: Etapas 1, 2, 5, 8, 9 (obrigat\\u00f3rias)\\n\\ud83d\\udfe2 SESS\\u00c3O CL\\u00cdNICA: Etapas 3, 4, 6, 11, 12 (obrigat\\u00f3rias)\\n\\ud83d\\udfe0 SUPERVIS\\u00c3O: Etapas 13, 2, 7 (obrigat\\u00f3rias)\\n\\ud83d\\udd34 CRISE/RISCO: Etapa 8 (prioridade absoluta)\\n\\u26aa LIVRE: Resposta direta e objetiva\\n\\nETAPAS DISPON\\u00cdVEIS:\\n01 \\u2014 Resumo Cl\\u00ednico Estruturado: Dados sociodemogr\\u00e1ficos, queixa, hist\\u00f3ricos, fatores de risco/prote\\u00e7\\u00e3o\\n02 \\u2014 Mapa de Lacunas: Informa\\u00e7\\u00f5es ausentes priorizadas (\\ud83d\\udd34 Alta / \\ud83d\\udfe0 M\\u00e9dia-Alta / \\ud83d\\udfe1 M\\u00e9dia / \\ud83d\\udfe2 Baixa)\\n03 \\u2014 Modelo Cognitivo ABC+: Situa\\u00e7\\u00e3o \\u2192 Pensamentos \\u2192 Emo\\u00e7\\u00f5es \\u2192 Fisiologia \\u2192 Comportamentos \\u2192 Consequ\\u00eancias\\n04 \\u2014 An\\u00e1lise de Distor\\u00e7\\u00f5es Cognitivas: Por distor\\u00e7\\u00e3o: evid\\u00eancias a favor/contra, grau de confian\\u00e7a, impacto funcional\\n05 \\u2014 Hierarquia de Cren\\u00e7as: Central (\\\"Sou...\\\"), Intermedi\\u00e1ria (SE...ENT\\u00c3O...), Pressupostos (regras de conduta)\\n06 \\u2014 Fatores de Manuten\\u00e7\\u00e3o: Evita\\u00e7\\u00e3o, comportamentos de seguran\\u00e7a, rumina\\u00e7\\u00e3o, perfeccionismo, depend\\u00eancia emocional\\n07 \\u2014 Hip\\u00f3teses Diagn\\u00f3sticas (DSM-5): Confian\\u00e7a, evid\\u00eancias a favor/contra, dados faltantes, diferenciais\\n08 \\u2014 Avalia\\u00e7\\u00e3o de Risco: Idea\\u00e7\\u00e3o/plano/inten\\u00e7\\u00e3o/meios. N\\u00edveis: Baixo / Moderado / Elevado / Cr\\u00edtico\\n09 \\u2014 Formula\\u00e7\\u00e3o Cognitiva Integrativa: Narrativa longitudinal \\u2014 Experi\\u00eancias \\u2192 Cren\\u00e7as \\u2192 Gatilhos \\u2192 Respostas \\u2192 Manuten\\u00e7\\u00e3o\\n10 \\u2014 Plano Terap\\u00eautico: Objetivos curto/m\\u00e9dio/longo prazo com indicadores mensur\\u00e1veis\\n11 \\u2014 Interven\\u00e7\\u00f5es TCC Indicadas: T\\u00e9cnicas selecionadas com justificativa cl\\u00ednica vinculada aos fatores de manuten\\u00e7\\u00e3o\\n12 \\u2014 Plano de Sess\\u00e3o: Agenda, objetivo, t\\u00e9cnica(s), exerc\\u00edcio(s), tarefa de casa, avalia\\u00e7\\u00e3o da tarefa\\n13 \\u2014 Supervis\\u00e3o Reflexiva: Pontos cegos, hip\\u00f3teses alternativas, vieses cl\\u00ednicos, perguntas para aprofundar\\n\\nDETALHAMENTO DA ETAPA 09 \\u2014 FORMULA\\u00c7\\u00c3O COGNITIVA INTEGRATIVA (Modelo de Beck):\\nConstrua uma narrativa longitudinal coerente que responda: \\\"Por que esta pessoa, com este problema, neste momento?\\\"\\n\\nComponentes obrigat\\u00f3rios:\\n\\u2022 EXPERI\\u00caNCIAS FORMATIVAS: Eventos de desenvolvimento que contribu\\u00edram para a forma\\u00e7\\u00e3o das cren\\u00e7as centrais (inf\\u00e2ncia, fam\\u00edlia de origem, traumas, v\\u00ednculos precoces)\\n\\u2022 CREN\\u00c7AS CENTRAIS: N\\u00facleos de cren\\u00e7a absolutas e globais sobre si mesmo (\\\"Sou incapaz/rejeit\\u00e1vel/indigno\\\"), os outros (\\\"As pessoas me abandonam\\\") e o mundo (\\\"O mundo \\u00e9 perigoso\\\")\\n\\u2022 CREN\\u00c7AS INTERMEDI\\u00c1RIAS: Regras e pressupostos condicionais (SE...ENT\\u00c3O..., DEVO...) que operacionalizam as cren\\u00e7as centrais\\n\\u2022 SITUA\\u00c7\\u00c3O GATILHO: Situa\\u00e7\\u00f5es contempor\\u00e2neas que ativam as cren\\u00e7as e disparam pensamentos autom\\u00e1ticos\\n\\u2022 PENSAMENTOS AUTOM\\u00c1TICOS: Cogni\\u00e7\\u00f5es imediatas e involunt\\u00e1rias t\\u00edpicas do paciente, incluindo imagens mentais\\n\\u2022 EMO\\u00c7\\u00d5ES: Nome da emo\\u00e7\\u00e3o + intensidade estimada (0-100%). Ex: Ansiedade 80%, Vergonha 70%\\n\\u2022 REA\\u00c7\\u00d5ES FISIOL\\u00d3GICAS: Sintomas corporais t\\u00edpicos (taquicardia, tens\\u00e3o muscular, sudorese, fadiga etc.)\\n\\u2022 COMPORTAMENTOS: O que o paciente faz e o que evita; comportamentos de seguran\\u00e7a; padr\\u00f5es recorrentes\\n\\u2022 MECANISMOS DE MANUTEN\\u00c7\\u00c3O: Fatores que perpetuam o ciclo \\u2014 evita\\u00e7\\u00e3o, rumina\\u00e7\\u00e3o, busca de garantias, perfeccionismo, depend\\u00eancia emocional\\n\\nTom de resposta: linguagem t\\u00e9cnica e precisa mas acess\\u00edvel, como um colega supervisor experiente. Reconhe\\u00e7a explicitamente quando os dados s\\u00e3o insuficientes. Fa\\u00e7a perguntas reflexivas quando pertinente.\"");
 
 async function callClaude(messages, maxTokens = 1500) {
   const apiKey = localStorage.getItem('psicotcc_apikey');
@@ -4571,6 +4539,7 @@ function renderFormulacao() {
   if (!p) { diag.innerHTML = ''; return; }
 
   const cf = p.caseFormulation || {};
+  const hasAI = cf.aiGenerated;
 
   const blockStyle = (color) =>
     'border:2px solid ' + color + ';border-radius:12px;padding:14px 16px;cursor:pointer;' +
@@ -4592,7 +4561,14 @@ function renderFormulacao() {
   const arrow = '<div style="text-align:center;font-size:20px;color:var(--primary);line-height:1;margin:4px 0">↓</div>';
   const arrowRight = '<div style="text-align:center;font-size:20px;color:#8B7FD4;line-height:1;margin:0 4px">→</div>';
 
+  const aiStamp = hasAI
+    ? '<div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;text-align:center">' +
+      '🤖 Última geração por IA em ' + (cf.updatedAt ? new Date(cf.updatedAt).toLocaleDateString('pt-BR') : '—') +
+      ' · <span style="color:var(--primary)">Revise criticamente antes de usar</span></div>'
+    : '';
+
   diag.innerHTML =
+    aiStamp +
     // Block 1
     blockHtml(FORMULACAO_BLOCKS[0]) + arrow +
     // Blocks 2 + 3 (side by side)
@@ -4661,6 +4637,264 @@ function printFormulacao() {
   });
   w.document.write('<html><head><title>Formulação — ' + escHtml(p.name) + '</title><style>body{font-family:Georgia,serif;padding:28px;color:#222;max-width:720px;margin:0 auto}@media print{button{display:none}}</style></head><body>' + body + '<br><button onclick="window.print()">Imprimir</button></body></html>');
   w.document.close();
+}
+
+// ── AI GENERATION ────────────────────────────────────────────────
+
+function buildFormulacaoContext(p, an, evos, cf) {
+  const initials = (p.name || '').split(' ').filter(Boolean).map(function(n){ return n[0] + '.'; }).join('');
+
+  var ctx = 'Modo: ANAMNESE INICIAL\nEtapas desejadas: 9\nFoco especial: Formulação Cognitiva Integrativa para preenchimento do Diagrama de Beck\n\n';
+  ctx += 'DADOS CLÍNICOS DO PACIENTE (iniciais: ' + initials + '):\n\n';
+
+  function addField(label, val) {
+    if (!val || val === '—' || val === '') return;
+    var stripped = (val + '').replace(/<[^>]+>/g, '').trim();
+    if (stripped && stripped !== '—') ctx += '- ' + label + ': ' + stripped + '\n';
+  }
+
+  addField('Idade', an['an-idade'] || p.age);
+  addField('Gênero', an['an-genero']);
+  addField('Estado Civil', an['an-estado-civil']);
+  addField('Escolaridade', an['an-escolaridade']);
+  addField('Profissão', an['an-profissao']);
+  addField('Situação Profissional', an['an-sit-prof']);
+  addField('Nível Socioeconômico', an['an-socio']);
+  addField('Arranjo Familiar', an['an-familia']);
+  addField('Queixa Principal', an['an-queixa'] || p.complaint);
+  addField('Duração da Queixa', an['an-tempo-queixa']);
+  addField('Início do Problema', an['an-inicio-prob']);
+  addField('Evolução do Problema', an['an-evolucao-prob']);
+  addField('Fatores Precipitantes', an['an-precipitantes']);
+  addField('O que Melhora', an['an-melhora']);
+  addField('O que Piora', an['an-piora']);
+  addField('Impacto na Vida Diária', an['an-impacto']);
+  addField('Diagnósticos Anteriores', an['an-diag-ant']);
+  addField('Internações Psiquiátricas', an['an-internacoes']);
+  addField('Medicações em Uso', an['an-medicacoes']);
+  addField('Tentativas de Suicídio', an['an-tentativas']);
+  addField('Autolesão', an['an-autolesao']);
+  addField('Atendimentos Psicológicos Anteriores', an['an-psi-ant']);
+  addField('Abordagens Anteriores', an['an-abordagens-ant']);
+  addField('Doenças Crônicas', an['an-doencas']);
+  addField('Condições Neurológicas', an['an-neuro']);
+  addField('Uso de Álcool', an['an-alcool']);
+  addField('Tabagismo', an['an-tabaco']);
+  addField('Outras Substâncias', an['an-substancias']);
+  addField('Padrão de Sono', an['an-sono']);
+  addField('Apetite', an['an-apetite']);
+  addField('Família de Origem', an['an-familia-orig']);
+  addField('Vínculo com Pais/Cuidadores', an['an-vinculo-pais']);
+  addField('Transtornos Mentais na Família', an['an-tm-familia']);
+  addField('Perdas Significativas', an['an-perdas']);
+  addField('Violência Familiar', an['an-violencia-fam']);
+  addField('Padrões Relacionais', an['an-padroes-rel']);
+  addField('Desenvolvimento', an['an-desenv']);
+  addField('História de Abuso/Trauma', an['an-abuso']);
+  addField('Rede de Apoio', an['an-rede-apoio']);
+  addField('Vínculos Atuais', an['an-vinculos-atuais']);
+  addField('Relacionamento Amoroso', an['an-rel-amoroso']);
+  addField('Filhos', an['an-filhos']);
+  addField('Trabalho/Estudos', an['an-trabalho']);
+  addField('Satisfação no Trabalho', an['an-sat-trab']);
+  addField('Espiritualidade/Religião', an['an-espiritualidade']);
+  addField('Hobbies/Lazer', an['an-hobbies']);
+  addField('Isolamento Social', an['an-isolamento']);
+  addField('Ideação Suicida atual', an['an-ideacao']);
+  addField('Plano Suicida', an['an-plano-sui']);
+  addField('Acesso a Meios', an['an-meios']);
+  addField('Fatores de Proteção', an['an-fatores-prot']);
+  addField('Fatores de Risco', an['an-fatores-risco']);
+  addField('Risco Geral Avaliado', an['an-risco-geral']);
+  addField('Expectativas da Terapia', an['an-expectativas']);
+  addField('Objetivos Terapêuticos', an['an-obj-terapia']);
+  addField('Observações do Psicólogo', an['an-obs-psi']);
+
+  if (evos.length > 0) {
+    ctx += '\nÚLTIMAS ' + evos.length + ' SESSÕES REGISTRADAS:\n';
+    evos.forEach(function(evo, i) {
+      var dateStr = evo.date ? new Date(evo.date + 'T00:00').toLocaleDateString('pt-BR') : ('Sessão ' + (i + 1));
+      ctx += '\n[' + dateStr + ' | Risco: ' + (evo.risk || 'N/I') + ']\n';
+      function addSection(label, html) {
+        if (!html) return;
+        var text = (html + '').replace(/<[^>]+>/g, '').trim();
+        if (text) ctx += label + ': ' + text.substring(0, 400) + '\n';
+      }
+      addSection('Conteúdo/Queixas', evo.s1);
+      addSection('Objetivos da sessão', evo.s2);
+      addSection('Intervenções', evo.s3);
+      addSection('Resposta do paciente', evo.s4);
+      addSection('Observações clínicas', evo.s5);
+      addSection('Tarefa de casa', evo.s8);
+    });
+  }
+
+  var hasExisting = false;
+  FORMULACAO_BLOCKS.forEach(function(b){ if (cf[b.id] && cf[b.id].trim()) hasExisting = true; });
+  if (hasExisting) {
+    ctx += '\nFORMULAÇÃO PRÉVIA (para enriquecer e atualizar, não apenas copiar):\n';
+    FORMULACAO_BLOCKS.forEach(function(b) {
+      if (cf[b.id] && cf[b.id].trim()) {
+        ctx += '- ' + b.label + ': ' + cf[b.id].substring(0, 250) + '\n';
+      }
+    });
+  }
+
+  ctx += '\n\nINSTRUÇÃO DE SAÍDA OBRIGATÓRIA:\n';
+  ctx += 'Retorne SOMENTE um objeto JSON válido, sem texto antes ou depois, sem blocos de código markdown.\n';
+  ctx += 'Use a estrutura exata abaixo. Para cada campo, seja específico e clínico. ';
+  ctx += 'Marque [FATO], [INFERÊNCIA] e [HIPÓTESE] conforme adequado. ';
+  ctx += 'Limite cada campo a 250 palavras. ';
+  ctx += 'Se dados forem insuficientes, indique quais perguntas precisam ser investigadas.\n\n';
+  ctx += '{\n';
+  ctx += '  "block1": "Experiências Formativas relevantes identificadas nos dados...",\n';
+  ctx += '  "block2": "Crenças Centrais hipotéticas (sobre si, outros e mundo)...",\n';
+  ctx += '  "block3": "Crenças Intermediárias — regras e pressupostos condicionais...",\n';
+  ctx += '  "block4": "Situação Gatilho mais recorrente nos dados...",\n';
+  ctx += '  "block5": "Pensamentos Automáticos típicos identificados...",\n';
+  ctx += '  "block6a": "Emoções predominantes e intensidades estimadas...",\n';
+  ctx += '  "block6b": "Reações Fisiológicas relatadas ou inferidas...",\n';
+  ctx += '  "block6c": "Comportamentos, evitações e padrões de resposta...",\n';
+  ctx += '  "block7": "Mecanismos de Manutenção do problema identificados..."\n';
+  ctx += '}';
+
+  return ctx;
+}
+
+async function gerarFormulacaoIA() {
+  if (!APP.activePatient) return toast('Selecione um paciente ativo.', 'error');
+
+  var apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) {
+    toast('Configure a chave de API Claude em Configurações → API Claude.', 'error');
+    showPanel('settings');
+    setTimeout(function(){ showSettingsPanel('apikey'); }, 100);
+    return;
+  }
+
+  var p = APP.activePatient;
+  var an = p.anamnese || {};
+  var evos = (p.evolutions || []).slice(-5);
+  var cf = p.caseFormulation || {};
+
+  var hasData = (an && Object.values(an).some(function(v){ return v && v.toString().trim(); })) ||
+                (evos.length > 0) || p.complaint;
+  if (!hasData) {
+    return toast('Preencha ao menos a Anamnese ou registre sessões antes de gerar a formulação.', 'warning');
+  }
+
+  // Loading modal
+  var statusMsgs = [
+    'Analisando dados clínicos do paciente...',
+    'Identificando padrões cognitivos...',
+    'Formulando hipóteses de crenças...',
+    'Estruturando o Modelo de Beck...',
+    'Aguardando resposta da IA...'
+  ];
+  var msgIdx = 0;
+  showModal('🤖 Gerando Formulação com IA',
+    '<div style="text-align:center;padding:24px 16px">' +
+    '<div style="font-size:48px;margin-bottom:16px">🧠</div>' +
+    '<div class="ai-thinking" style="justify-content:center;margin-bottom:16px">' +
+    '<div class="ai-thinking-dots"><span></span><span></span><span></span></div>' +
+    '</div>' +
+    '<div id="form-ai-status" style="color:var(--text-muted);font-size:13px;min-height:20px">' + statusMsgs[0] + '</div>' +
+    '<div style="margin-top:12px;font-size:11px;color:var(--text-muted)">Isso pode levar alguns segundos...</div>' +
+    '</div>',
+    [{ label: 'Cancelar', cls: 'btn-secondary', action: closeModal }]
+  );
+
+  var statusInterval = setInterval(function() {
+    msgIdx = (msgIdx + 1) % statusMsgs.length;
+    var el = document.getElementById('form-ai-status');
+    if (el) el.textContent = statusMsgs[msgIdx];
+  }, 2200);
+
+  var ctx = buildFormulacaoContext(p, an, evos, cf);
+
+  try {
+    var response = await callClaude([{ role: 'user', content: ctx }], 4000);
+    clearInterval(statusInterval);
+    closeModal();
+
+    // Parse JSON — extract object even if wrapped in extra text
+    var jsonText = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    var match = jsonText.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Resposta da IA não contém JSON válido. Tente novamente.');
+    var blocks = JSON.parse(match[0]);
+
+    // Validate block keys
+    var valid = FORMULACAO_BLOCKS.some(function(b){ return blocks[b.id]; });
+    if (!valid) throw new Error('JSON recebido não contém os blocos esperados.');
+
+    showFormulacaoPreview(blocks, cf);
+
+  } catch(e) {
+    clearInterval(statusInterval);
+    closeModal();
+    toast('Erro na geração: ' + e.message, 'error');
+  }
+}
+
+function showFormulacaoPreview(newBlocks, oldCf) {
+  var hasOld = FORMULACAO_BLOCKS.some(function(b){ return oldCf[b.id] && oldCf[b.id].trim(); });
+
+  var html = '<div style="font-size:12px;margin-bottom:14px;padding:10px;background:var(--warning-light,#FFF9E6);border-radius:8px;border-left:3px solid #E8A838">' +
+    '⚠️ <strong>Revisão obrigatória:</strong> A IA é um apoio clínico. Revise criticamente cada bloco antes de aplicar.' +
+    (hasOld ? ' Conteúdo atual será substituído.' : '') +
+    '</div>' +
+    '<div style="max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px">';
+
+  FORMULACAO_BLOCKS.forEach(function(b) {
+    var newContent = (newBlocks[b.id] || '').trim();
+    var oldContent = (oldCf[b.id] || '').trim();
+    html += '<div style="border:1px solid ' + b.color + '40;border-radius:10px;padding:12px">' +
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
+      '<span style="font-size:16px">' + b.icon + '</span>' +
+      '<span style="font-weight:700;font-size:12px;color:' + b.color + '">' + b.label + '</span>' +
+      '</div>';
+    if (oldContent) {
+      html += '<div style="font-size:10px;color:var(--text-muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Conteúdo atual</div>' +
+        '<div style="font-size:11px;color:var(--text-muted);background:#f5f5f5;border-radius:6px;padding:6px 8px;margin-bottom:8px;white-space:pre-wrap">' +
+        escHtml(oldContent.substring(0, 100)) + (oldContent.length > 100 ? '...' : '') + '</div>';
+    }
+    html += '<div style="font-size:10px;color:' + b.color + ';margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;font-weight:700">🤖 Gerado pela IA</div>' +
+      '<div style="font-size:12px;white-space:pre-wrap;background:' + b.color + '12;border-radius:6px;padding:8px 10px;line-height:1.5">' +
+      escHtml(newContent || '— Não gerado —') + '</div>' +
+      '</div>';
+  });
+
+  html += '</div>';
+
+  var captured = newBlocks;
+  showModal('🤖 Formulação Gerada pela IA — Revisar', html, [
+    {
+      label: '✅ Aplicar Formulação',
+      cls: 'btn-primary',
+      action: function() { applyFormulacaoAI(captured); }
+    },
+    {
+      label: 'Descartar',
+      cls: 'btn-secondary',
+      action: closeModal
+    }
+  ]);
+}
+
+function applyFormulacaoAI(blocks) {
+  if (!APP.activePatient) return;
+  if (!APP.activePatient.caseFormulation) APP.activePatient.caseFormulation = {};
+  FORMULACAO_BLOCKS.forEach(function(b) {
+    if (blocks[b.id] !== undefined) {
+      APP.activePatient.caseFormulation[b.id] = blocks[b.id];
+    }
+  });
+  APP.activePatient.caseFormulation.updatedAt = new Date().toISOString();
+  APP.activePatient.caseFormulation.aiGenerated = true;
+  savePatients();
+  closeModal();
+  renderFormulacao();
+  toast('Formulação aplicada! Revise e ajuste os blocos conforme necessário.', 'success');
 }
 
 // ── GOOGLE DRIVE ─────────────────────────────────────────────

@@ -2133,7 +2133,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 26/06/2026 11:01
+//  Gerado automaticamente em 07/07/2026 13:18
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2286,13 +2286,19 @@ function initApp() {
     loadFromGDrive();
   } else if (gdEmail && !gdToken) {
     // User has connected before but token expired (browser was closed)
-    // Show reconnecting indicator and silently reconnect
     const badge = document.getElementById('sync-badge');
     const syncText = document.getElementById('sync-text');
-    if (badge) badge.className = 'topbar-badge badge-sync syncing';
-    if (syncText) syncText.textContent = 'Reconectando Drive...';
-    toast('Reconectando ao Google Drive automaticamente...', 'info');
-    setTimeout(() => silentReconnectGDrive(), 1200);
+    if (sessionStorage.getItem('psicotcc_silent_failed') === '1') {
+      // Already tried silent reconnect this session and it failed — show button, don't loop
+      if (badge) badge.className = 'topbar-badge badge-sync offline';
+      if (syncText) syncText.innerHTML = '<button onclick="connectGDrive()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;font-weight:600;text-decoration:underline">Reconectar Drive</button>';
+    } else {
+      // First attempt — try silent OAuth reconnect
+      if (badge) badge.className = 'topbar-badge badge-sync syncing';
+      if (syncText) syncText.textContent = 'Reconectando Drive...';
+      toast('Reconectando ao Google Drive automaticamente...', 'info');
+      setTimeout(() => silentReconnectGDrive(), 1200);
+    }
   }
 }
 
@@ -4957,9 +4963,20 @@ function connectGDrive() {
 
 function silentReconnectGDrive() {
   const clientId = localStorage.getItem('psicotcc_gd_client_id');
-  if (!clientId || clientId === 'SEU_CLIENT_ID_AQUI.apps.googleusercontent.com') return;
+  if (!clientId || clientId === 'SEU_CLIENT_ID_AQUI.apps.googleusercontent.com') {
+    // No valid clientId — mark as failed and reset badge so it doesn't stay stuck
+    sessionStorage.setItem('psicotcc_silent_failed', '1');
+    const badge = document.getElementById('sync-badge');
+    const syncText = document.getElementById('sync-text');
+    if (badge) badge.className = 'topbar-badge badge-sync offline';
+    if (syncText) syncText.innerHTML = '<button onclick="connectGDrive()" style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;font-weight:600;text-decoration:underline">Reconectar Drive</button>';
+    return;
+  }
   const gdEmail = localStorage.getItem('psicotcc_gd_email');
-  if (!gdEmail) return;
+  if (!gdEmail) {
+    sessionStorage.setItem('psicotcc_silent_failed', '1');
+    return;
+  }
 
   const redirectUri = location.href.split('?')[0].split('#')[0];
   const state = 'silent_' + Math.random().toString(36).substr(2);
@@ -5023,6 +5040,10 @@ async function handleGDriveCallback() {
 
   // If silent reconnect failed (needs user interaction), show reconnect button
   if (!token && error) {
+    // Set failure flag BEFORE checkSession() so initApp() sees it and won't loop
+    if (state.startsWith('silent_')) {
+      sessionStorage.setItem('psicotcc_silent_failed', '1');
+    }
     checkSession();
     if (state.startsWith('silent_')) {
       // Silent failed — show non-intrusive reconnect button in topbar
@@ -5047,6 +5068,7 @@ async function handleGDriveCallback() {
     const email = user.email || 'usuario Google';
 
     sessionStorage.setItem('psicotcc_gd_token', token);
+    sessionStorage.removeItem('psicotcc_silent_failed'); // Clear failure flag on successful auth
     localStorage.setItem('psicotcc_gd_email', email);
     APP.gDriveToken = token;
     APP.gDriveConnected = true;

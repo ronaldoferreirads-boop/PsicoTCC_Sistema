@@ -2133,7 +2133,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 07/07/2026 13:18
+//  Gerado automaticamente em 08/07/2026 10:58
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -5582,7 +5582,8 @@ function showHelp(panelId) {
 
 // ── INICIALIZAÇÃO ────────────────────────────────────────────
 window.addEventListener('load', () => {
-  if (window.location.hash && window.location.hash.includes('access_token')) {
+  if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('error='))) {
+    // Handles both successful OAuth callback (access_token) AND failed silent reconnect (error=access_denied)
     handleGDriveCallback().then(() => { checkSession(); });
   } else {
     checkSession();

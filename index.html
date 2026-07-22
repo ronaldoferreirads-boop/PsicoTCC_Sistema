@@ -1747,6 +1747,7 @@ tr.clickable { cursor: pointer; }
                 <option value="SUPERVISÃO">🟠 Supervisão de Caso</option>
                 <option value="CRISE">🔴 Crise / Risco</option>
               </select>
+              <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:none" onclick="showAIHistory()">📜 Histórico</button>
               <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:none" onclick="clearAIChat()">🗑️ Limpar</button>
             </div>
             <div class="ai-msgs" id="ai-msgs">
@@ -2133,7 +2134,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 08/07/2026 10:58
+//  Gerado automaticamente em 22/07/2026 12:59
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2272,6 +2273,10 @@ function initApp() {
   toast('Bem-vindo ao PsicoTCC!', 'success');
   checkLGPD();
 
+  // Auto-save: grava rascunhos ao digitar em qualquer aba e sincroniza com o Drive
+  initAutoSave();
+  setTimeout(checkDraftRecovery, 900);
+
   // Check Google Drive
   const gdToken = sessionStorage.getItem('psicotcc_gd_token');
   const gdEmail = localStorage.getItem('psicotcc_gd_email');
@@ -2283,7 +2288,8 @@ function initApp() {
     APP.gDriveFolderId = gdFolderId || null;
     APP.gDriveConnected = true;
     updateGDriveStatus(true, gdEmail);
-    loadFromGDrive();
+    // Sincronização automática no login: baixa do Drive e envia alterações locais
+    loadFromGDrive().then(() => autoSyncGDrive());
   } else if (gdEmail && !gdToken) {
     // User has connected before but token expired (browser was closed)
     const badge = document.getElementById('sync-badge');
@@ -2559,6 +2565,7 @@ function createPatient() {
 function savePatients() {
   localStorage.setItem('psicotcc_patients', JSON.stringify(APP.patients));
   updateDashboard();
+  clearDrafts();
   autoSyncGDrive();
 }
 function renderPatientEvolution(p) {
@@ -3591,10 +3598,12 @@ async function sendAIMessage() {
   scrollAI();
 
   APP.aiHistory.push({ role: 'user', content: fullMsg });
+  saveAIConversation();
 
   try {
     const response = await callClaude(APP.aiHistory, 3000);
     APP.aiHistory.push({ role: 'assistant', content: response });
+    saveAIConversation();
     thinking.remove();
     addAIMsg('ai', formatAIResponse(response));
   } catch(e) {
@@ -3632,10 +3641,96 @@ function scrollAI() {
 }
 
 function clearAIChat() {
+  if (APP.aiHistory.length) saveAIConversation();
+  APP.aiChatId = null;
   APP.aiHistory = [];
   const msgs = document.getElementById('ai-msgs');
   msgs.innerHTML = `<div class="ai-msg ai"><div class="ai-msg-avatar">🧠</div><div class="ai-msg-bubble"><strong>Supervisor Clínico TCC ativo.</strong><br>Chat reiniciado. Selecione o modo e compartilhe os dados do caso.<br><br><em>⚠️ Este sistema é uma ferramenta de apoio. Nunca substitui julgamento profissional.</em></div></div>`;
 }
+
+// ═══ PERSISTÊNCIA DE CONVERSAS DO SUPERVISOR TCC ═══
+function getAIChats() {
+  try { return JSON.parse(localStorage.getItem('psicotcc_ai_chats') || '[]'); } catch { return []; }
+}
+
+function cleanAIUserContent(content) {
+  return (content || '')
+    .replace(/^Modo: [^\n]*\n?/, '')
+    .replace(/^\[CONTEXTO DO PACIENTE ATIVO:[^\]]*\]\n?/, '')
+    .replace(/^\n+/, '');
+}
+
+function saveAIConversation() {
+  if (!APP.aiHistory.length) return;
+  const chats = getAIChats();
+  if (!APP.aiChatId) APP.aiChatId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+  const firstUser = APP.aiHistory.find(m => m.role === 'user');
+  const title = firstUser ? cleanAIUserContent(firstUser.content).substring(0, 60) : 'Conversa';
+  const rec = {
+    id: APP.aiChatId,
+    date: new Date().toISOString(),
+    mode: document.getElementById('ai-mode')?.value || 'LIVRE',
+    patient: APP.activePatient?.name || null,
+    title: title || 'Conversa',
+    messages: APP.aiHistory
+  };
+  const idx = chats.findIndex(c => c.id === APP.aiChatId);
+  if (idx >= 0) chats[idx] = rec; else chats.unshift(rec);
+  if (chats.length > 100) chats.length = 100;
+  localStorage.setItem('psicotcc_ai_chats', JSON.stringify(chats));
+  autoSyncGDrive();
+}
+
+function showAIHistory() {
+  const chats = getAIChats();
+  if (!chats.length) {
+    showModal('📜 Histórico do Supervisor TCC', '<p style="color:#4A5E72">Nenhuma conversa salva ainda. As conversas são gravadas automaticamente a cada mensagem enviada e sincronizadas com o Google Drive.</p>', [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
+    return;
+  }
+  const rows = chats.map(c => {
+    const d = new Date(c.date);
+    const dt = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const n = (c.messages || []).length;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #E8C4B8;border-radius:8px;margin-bottom:8px">'
+      + '<div style="flex:1;min-width:0;cursor:pointer" onclick="loadAIConversation(' + "'" + c.id + "'" + ')">'
+      + '<div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(c.title || 'Conversa') + '</div>'
+      + '<div style="font-size:11px;color:#7A8FA3">' + dt + ' · ' + (c.mode || '') + (c.patient ? ' · ' + escHtml(c.patient) : '') + ' · ' + n + ' mensagens</div>'
+      + '</div>'
+      + '<button class="btn btn-sm btn-secondary" onclick="loadAIConversation(' + "'" + c.id + "'" + ')">Abrir</button>'
+      + '<button class="btn btn-sm" style="background:#fdecea;color:#C0392B;border:none" onclick="deleteAIConversation(' + "'" + c.id + "'" + ')">🗑️</button>'
+      + '</div>';
+  }).join('');
+  showModal('📜 Histórico do Supervisor TCC', '<div style="max-height:420px;overflow-y:auto">' + rows + '</div>', [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
+}
+
+function loadAIConversation(id) {
+  const chat = getAIChats().find(c => c.id === id);
+  if (!chat) { toast('Conversa não encontrada.', 'error'); return; }
+  APP.aiChatId = chat.id;
+  APP.aiHistory = (chat.messages || []).slice();
+  const msgs = document.getElementById('ai-msgs');
+  msgs.innerHTML = '';
+  APP.aiHistory.forEach(m => {
+    if (m.role === 'user') addAIMsg('user', escHtml(cleanAIUserContent(m.content)).replace(/\n/g, '<br>'));
+    else addAIMsg('ai', formatAIResponse(m.content));
+  });
+  const modeSel = document.getElementById('ai-mode');
+  if (modeSel && chat.mode) modeSel.value = chat.mode;
+  closeModal();
+  showPanel('supervisor');
+  toast('Conversa restaurada. Você pode continuar de onde parou.', 'success');
+}
+
+function deleteAIConversation(id) {
+  if (!confirm('Excluir esta conversa do histórico? Esta ação não pode ser desfeita.')) return;
+  const chats = getAIChats().filter(c => c.id !== id);
+  localStorage.setItem('psicotcc_ai_chats', JSON.stringify(chats));
+  if (APP.aiChatId === id) { APP.aiChatId = null; APP.aiHistory = []; }
+  autoSyncGDrive();
+  showAIHistory();
+  toast('Conversa excluída.', 'info');
+}
+
 
 // ── CONFIGURAÇÕES ────────────────────────────────────────────
 function showSettingsPanel(p) {
@@ -5099,7 +5194,7 @@ async function handleGDriveCallback() {
 
     if (sessionStorage.getItem('psicotcc_session') === '1') {
       await loadFromGDrive();
-      await saveToGDrive('psicotcc_patients.json', APP.patients);
+      autoSyncGDrive();
       toast('Google Drive conectado! Conta: ' + email, 'success');
     } else {
       toast('Google conectado como ' + email, 'success');
@@ -5244,6 +5339,57 @@ async function loadFromGDrive() {
       APP.settings = merged;
       updateSidebarUser();
     }
+
+    // Carrega conversas do Supervisor TCC do Drive (mescla por id, mantém a mais recente)
+    let aiQuery = `name='psicotcc_ai_chats.json' and trashed=false`;
+    if (folderId) aiQuery += ` and '${folderId}' in parents`;
+    const aiSearch = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(aiQuery)}&fields=files(id)`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    const aiSearchData = await aiSearch.json();
+    const aiFileId = aiSearchData.files?.[0]?.id;
+    if (aiFileId) {
+      const aiResp = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${aiFileId}?alt=media`,
+        { headers: { Authorization: 'Bearer ' + token } }
+      );
+      const remoteChats = await aiResp.json();
+      if (Array.isArray(remoteChats)) {
+        const localChats = getAIChats();
+        const byId = {};
+        remoteChats.concat(localChats).forEach(c => {
+          if (!c || !c.id) return;
+          if (!byId[c.id] || (c.date || '') > (byId[c.id].date || '')) byId[c.id] = c;
+        });
+        const mergedChats = Object.values(byId).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        localStorage.setItem('psicotcc_ai_chats', JSON.stringify(mergedChats));
+      }
+    }
+
+    // Carrega rascunhos do Drive (apenas se não houver rascunho local)
+    const localDrafts = getDrafts();
+    if (!Object.keys(localDrafts).filter(k => !k.startsWith('__')).length) {
+      let dQuery = `name='psicotcc_drafts.json' and trashed=false`;
+      if (folderId) dQuery += ` and '${folderId}' in parents`;
+      const dSearch = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(dQuery)}&fields=files(id)`,
+        { headers: { Authorization: 'Bearer ' + token } }
+      );
+      const dSearchData = await dSearch.json();
+      const dFileId = dSearchData.files?.[0]?.id;
+      if (dFileId) {
+        const dResp = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${dFileId}?alt=media`,
+          { headers: { Authorization: 'Bearer ' + token } }
+        );
+        const remoteDrafts = await dResp.json();
+        if (remoteDrafts && typeof remoteDrafts === 'object' && Object.keys(remoteDrafts).length) {
+          localStorage.setItem('psicotcc_drafts', JSON.stringify(remoteDrafts));
+          checkDraftRecovery();
+        }
+      }
+    }
   } catch(e) {
     console.error('Erro ao carregar do Drive:', e);
   }
@@ -5327,7 +5473,9 @@ function autoSyncGDrive() {
     saveToGDrive('psicotcc_logos.json', {
       logo: localStorage.getItem('psicotcc_logo') || '',
       logo2: localStorage.getItem('psicotcc_logo2') || ''
-    })
+    }),
+    saveToGDrive('psicotcc_ai_chats.json', getAIChats()),
+    saveToGDrive('psicotcc_drafts.json', getDrafts())
   ]).then(() => {
     if (badge) badge.className = 'topbar-badge badge-sync';
     const hm = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -5358,7 +5506,9 @@ async function syncToGDrive() {
       saveToGDrive('psicotcc_logos.json', {
         logo: localStorage.getItem('psicotcc_logo') || '',
         logo2: localStorage.getItem('psicotcc_logo2') || ''
-      })
+      }),
+      saveToGDrive('psicotcc_ai_chats.json', getAIChats()),
+      saveToGDrive('psicotcc_drafts.json', getDrafts())
     ]);
     if (badge) badge.className = 'topbar-badge badge-sync';
     document.getElementById('sync-text').textContent = 'Drive ativo';
@@ -5369,6 +5519,77 @@ async function syncToGDrive() {
     toast('Erro ao sincronizar: ' + e.message, 'error');
   }
 }
+
+// ═══ AUTO-SAVE — grava rascunhos ao digitar e sincroniza com o Google Drive ═══
+const AUTOSAVE = { timer: null, DELAY: 3000 };
+
+function getDrafts() {
+  try { return JSON.parse(localStorage.getItem('psicotcc_drafts') || '{}'); } catch { return {}; }
+}
+
+function clearDrafts() {
+  localStorage.removeItem('psicotcc_drafts');
+}
+
+function initAutoSave() {
+  const app = document.getElementById('app');
+  if (!app || app.dataset.autosave === '1') return;
+  app.dataset.autosave = '1';
+  app.addEventListener('input', handleAutoSaveEvent, true);
+  app.addEventListener('change', handleAutoSaveEvent, true);
+}
+
+function handleAutoSaveEvent(e) {
+  const el = e.target;
+  if (!el || !el.id) return;
+  if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return;
+  if (el.type === 'password' || el.type === 'file') return;
+
+  const drafts = getDrafts();
+  if (el.type === 'checkbox' || el.type === 'radio') drafts[el.id] = el.checked;
+  else drafts[el.id] = el.value;
+  drafts.__updated = new Date().toISOString();
+  localStorage.setItem('psicotcc_drafts', JSON.stringify(drafts));
+
+  // Debounce: sincroniza com o Drive 3s após parar de digitar
+  clearTimeout(AUTOSAVE.timer);
+  AUTOSAVE.timer = setTimeout(() => autoSyncGDrive(), AUTOSAVE.DELAY);
+}
+
+function checkDraftRecovery() {
+  const drafts = getDrafts();
+  const ids = Object.keys(drafts).filter(k => !k.startsWith('__'));
+  if (!ids.length) return;
+  const when = drafts.__updated ? new Date(drafts.__updated).toLocaleString('pt-BR') : '';
+  showModal('💾 Rascunho não salvo encontrado',
+    '<p>Foram encontrados <strong>' + ids.length + ' campo(s) digitado(s)</strong> que não haviam sido salvos' + (when ? ' (última digitação em ' + when + ')' : '') + '.</p><p>Deseja restaurar esses dados nos formulários? Apenas campos vazios serão preenchidos.</p>',
+    [
+      { label: '♻️ Restaurar rascunho', cls: 'btn-primary', action: restoreDrafts },
+      { label: 'Descartar', cls: 'btn-secondary', action: discardDrafts }
+    ]);
+}
+
+function restoreDrafts() {
+  const drafts = getDrafts();
+  let n = 0;
+  Object.keys(drafts).forEach(id => {
+    if (id.startsWith('__')) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (typeof drafts[id] === 'boolean') { el.checked = drafts[id]; n++; }
+    else if (!el.value) { el.value = drafts[id]; n++; }
+  });
+  closeModal();
+  toast(n + ' campo(s) restaurado(s). Revise e salve normalmente.', 'success');
+}
+
+function discardDrafts() {
+  clearDrafts();
+  closeModal();
+  autoSyncGDrive();
+  toast('Rascunho descartado.', 'info');
+}
+
 
 // ── LOGOS E MARCA D'ÁGUA ─────────────────────────────────────
 function zoomLogo(img) {

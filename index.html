@@ -2139,7 +2139,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 22/07/2026 14:07
+//  Gerado automaticamente em 22/07/2026 15:56
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2346,7 +2346,8 @@ const TOPBAR_BUTTONS = {
   ],
   patients:     [{ label:'➕ Novo Paciente', cls:'btn-primary btn-md', action:'openNewPatient()' },
     { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('patients')" }],
-  anamnese:     [{ label:'📂 Carregar',     cls:'btn-secondary btn-md', action:'loadAnamnese()' },
+  anamnese:     [{ label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'gerarAnamneseIA()' },
+    { label:'📂 Carregar',     cls:'btn-secondary btn-md', action:'loadAnamnese()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveAnamnese()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
     { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('anamnese')" }],
@@ -2862,6 +2863,75 @@ function loadAnamnese() {
   }
 }
 
+// ═══ GERAR ANAMNESE COM IA — a partir de todos os módulos do paciente ═══
+async function gerarAnamneseIA() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) {
+    toast('Configure a chave de API Claude em Configurações → API Claude.', 'error');
+    showPanel('settings');
+    setTimeout(() => showSettingsPanel('apikey'), 100);
+    return;
+  }
+
+  const p = APP.activePatient;
+  if (!patientHasClinicalData(p)) {
+    return toast('Ainda não há dados suficientes sobre ' + p.name + ' (prontuário, evoluções, formulação, escalas ou conversas no Supervisor TCC) para gerar a anamnese automaticamente.', 'warning');
+  }
+
+  // Monta a especificação de cada campo da Anamnese (com as opções exatas
+  // dos campos de seleção) para a IA preencher com precisão.
+  const fieldSpecs = [];
+  const fieldTemplate = {};
+  ANAMNESE_SECTIONS.forEach(sec => sec.fields.forEach(([label, id, type, opts]) => {
+    if (type === 'select') {
+      fieldSpecs.push(`${id} — "${label}" — escolha EXATAMENTE uma destas opções ou deixe "": ${JSON.stringify(opts)}`);
+    } else {
+      fieldSpecs.push(`${id} — "${label}" — texto livre, ou "" se não houver informação`);
+    }
+    fieldTemplate[id] = '';
+  }));
+
+  const ctx = buildPatientClinicalContext(p);
+
+  toast('Analisando prontuário, evoluções, formulação, escalas e Supervisor TCC para montar a anamnese...', 'info');
+  try {
+    const prompt = `Com base em TODAS as informações clínicas do paciente reunidas abaixo — prontuário, evoluções de sessão, formulação de caso, escalas aplicadas e conversas com o Supervisor Clínico TCC — preencha a Ficha de Anamnese Psicológica.
+
+${ctx}
+
+Preencha SOMENTE os campos abaixo para os quais existam informações reais no contexto acima. Para qualquer campo sem informação disponível, retorne string vazia "" — NUNCA invente dados que não constem no histórico do paciente. Para os campos de seleção, use exatamente uma das opções fornecidas (ou "" se nenhuma se aplicar).
+
+Campos a preencher:
+${fieldSpecs.join('\n')}
+
+Responda em JSON usando exatamente estas chaves: ${JSON.stringify(fieldTemplate)}`;
+
+    const parsed = await callClaudeForJSON(prompt, 4000);
+    let preenchidos = 0;
+    Object.keys(fieldTemplate).forEach(id => {
+      const el = document.getElementById(id);
+      if (!el || parsed[id] === undefined || parsed[id] === null) return;
+      const val = parsed[id].toString().trim();
+      if (!val) return;
+      if (el.tagName === 'SELECT') {
+        const optExists = Array.from(el.options).some(o => o.value === val || o.textContent === val);
+        if (optExists) { el.value = val; preenchidos++; }
+      } else {
+        el.value = val;
+        preenchidos++;
+      }
+    });
+    if (preenchidos === 0) {
+      toast('A IA não encontrou dados suficientes no histórico do paciente para preencher a anamnese.', 'warning');
+    } else {
+      toast(`Anamnese gerada com IA — ${preenchidos} campo(s) preenchido(s). Revise cuidadosamente antes de salvar.`, 'success');
+    }
+  } catch(e) {
+    toast('Erro ao gerar anamnese: ' + e.message, 'error');
+  }
+}
+
 // ── PRONTUÁRIO ───────────────────────────────────────────────
 function renderProntuario() {
   const list = document.getElementById('prontuario-list');
@@ -2948,13 +3018,13 @@ function updateEvoHeader() {
   document.getElementById('evo-sig-crp').textContent = cfg.crp ? `${cfg.crp} · ${cfg.spec || 'Psicóloga'}` : '—';
   document.getElementById('evo-meta-patient').textContent = p ? p.name : '—';
   const trSel = document.getElementById('evo-task-review-status');
-  if (trSel) trSel.value = e.taskReviewStatus || 'nao_havia';
+  if (trSel) trSel.value = 'nao_havia';
   const trRelEl = document.getElementById('evo-task-review-relato');
-  if (trRelEl) trRelEl.innerHTML = e.taskReviewRelato || '';
+  if (trRelEl) trRelEl.innerHTML = '';
   const trAnEl = document.getElementById('evo-task-review-analise');
-  if (trAnEl) trAnEl.innerHTML = e.taskReviewAnalise || '';
+  if (trAnEl) trAnEl.innerHTML = '';
   const taskDlEl = document.getElementById('evo-task-deadline');
-  if (taskDlEl) taskDlEl.value = e.taskDeadline || '';
+  if (taskDlEl) taskDlEl.value = '';
   updateEvoMeta();
 }
 
@@ -2971,23 +3041,32 @@ function updateEvoMeta() {
 async function genEvolution() {
   if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
   const apiKey = localStorage.getItem('psicotcc_apikey');
-  if (!apiKey) return toast('Configure a chave de API Claude nas Configurações.', 'error');
+  if (!apiKey) {
+    toast('Configure a chave de API Claude em Configurações → API Claude.', 'error');
+    showPanel('settings');
+    setTimeout(() => showSettingsPanel('apikey'), 100);
+    return;
+  }
 
+  const p = APP.activePatient;
   const date = document.getElementById('evo-date').value;
   const dur = document.getElementById('evo-duration').value;
   const mod = document.getElementById('evo-modality').value;
   const risk = document.getElementById('evo-risk').value;
   const riskObs = document.getElementById('evo-risk-obs').value;
-  const an = APP.activePatient.anamnese || {};
-  const lastEvo = (APP.activePatient.evolutions || []).slice(-1)[0];
 
-  const prompt = `Você é um Supervisor Clínico de TCC. Gere um Registro de Evolução estruturado e profissional.
+  // Reúne TUDO que já existe sobre o paciente: Anamnese, Prontuário,
+  // Evoluções anteriores, Formulação de Caso, Escalas aplicadas e
+  // conversas registradas no Supervisor TCC (IA).
+  const ctx = buildPatientClinicalContext(p);
 
-Paciente: ${APP.activePatient.name}
-Data: ${date} | Duração: ${dur}min | Modalidade: ${mod}
-Risco avaliado: ${risk} ${riskObs ? '— '+riskObs : ''}
-Queixa principal: ${an['an-queixa'] || 'não informada'}
-${lastEvo ? `Plano da sessão anterior: ${lastEvo.s7 || '—'}` : ''}
+  const prompt = `Com base em TODO o histórico clínico do paciente reunido abaixo — anamnese, prontuário, evoluções de sessão anteriores, formulação de caso, escalas aplicadas e conversas registradas com o Supervisor Clínico TCC — gere o Registro de Evolução estruturado da sessão de HOJE, dando continuidade real ao caso (retome temas e planos das sessões anteriores quando fizer sentido).
+
+${ctx || 'Nenhum histórico anterior registrado ainda para este paciente — baseie-se apenas nos dados da sessão de hoje abaixo.'}
+
+═══ DADOS DA SESSÃO DE HOJE ═══
+Data: ${date || 'não informada'} | Duração: ${dur || '—'}min | Modalidade: ${mod || '—'}
+Risco avaliado nesta sessão: ${risk}${riskObs ? ' — ' + riskObs : ''}
 
 Gere os 7 campos da evolução:
 1. Estado emocional e funcional relatado
@@ -2998,18 +3077,16 @@ Gere os 7 campos da evolução:
 6. Encaminhamentos e tarefa para a semana
 7. Plano para a próxima sessão
 
-Responda APENAS com JSON: {"s1":"...","s2":"...","s3":"...","s4":"...","s5":"...","s6":"...","s7":"..."}`;
+Responda com um objeto JSON: {"s1":"...","s2":"...","s3":"...","s4":"...","s5":"...","s6":"...","s7":"..."}`;
 
-  toast('Gerando evolução com IA...', 'info');
+  toast('Analisando o histórico completo do paciente e gerando a evolução...', 'info');
   try {
-    const resp = await callClaude([{ role: 'user', content: prompt }], 1500);
-    const clean = resp.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
+    const parsed = await callClaudeForJSON(prompt, 2500);
     ['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(k => {
       const el = document.getElementById('evo-' + k);
       if (el && parsed[k]) el.innerHTML = parsed[k].replace(/\n/g, '<br>');
     });
-    toast('Evolução gerada pela IA!', 'success');
+    toast('Evolução gerada com base no histórico completo do paciente! Revise antes de salvar.', 'success');
   } catch(e) {
     toast('Erro ao gerar evolução: ' + e.message, 'error');
   }
@@ -5981,30 +6058,157 @@ function toast(msg, type = 'info', duration = 3500) {
   setTimeout(() => t.remove(), duration);
 }
 
-// ══════════════════════════════════════════════════════════════
-// MENU DE AJUDA — todos os painéis
-// ══════════════════════════════════════════════════════════════
-const HELP_CONTENT = JSON.parse(String.raw`{"dashboard": {"titulo": "🏠 Dashboard", "texto": "Tela inicial do PsicoTCC. Mostra um resumo geral do consultório em tempo real.\n\n📊 ESTATÍSTICAS\n• Total de pacientes cadastrados\n• Evoluções de sessão registradas\n• Documentos clínicos gerados\n• Transcrições processadas\n• Sessões agendadas nesta semana\n\n⚡ ACESSO RÁPIDO\nBotões para as ações mais comuns: novo paciente, nova evolução, processar transcrição e abrir o Supervisor TCC.\n\n🕐 ÚLTIMAS ATIVIDADES\nHistórico das ações mais recentes no sistema.\n\nDICA: Selecione sempre um paciente ativo na barra lateral antes de usar as ferramentas clínicas."}, "patients": {"titulo": "👥 Pacientes", "texto": "Central de cadastro e seleção de pacientes. Todos os dados clínicos ficam vinculados ao paciente ativo.\n\n➕ CADASTRAR NOVO PACIENTE\nClique em Novo Paciente na barra superior. Informe: nome, idade, gênero, queixa principal, modalidade de atendimento e data de início.\n\n🖱️ SELECIONAR PACIENTE ATIVO\nClique no card do paciente. O nome aparece no topo da barra lateral e todas as ferramentas passam a operar para esse paciente.\n\n🔍 BUSCAR\nUse o campo de busca para filtrar pacientes por nome ou queixa.\n\n📊 CARD DO PACIENTE\nMostra nome, idade, queixa, modalidade, data de início e total de evoluções registradas.\n\n🗑️ EXCLUIR\nClique no ícone de lixeira no canto do card. Atenção: remove todos os dados do paciente permanentemente.\n\nDICA: Sempre selecione o paciente antes de abrir qualquer outro painel."}, "anamnese": {"titulo": "📋 Anamnese", "texto": "Formulário estruturado para coleta de dados clínicos iniciais do paciente.\n\n📂 SEÇÕES DO FORMULÁRIO\nO formulário possui 8 seções colapsáveis. Clique no cabeçalho de cada seção para expandir ou recolher:\n• Identificação e dados pessoais\n• Queixa principal e história do problema\n• Histórico psicológico e psiquiátrico\n• Histórico médico e medicamentos\n• Histórico familiar e dinâmica relacional\n• Contexto social, trabalho e espiritualidade\n• Eventos traumáticos e fatores de risco\n• Fatores de proteção\n\n📂 CARREGAR\nCarrega os dados já salvos do paciente ativo. Se não houver dados, o formulário ficará em branco.\n\n💾 SALVAR\nSalva todos os campos preenchidos no prontuário do paciente.\n\n🖨️ PDF\nImprime a anamnese completa com cabeçalho do consultório.\n\nIMPORTANTE: Selecione o paciente ativo antes de carregar ou salvar."}, "prontuario": {"titulo": "📁 Prontuário Eletrônico", "texto": "Registro cronológico de todas as anotações clínicas do paciente.\n\n➕ NOVO REGISTRO\nClique no botão Novo Registro na barra superior. Preencha:\n• Tipo: anotação clínica, contato entre sessões, intercorrência, avaliação de risco, etc.\n• Data do registro\n• Conteúdo da anotação\n\n📋 LISTAGEM\nOs registros aparecem em ordem cronológica reversa — os mais recentes primeiro.\n\n✕ EXCLUIR\nClique no X ao lado de qualquer registro para removê-lo permanentemente.\n\n🖨️ PDF\nImprime o prontuário completo do paciente ativo com cabeçalho do consultório.\n\nDICA: Use o prontuário para registrar qualquer informação que não se enquadre nas evoluções formais, como contatos telefônicos, intercorrências ou observações gerais."}, "evolucao": {"titulo": "📈 Evolução de Sessão", "texto": "Registro formal de cada sessão realizada, seguindo o modelo TCC com 7 campos clínicos.\n\n📋 DADOS DA SESSÃO\nPreencha: data, duração em minutos, modalidade (presencial ou online) e número da sessão.\n\n📝 CAMPOS CLÍNICOS\n• S1 — Estado Emocional e Funcional Relatado\n• S2 — Temas Trabalhados na Sessão\n• S3 — Intervenções e Técnicas Utilizadas\n• S4 — Observações Clínicas\n• S5 — Avaliação de Risco\n• S6 — Encaminhamentos e Tarefa para a Semana\n• S7 — Plano para a Próxima Sessão\n\n🤖 GERAR COM IA\nO sistema usa os dados do paciente e da sessão anterior para preencher os campos automaticamente. Revise antes de salvar.\n\n💾 SALVAR\nSalva a evolução no histórico do paciente.\n\n📂 HISTÓRICO\nLista todas as evoluções salvas. Clique em Abrir para carregar uma anterior. Clique em X para excluir.\n\nDICA: Preencha os dados da sessão antes de clicar em Gerar com IA para obter um resultado mais preciso."}, "transcricao": {"titulo": "🎙️ Transcrição de Sessão", "texto": "Processa arquivos de transcrição bruta de sessão e os reorganiza em formato clínico profissional.\n\n📎 UPLOAD DO ARQUIVO\nArraste ou clique na área de upload para selecionar um arquivo .docx com a transcrição da sessão. Suporta transcrições geradas pelo Word, Google Docs ou aplicativos de transcrição automática.\n\n🤖 PROCESSAR COM IA\nA IA identifica as falas da Psicóloga e do Paciente, corrige erros e reorganiza o texto com formatação profissional. Aguarde o processamento antes de salvar.\n\n💾 SALVAR\nSalva a transcrição processada no histórico do paciente ativo.\n\n📂 HISTÓRICO\nLista todas as transcrições salvas. Clique em Abrir para visualizar uma transcrição anterior. Clique em X para excluir.\n\n🖨️ PDF\nImprime a transcrição formatada com cabeçalho do consultório.\n\n🗑️ LIMPAR\nRemove o arquivo carregado e limpa o resultado exibido.\n\nDICA: Quanto mais completa e clara a transcrição bruta, melhor o resultado da IA. Certifique-se de que o arquivo .docx contém o texto completo da sessão."}, "documentos": {"titulo": "📄 Documentos Clínicos", "texto": "Gera documentos psicológicos formais seguindo as resoluções do CFP.\n\n📋 TIPOS DISPONÍVEIS\n• Laudo Psicológico\n• Relatório Psicológico\n• Atestado Psicológico\n• Parecer Psicológico\n• Encaminhamento\n\n🤖 GERAR COM IA\nSelecione o tipo de documento e clique em Gerar com IA. O sistema preenche automaticamente com base nos dados do paciente ativo. Revise e edite o conteúdo antes de salvar.\n\n✏️ EDIÇÃO\nClique em qualquer seção do documento para editar o texto diretamente no campo.\n\n💾 SALVAR\nSalva o documento no histórico do paciente ativo.\n\n📂 DOCUMENTOS SALVOS\nPainel lateral com todos os documentos do paciente. Clique em Abrir para recarregar um documento anterior. Clique em X para excluir.\n\n🖨️ PDF\nImprime o documento com cabeçalho, logo e espaço para assinatura.\n\nIMPORTANTE: Revise criticamente todo o conteúdo gerado pela IA antes de salvar ou imprimir. O documento deve refletir seu julgamento clínico."}, "contrato": {"titulo": "✍️ Contrato de Serviços", "texto": "Modelo completo de Contrato de Prestação de Serviços Psicológicos, construído automaticamente com os dados do paciente.\n\n📋 CLAUSULAS DO CONTRATO\n• Objeto do contrato e identificação das partes\n• Duração e frequência das sessões\n• Honorários e forma de pagamento\n• Política de faltas e cancelamentos\n• Sigilo profissional conforme o Código de Ética\n• Condições de rescisão\n• Contato entre sessões e situações de emergência\n\n✏️ EDIÇÃO\nClique em qualquer campo destacado para editar diretamente: valores, datas, prazos e dados do contratante.\n\n💾 SALVAR\nSalva o contrato preenchido no prontuário do paciente.\n\n🖨️ PDF\nImprime o contrato formatado para assinatura física.\n\n🗑️ LIMPAR\nRestaura o contrato ao modelo original sem os dados editados.\n\nIMPORTANTE: Revise todos os valores e prazos antes de imprimir. O modelo segue a Resolução CFP n. 10/2005."}, "supervisor": {"titulo": "🤖 Supervisor TCC (IA)", "texto": "Assistente de raciocínio clínico especializado em Terapia Cognitivo-Comportamental. Auxilia na formulação de casos, hipóteses diagnósticas e planejamento de sessões.\n\n🔵 MODOS DE OPERAÇÃO\n• Modo Livre: perguntas técnicas e conceituais gerais\n• Anamnese Inicial: analisa os primeiros dados do paciente\n• Sessão Clínica: modelo ABC+, distorções cognitivas, intervenções\n• Supervisão de Caso: revisao critica, pontos cegos, vieses clínicos\n• Crise e Risco: avaliação de risco com prioridade máxima\n\n📝 COMO USAR\nSelecione o modo na lista suspensa, descreva o caso ou a situação clínica no campo de texto e clique em Enviar. O sistema responde marcando os conceitos como FATO, INFERÊNCIA ou HIPÓTESE.\n\n🗑️ LIMPAR CHAT\nReinicia a conversa. O histórico clínico do paciente não é apagado.\n\nDICA: Com um paciente selecionado, o Supervisor captura automaticamente os dados cadastrais para contextualizar a análise.\n\nIMPORTANTE: Este sistema é uma ferramenta de apoio ao raciocínio clínico. Nunca substitui o julgamento profissional ou a supervisão clínica humana."}, "agenda": {"titulo": "📅 Agenda de Sessões", "texto": "Grade semanal visual para organizar e acompanhar os horários de atendimento.\n\n📅 NAVEGAÇÃO SEMANAL\nUse os botões Anterior e Proxima para navegar entre semanas. O botão Hoje retorna à semana atual.\n\n➕ AGENDAR SESSÃO\nClique em Nova Sessão na barra superior ou clique diretamente em qualquer célula da grade. Preencha: paciente, data, horário de início, horário de fim, modalidade e observações.\n\n🎨 CARDS NA GRADE\nCada sessão aparece como um card colorido no horário correspondente. Clique no card para editar ou alterar o status.\n\n✅ STATUS DAS SESSÕES\n• Agendada: card com cor normal\n• Realizada: card com visual esmaecido\n• Cancelada: card com borda vermelha\n\n🗑️ EXCLUIR\nAo clicar no card e editar a sessão, use o botão Excluir para remover permanentemente.\n\nDICA: Marque a sessão como Realizada e depois registre a Evolução de Sessão para manter o histórico clínico completo."}, "escalas": {"titulo": "📊 Escalas Psicológicas", "texto": "Aplica escalas psicológicas validadas e acompanha a evolução dos escores ao longo do tratamento.\n\n📋 ESCALAS DISPONÍVEIS\n• PHQ-9: rastreio de depressão, pontuação de 0 a 27\n• GAD-7: rastreio de ansiedade generalizada, pontuação de 0 a 21\n• BAI: Inventário de Ansiedade de Beck, pontuação de 0 a 63\n• BDI-II: Inventário de Depressão de Beck, pontuação de 0 a 63\n\n▶ COMO APLICAR\n1. Selecione a escala na lista suspensa\n2. Responda cada item com o paciente\n3. Clique em Calcular e Salvar\nO sistema calcula automaticamente a pontuação total e a classificação de severidade.\n\n📈 HISTÓRICO\nExibe todas as aplicações anteriores com grafico de evolução dos escores, data e classificação. Use Abrir para ver as respostas de uma aplicação específica. Use X para excluir.\n\nDICA: Aplique as escalas no início do tratamento e a cada 4 a 6 semanas para monitorar o progresso de forma objetiva."}, "recursos": {"titulo": "🗂️ Recursos TCC", "texto": "Biblioteca de formulários terapêuticos estruturados para uso nas sessões de TCC.\n\n📋 RECURSOS DISPONÍVEIS\n• RPD — Registro de Pensamentos Disfuncionais: situação, emoção, pensamento automático, distorção cognitiva e resposta racional\n• Registro de Humor Diário: tabela semanal com registro de emoções e intensidade\n• Planejamento de Atividades Prazerosas: grade semanal para programação de atividades\n• Ficha de Experimento Comportamental: predição do paciente, resultado real e conclusao\n• Hierarquia de Exposição: lista de situações ordenadas por nivel de ansiedade de 0 a 100\n• Vantagens e Desvantagens: tabela comparativa para tomada de decisão\n\n▶ COMO USAR\n1. Selecione o tipo de recurso na lista suspensa\n2. Preencha os campos com o paciente durante a sessão\n3. Clique em Salvar no Prontuário para registrar\n\n📂 HISTÓRICO\nLista todos os recursos salvos do paciente. Use Abrir para visualizar um recurso anterior. Use X para excluir.\n\n🖨️ IMPRIMIR\nGera versão imprimível do recurso preenchido para entregar ao paciente como tarefa de casa."}, "formulacao": {"titulo": "🧩 Formulação de Caso", "texto": "Organiza visualmente o modelo cognitivo do paciente baseado no Modelo Cognitivo de Beck.\n\n🧱 BLOCOS DO DIAGRAMA\n• Experiências Formativas: infância, desenvolvimento e eventos que moldaram as crenças\n• Crenças Centrais: núcleo de crença sobre si mesmo, os outros e o mundo\n• Crenças Intermediárias: regras condicionais e pressupostos\n• Situação Gatilho: evento atual que ativou o sistema de crenças\n• Pensamentos Automáticos: cognições imediatas na situação gatilho\n• Reações: o sistema separa este componente em três sub-blocos para maior precisão clínica:\n  - Emoção: sentimentos ativados e intensidade subjetiva (0–100%)\n  - Reação Fisiológica: respostas corporais, como tensão, taquicardia, sudorese ou alterações respiratórias\n  - Comportamento: ações, esquivas, rituais, busca de segurança ou respostas observáveis\n• Mecanismos de Manutenção: fatores que perpetuam o problema\n\n✏️ EDITAR BLOCO\nClique em qualquer bloco do diagrama para abrir o editor. Digite o conteúdo clínico e clique em Salvar bloco.\n\n🤖 GERAR COM IA\nPreenche automaticamente todos os blocos usando o Supervisor Clínico de TCC com Inteligência Artificial.\n\nO botão coleta e analisa:\n• Todos os campos preenchidos na Anamnese do paciente\n• As últimas 5 sessões de evolução registradas\n• O conteúdo já existente na formulação (para enriquecer, não apenas substituir)\n\nA IA aplica o Prompt Mestre de Supervisão Clínica e gera hipóteses marcadas como [FATO], [INFERÊNCIA] ou [HIPÓTESE].\n\nAntes de salvar, um modal de revisão exibe o conteúdo gerado bloco a bloco para sua avaliação crítica. Você pode aplicar a sugestão ao diagrama ou cancelar sem alterar a formulação atual.\n\n⚠️ ATENÇÃO: A IA é um apoio ao raciocínio clínico, não um substituto. Revise o conteúdo gerado antes de incorporar ao prontuário.\n\n💾 SALVAR FORMULAÇÃO\nSalva todos os blocos no prontuário do paciente.\n\n🖨️ IMPRIMIR\nGera PDF da formulação completa para revisão clínica e documentação do caso.\n\nDICA: Use o botão Gerar com IA periodicamente para atualizar as hipóteses conforme novas informações surgem."}}`);
 
-function showHelp(panelId) {
-  const h = HELP_CONTENT[panelId];
-  if (!h) { console.warn('showHelp: panel not found:', panelId); return; }
-  const linhas = h.texto.split('\n').filter(l => l.trim());
-  let body = '<div style="max-height:460px;overflow-y:auto;line-height:1.75;font-size:13.5px;padding-right:6px">';
-  linhas.forEach(function(linha) {
-    if (/^[📊📋▶🔵🧱📈🎨✅📂⚡🕐🔍🎙️📎✏️🗑️📅➕📝💾🖨️📚🤖]/.test(linha)) {
-      body += '<div style="font-weight:700;color:var(--primary);margin-top:14px;margin-bottom:4px">' + linha + '</div>';
-    } else if (linha.startsWith('•')) {
-      body += '<div style="padding-left:18px;margin-bottom:3px;color:var(--text-secondary)">' + linha + '</div>';
-    } else if (/^(IMPORTANTE|DICA|ATENÇÃO)/.test(linha)) {
-      var isDica = linha.startsWith('DICA');
-      body += '<div style="background:' + (isDica ? '#fff8e1' : 'var(--surface-alt)') + ';border-left:3px solid ' + (isDica ? 'var(--accent)' : 'var(--primary)') + ';padding:8px 12px;border-radius:0 6px 6px 0;margin-top:10px;font-size:12.5px">' + linha + '</div>';
-    } else if (linha.trim()) {
-      body += '<div style="margin-bottom:5px;color:var(--text)">' + linha + '</div>';
-    }
+// ══════════════════════════════════════════════════════════════
+// CONTEXTO CLÍNICO COMPLETO DO PACIENTE — usado pelos geradores de IA
+// (Evolução, Anamnese e outros) para reunir tudo que já existe sobre
+// o paciente em todos os módulos antes de acionar a IA.
+// ══════════════════════════════════════════════════════════════
+
+function stripHtml(html) {
+  if (!html) return '';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return (tmp.textContent || tmp.innerText || '').trim();
+}
+
+function patientHasClinicalData(p) {
+  if (!p) return false;
+  const an = p.anamnese || {};
+  const anFilled = Object.values(an).some(v => v && v.toString().trim());
+  const hasPront = (p.prontuario || []).length > 0;
+  const hasEvo = (p.evolutions || []).length > 0;
+  const cf = p.caseFormulation || {};
+  const hasCf = Object.keys(cf).some(k => k !== 'updatedAt' && k !== 'aiGenerated' && cf[k] && cf[k].toString().trim());
+  const hasScales = (p.scales || []).length > 0;
+  const chats = (typeof getAIChats === 'function' ? getAIChats() : []).filter(c => c.patient === p.name);
+  return anFilled || hasPront || hasEvo || hasCf || hasScales || chats.length > 0;
+}
+
+function buildPatientClinicalContext(p) {
+  if (!p) return '';
+  let ctx = `PACIENTE: ${p.name || '—'}`;
+  if (p.age) ctx += `, ${p.age} anos`;
+  if (p.gender) ctx += `, ${p.gender}`;
+  if (p.complaint) ctx += `\nQueixa registrada no cadastro: ${p.complaint}`;
+  if (p.evolutions && p.evolutions.length) ctx += `\nTotal de sessões registradas: ${p.evolutions.length}`;
+  ctx += `\n\n`;
+
+  // ── Anamnese ──
+  const an = p.anamnese || {};
+  if (typeof ANAMNESE_SECTIONS !== 'undefined') {
+    const anFilled = [];
+    ANAMNESE_SECTIONS.forEach(sec => sec.fields.forEach(([label, id]) => {
+      if (an[id] && an[id].toString().trim()) anFilled.push(`- ${label}: ${an[id]}`);
+    }));
+    if (anFilled.length) ctx += `═══ ANAMNESE ═══\n${anFilled.join('\n')}\n\n`;
+  }
+
+  // ── Prontuário (últimos 10 registros) ──
+  const pront = (p.prontuario || []).slice(-10);
+  if (pront.length) {
+    ctx += `═══ PRONTUÁRIO — últimos ${pront.length} registro(s) ═══\n`;
+    pront.forEach(e => { ctx += `[${e.date || '—'}] ${e.type || 'Registro'}: ${e.content || ''}\n`; });
+    ctx += `\n`;
+  }
+
+  // ── Evoluções de sessão (últimas 5) ──
+  const evos = (p.evolutions || []).slice(-5);
+  if (evos.length) {
+    ctx += `═══ EVOLUÇÕES DE SESSÃO — últimas ${evos.length} ═══\n`;
+    evos.forEach(e => {
+      ctx += `\n[Sessão #${e.sessionNum || '—'} em ${e.date || '—'}] Risco: ${e.risk || '—'}${e.riskObs ? ' — ' + e.riskObs : ''}\n`;
+      if (e.s1) ctx += `Estado emocional/funcional: ${stripHtml(e.s1)}\n`;
+      if (e.s2) ctx += `Temas trabalhados: ${stripHtml(e.s2)}\n`;
+      if (e.s3) ctx += `Intervenções/técnicas: ${stripHtml(e.s3)}\n`;
+      if (e.s4) ctx += `Observações clínicas: ${stripHtml(e.s4)}\n`;
+      if (e.s5) ctx += `Avaliação de risco: ${stripHtml(e.s5)}\n`;
+      if (e.s6) ctx += `Encaminhamentos/tarefa: ${stripHtml(e.s6)}\n`;
+      if (e.s7) ctx += `Plano para a próxima sessão: ${stripHtml(e.s7)}\n`;
+      if (e.s8) ctx += `Tarefa de casa prescrita: ${stripHtml(e.s8)}\n`;
+    });
+    ctx += `\n`;
+  }
+
+  // ── Formulação de caso (Modelo de Beck) ──
+  const cf = p.caseFormulation || {};
+  if (typeof FORMULACAO_BLOCKS !== 'undefined') {
+    const cfFilled = FORMULACAO_BLOCKS
+      .filter(b => cf[b.id] && cf[b.id].toString().trim())
+      .map(b => `- ${b.label}: ${cf[b.id]}`);
+    if (cfFilled.length) ctx += `═══ FORMULAÇÃO DE CASO (Modelo de Beck) ═══\n${cfFilled.join('\n')}\n\n`;
+  }
+
+  // ── Escalas psicológicas (última aplicação de cada escala) ──
+  const scales = p.scales || [];
+  if (scales.length) {
+    const byScale = {};
+    scales.forEach(s => { (byScale[s.scaleId] = byScale[s.scaleId] || []).push(s); });
+    ctx += `═══ ESCALAS PSICOLÓGICAS APLICADAS ═══\n`;
+    Object.entries(byScale).forEach(([sid, list]) => {
+      const def = (typeof SCALES_DEF !== 'undefined') ? SCALES_DEF[sid] : null;
+      const last = list[list.length - 1];
+      ctx += `- ${def ? def.name : sid}: última aplicação em ${last.date || '—'} — pontuação ${last.score} (${last.classification})\n`;
+    });
+    ctx += `\n`;
+  }
+
+  // ── Supervisor TCC (IA) — conversas já registradas sobre este paciente ──
+  const chats = (typeof getAIChats === 'function' ? getAIChats() : []).filter(c => c.patient === p.name);
+  if (chats.length) {
+    ctx += `═══ SUPERVISOR TCC (IA) — pontos de conversas anteriores sobre este paciente ═══\n`;
+    chats.slice(0, 5).forEach(c => {
+      const lastAi = (c.messages || []).filter(m => m.role === 'assistant').slice(-1);
+      lastAi.forEach(m => {
+        const text = getContentText(m.content);
+        if (text) {
+          const dt = c.date ? new Date(c.date).toLocaleDateString('pt-BR') : '—';
+          ctx += `[${dt} · Modo ${c.mode || '—'}]\n${text.substring(0, 1500)}\n\n`;
+        }
+      });
+    });
+  }
+
+  return ctx.trim();
+}
+
+// Chamada à IA para geração de DADOS ESTRUTURADOS (JSON).
+// Usa um system prompt dedicado e enxuto — propositalmente diferente do
+// TCC_SYSTEM_PROMPT do Supervisor (que exige formato narrativo com
+// marcação [FATO]/[INFERÊNCIA]/[HIPÓTESE] e Etapas 1-13). Misturar os
+// dois formatos fazia a IA responder fora do JSON esperado e quebrava
+// o preenchimento automático. Aqui a IA é instruída a responder SOMENTE
+// com JSON, e a nunca inventar dado clínico que não conste no contexto.
+async function callClaudeForJSON(userPrompt, maxTokens = 2500) {
+  const apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) throw new Error('Chave de API não configurada');
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      system: 'Você é um assistente clínico que ajuda psicólogos a preencher formulários estruturados a partir de dados clínicos já existentes. Responda SEMPRE e SOMENTE com um objeto JSON válido — sem markdown, sem crases, sem texto antes ou depois. Baseie-se estritamente nas informações fornecidas no contexto: nunca invente sintomas, diagnósticos, medicações, datas ou eventos que não constem nele. Se não houver informação suficiente para um campo, retorne string vazia "" para esse campo. Nunca afirme diagnóstico definitivo — trate hipóteses sempre como hipóteses.',
+      messages: [{ role: 'user', content: userPrompt }]
+    })
   });
-  body += '</div>';
-  showModal(h.titulo, body, [{ label: '✓ Entendido', cls: 'btn-primary', action: function(){ closeModal(); } }]);
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${response.status}`);
+  }
+  const data = await response.json();
+  const text = data.content?.[0]?.text || '';
+  const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  const match = clean.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('A IA não retornou um JSON válido. Tente novamente.');
+  return JSON.parse(match[0]);
 }
 
 

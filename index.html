@@ -1747,6 +1747,8 @@ tr.clickable { cursor: pointer; }
                 <option value="SUPERVISÃO">🟠 Supervisão de Caso</option>
                 <option value="CRISE">🔴 Crise / Risco</option>
               </select>
+              <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:none" onclick="document.getElementById('ai-import-file').click()">📥 Importar</button>
+              <input type="file" id="ai-import-file" accept=".json" style="display:none" onchange="importAIChats(event)">
               <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:none" onclick="showAIHistory()">📜 Histórico</button>
               <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:none" onclick="clearAIChat()">🗑️ Limpar</button>
             </div>
@@ -1760,7 +1762,10 @@ tr.clickable { cursor: pointer; }
                 </div>
               </div>
             </div>
+            <div id="ai-attachments" style="display:none;flex-wrap:wrap;gap:4px;padding:0 4px 6px"></div>
             <div class="ai-input-row">
+              <button type="button" title="Anexar arquivo (imagem, PDF, .docx, .txt, .csv, .md)" onclick="document.getElementById('ai-attach-file').click()" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0 6px;flex-shrink:0">📎</button>
+              <input type="file" id="ai-attach-file" multiple accept="image/png,image/jpeg,image/gif,image/webp,application/pdf,.pdf,.docx,.txt,.csv,.md" style="display:none" onchange="handleAttachFile(event)">
               <textarea id="ai-input" placeholder="Digite sua solicitação clínica... (Enter para enviar, Shift+Enter para nova linha)" onkeydown="handleAIKey(event)"></textarea>
               <button class="ai-send-btn" onclick="sendAIMessage()" id="ai-send-btn">➤</button>
             </div>
@@ -2134,7 +2139,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 22/07/2026 12:59
+//  Gerado automaticamente em 22/07/2026 14:07
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -3570,7 +3575,8 @@ function handleAIKey(e) {
 async function sendAIMessage() {
   const input = document.getElementById('ai-input');
   const text = input.value.trim();
-  if (!text) return;
+  const attachments = (APP.aiAttachments || []).slice();
+  if (!text && !attachments.length) return;
 
   const apiKey = localStorage.getItem('psicotcc_apikey');
   if (!apiKey) {
@@ -3583,10 +3589,31 @@ async function sendAIMessage() {
   const mode = document.getElementById('ai-mode').value;
   const p = APP.activePatient;
   const contextHeader = p ? `\n[CONTEXTO DO PACIENTE ATIVO: ${p.name}${p.age ? ', ' + p.age + ' anos' : ''}${p.complaint ? ' — Queixa: ' + p.complaint.substring(0,100) : ''}]\n` : '';
-  const fullMsg = `Modo: ${mode}${contextHeader}\n${text}`;
 
-  addAIMsg('user', text);
+  // Anexos de texto (.txt, .csv, .md, .docx) entram embutidos no texto da mensagem
+  const textAttachments = attachments.filter(a => a.kind === 'text');
+  const mediaAttachments = attachments.filter(a => a.kind === 'image' || a.kind === 'document');
+  let attachedText = '';
+  textAttachments.forEach(a => {
+    attachedText += `\n\n[ARQUIVO ANEXADO: ${a.name}]\n${a.content}\n[FIM DO ARQUIVO: ${a.name}]`;
+  });
+
+  const fullMsg = `Modo: ${mode}${contextHeader}\n${text}${attachedText}`;
+
+  // Monta o conteúdo enviado à API — texto simples, ou array multimodal se houver imagem/PDF
+  let apiContent = fullMsg;
+  if (mediaAttachments.length) {
+    apiContent = [{ type: 'text', text: fullMsg }];
+    mediaAttachments.forEach(a => {
+      apiContent.push({ type: a.kind, source: { type: 'base64', media_type: a.mediaType, data: a.data } });
+    });
+  }
+
+  const chipHtml = renderAttachChipsHtml(attachments);
+  addAIMsg('user', text + chipHtml);
   input.value = '';
+  APP.aiAttachments = [];
+  renderAttachments();
   document.getElementById('ai-send-btn').disabled = true;
 
   // Show thinking
@@ -3597,7 +3624,7 @@ async function sendAIMessage() {
   document.getElementById('ai-msgs').appendChild(thinking);
   scrollAI();
 
-  APP.aiHistory.push({ role: 'user', content: fullMsg });
+  APP.aiHistory.push({ role: 'user', content: apiContent });
   saveAIConversation();
 
   try {
@@ -3644,6 +3671,8 @@ function clearAIChat() {
   if (APP.aiHistory.length) saveAIConversation();
   APP.aiChatId = null;
   APP.aiHistory = [];
+  APP.aiAttachments = [];
+  renderAttachments();
   const msgs = document.getElementById('ai-msgs');
   msgs.innerHTML = `<div class="ai-msg ai"><div class="ai-msg-avatar">🧠</div><div class="ai-msg-bubble"><strong>Supervisor Clínico TCC ativo.</strong><br>Chat reiniciado. Selecione o modo e compartilhe os dados do caso.<br><br><em>⚠️ Este sistema é uma ferramenta de apoio. Nunca substitui julgamento profissional.</em></div></div>`;
 }
@@ -3653,8 +3682,23 @@ function getAIChats() {
   try { return JSON.parse(localStorage.getItem('psicotcc_ai_chats') || '[]'); } catch { return []; }
 }
 
+function getContentText(content) {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    const t = content.find(b => b.type === 'text');
+    return t ? t.text : '';
+  }
+  return '';
+}
+
+function getContentAttachments(content) {
+  if (!Array.isArray(content)) return [];
+  return content.filter(b => b.type === 'image' || b.type === 'document')
+    .map(b => ({ kind: b.type, name: b.type === 'image' ? 'imagem anexada' : 'documento anexado' }));
+}
+
 function cleanAIUserContent(content) {
-  return (content || '')
+  return (getContentText(content) || '')
     .replace(/^Modo: [^\n]*\n?/, '')
     .replace(/^\[CONTEXTO DO PACIENTE ATIVO:[^\]]*\]\n?/, '')
     .replace(/^\n+/, '');
@@ -3677,7 +3721,12 @@ function saveAIConversation() {
   const idx = chats.findIndex(c => c.id === APP.aiChatId);
   if (idx >= 0) chats[idx] = rec; else chats.unshift(rec);
   if (chats.length > 100) chats.length = 100;
-  localStorage.setItem('psicotcc_ai_chats', JSON.stringify(chats));
+  try {
+    localStorage.setItem('psicotcc_ai_chats', JSON.stringify(chats));
+  } catch (e) {
+    toast('⚠️ Anexos muito grandes para salvar no histórico local. A conversa continua na tela, mas talvez não seja possível recuperá-la depois — considere anexos menores.', 'error');
+    return;
+  }
   autoSyncGDrive();
 }
 
@@ -3711,8 +3760,12 @@ function loadAIConversation(id) {
   const msgs = document.getElementById('ai-msgs');
   msgs.innerHTML = '';
   APP.aiHistory.forEach(m => {
-    if (m.role === 'user') addAIMsg('user', escHtml(cleanAIUserContent(m.content)).replace(/\n/g, '<br>'));
-    else addAIMsg('ai', formatAIResponse(m.content));
+    if (m.role === 'user') {
+      const chipHtml = renderAttachChipsHtml(getContentAttachments(m.content));
+      addAIMsg('user', escHtml(cleanAIUserContent(m.content)).replace(/\n/g, '<br>') + chipHtml);
+    } else {
+      addAIMsg('ai', formatAIResponse(getContentText(m.content) || m.content));
+    }
   });
   const modeSel = document.getElementById('ai-mode');
   if (modeSel && chat.mode) modeSel.value = chat.mode;
@@ -3729,6 +3782,160 @@ function deleteAIConversation(id) {
   autoSyncGDrive();
   showAIHistory();
   toast('Conversa excluída.', 'info');
+}
+
+
+// ═══ IMPORTAÇÃO DE CONVERSAS — necessária por causa do escopo drive.file ═══
+// O escopo "drive.file" só permite ao app ver arquivos que ELE MESMO criou.
+// Um arquivo colocado manualmente no Drive (fora do app) fica invisível
+// para o app, mesmo estando na pasta certa com o nome certo. Por isso,
+// a importação lê o arquivo local do computador e deixa o PRÓPRIO APP
+// gravá-lo no Drive — assim ele passa a existir "pertencendo" ao app.
+function importAIChats(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try {
+      data = JSON.parse(reader.result);
+    } catch (e) {
+      toast('Arquivo inválido: não é um JSON válido.', 'error');
+      return;
+    }
+
+    const incoming = Array.isArray(data) ? data : [data];
+    const valid = incoming.filter(c => c && Array.isArray(c.messages) && c.messages.length);
+    if (!valid.length) {
+      toast('Nenhuma conversa válida encontrada no arquivo (esperado: lista com campo "messages").', 'error');
+      return;
+    }
+
+    valid.forEach(c => {
+      if (!c.id) c.id = 'chat_import_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+      if (!c.date) c.date = new Date().toISOString();
+      c.messages = c.messages.filter(m => m && (m.role === 'user' || m.role === 'assistant') && (typeof m.content === 'string' || Array.isArray(m.content)));
+      if (!c.title) {
+        const firstUser = c.messages.find(m => m.role === 'user');
+        c.title = firstUser ? cleanAIUserContent(firstUser.content).substring(0, 60) : 'Conversa importada';
+      }
+    });
+
+    const chats = getAIChats();
+    let added = 0, updated = 0;
+    valid.forEach(c => {
+      const idx = chats.findIndex(x => x.id === c.id);
+      if (idx >= 0) { chats[idx] = c; updated++; } else { chats.unshift(c); added++; }
+    });
+    if (chats.length > 100) chats.length = 100;
+    localStorage.setItem('psicotcc_ai_chats', JSON.stringify(chats));
+
+    // Grava pelo próprio app — isso faz o arquivo "pertencer" ao app no Drive
+    autoSyncGDrive();
+
+    toast(`Importação concluída: ${added} nova(s), ${updated} atualizada(s).`, 'success');
+    showAIHistory();
+  };
+  reader.onerror = () => toast('Erro ao ler o arquivo.', 'error');
+  reader.readAsText(file, 'UTF-8');
+}
+
+
+// ═══ ANEXOS NO CHAT DO SUPERVISOR TCC ═══
+const AI_ATTACH_MAX_MB = 15;
+const AI_ATTACH_MAX_COUNT = 5;
+const AI_ATTACH_IMG_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function handleAttachFile(event) {
+  const files = Array.from(event.target.files || []);
+  event.target.value = '';
+  if (!files.length) return;
+
+  APP.aiAttachments = APP.aiAttachments || [];
+  if (APP.aiAttachments.length + files.length > AI_ATTACH_MAX_COUNT) {
+    toast(`Máximo de ${AI_ATTACH_MAX_COUNT} anexos por mensagem.`, 'error');
+    return;
+  }
+
+  files.forEach(file => {
+    if (file.size > AI_ATTACH_MAX_MB * 1024 * 1024) {
+      toast(`"${file.name}" excede ${AI_ATTACH_MAX_MB}MB e não foi anexado.`, 'error');
+      return;
+    }
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+
+    if (AI_ATTACH_IMG_TYPES.includes(file.type)) {
+      readFileAsDataURL(file)
+        .then(dataUrl => addAttachment({ kind: 'image', name: file.name, mediaType: file.type, data: dataUrl.split(',')[1] }))
+        .catch(() => toast('Erro ao ler imagem: ' + file.name, 'error'));
+    } else if (file.type === 'application/pdf' || ext === 'pdf') {
+      readFileAsDataURL(file)
+        .then(dataUrl => addAttachment({ kind: 'document', name: file.name, mediaType: 'application/pdf', data: dataUrl.split(',')[1] }))
+        .catch(() => toast('Erro ao ler PDF: ' + file.name, 'error'));
+    } else if (ext === 'docx') {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        try {
+          const result = await mammoth.extractRawText({ arrayBuffer: e.target.result });
+          addAttachment({ kind: 'text', name: file.name, content: result.value });
+        } catch (err) { toast('Erro ao ler .docx: ' + file.name, 'error'); }
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (['txt', 'csv', 'md', 'json'].includes(ext)) {
+      const reader = new FileReader();
+      reader.onload = e => addAttachment({ kind: 'text', name: file.name, content: e.target.result });
+      reader.onerror = () => toast('Erro ao ler arquivo: ' + file.name, 'error');
+      reader.readAsText(file, 'UTF-8');
+    } else {
+      toast(`Tipo não suportado: ${file.name}. Use imagem, PDF, .docx, .txt, .csv ou .md.`, 'error');
+    }
+  });
+}
+
+function addAttachment(att) {
+  APP.aiAttachments = APP.aiAttachments || [];
+  APP.aiAttachments.push(att);
+  renderAttachments();
+}
+
+function removeAttachment(idx) {
+  (APP.aiAttachments || []).splice(idx, 1);
+  renderAttachments();
+}
+
+function renderAttachments() {
+  const box = document.getElementById('ai-attachments');
+  if (!box) return;
+  const list = APP.aiAttachments || [];
+  if (!list.length) { box.innerHTML = ''; box.style.display = 'none'; return; }
+  box.style.display = 'flex';
+  box.innerHTML = list.map((a, i) => {
+    const icon = a.kind === 'image' ? '🖼️' : a.kind === 'document' ? '📄' : '📝';
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:#F6E9D7;border:1px solid #E8C4B8;border-radius:14px;padding:4px 10px;font-size:12px">'
+      + icon + ' ' + escHtml(a.name)
+      + '<button type="button" onclick="removeAttachment(' + i + ')" style="background:none;border:none;cursor:pointer;color:#C0392B;font-weight:700;padding:0 2px;font-size:13px" title="Remover">✕</button></span>';
+  }).join('');
+}
+
+// Gera os "chips" de anexo exibidos dentro da bolha da mensagem no chat
+function renderAttachChipsHtml(list) {
+  if (!list || !list.length) return '';
+  const chips = list.map(a => {
+    const icon = a.kind === 'image' ? '🖼️' : a.kind === 'document' ? '📄' : '📝';
+    return '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,0.06);border-radius:12px;padding:2px 8px;font-size:11px;margin-top:6px;margin-right:4px">' + icon + ' ' + escHtml(a.name) + '</span>';
+  }).join('');
+  return '<div style="margin-top:4px">' + chips + '</div>';
 }
 
 

@@ -2137,7 +2137,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 28/07/2026 18:09
+//  Gerado automaticamente em 28/07/2026 18:35
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -3875,20 +3875,18 @@ function buildContrato() {
   const p = APP.activePatient;
 
   // Se já existe um contrato salvo para o paciente ativo, restaura o que
-  // foi salvo (preservando eventuais edições feitas manualmente) em vez
-  // de reconstruir o modelo em branco.
+  // foi salvo (preservando eventuais edições feitas manualmente nas
+  // cláusulas) em vez de reconstruir o modelo do zero.
   if (p && p.contract && p.contract.content) {
     document.getElementById('contrato-area').innerHTML = `<div class="doc-template" id="contract-doc">${p.contract.content}</div>`;
     restoreLogosInDoc();
+    // Mesmo em um contrato salvo anteriormente, os dados do Contratante
+    // (nome/CPF/endereço) são ressincronizados com o cadastro atual do
+    // paciente — assim um contrato salvo antes de o cadastro ter CPF/
+    // endereço preenchidos passa a exibi-los automaticamente.
+    syncContratanteFields(p);
     return;
   }
-
-  // Preenchimento automático do Contratante com base no cadastro do
-  // paciente ativo (módulo Pacientes). Os campos continuam editáveis
-  // (contenteditable) para ajustes manuais antes de salvar/imprimir.
-  const contratanteNome     = p?.name    ? escHtml(p.name)    : '[Nome completo do paciente ou responsável legal]';
-  const contratanteCpf      = p?.cpf     ? escHtml(p.cpf)     : '[CPF]';
-  const contratanteEndereco = p?.address ? escHtml(p.address) : '[endereço]';
 
   document.getElementById('contrato-area').innerHTML = `
     <div class="doc-template" id="contract-doc">
@@ -3906,7 +3904,7 @@ function buildContrato() {
       <div class="doc-section">
         <h3>PARTES CONTRATANTES</h3>
         <p><strong>CONTRATADA:</strong> ${cfg.name || '[Nome]'}, Psicóloga inscrita no Conselho Regional de Psicologia sob o nº ${cfg.crp || '[CRP]'}, com consultório localizado em ${cfg.address || '[endereço]'}.</p>
-        <p style="margin-top:8px"><strong>CONTRATANTE:</strong> <span contenteditable="true">${contratanteNome}</span>, CPF nº <span contenteditable="true">${contratanteCpf}</span>, residente em <span contenteditable="true">${contratanteEndereco}</span>.</p>
+        <p style="margin-top:8px"><strong>CONTRATANTE:</strong> <span contenteditable="true" id="ctr-nome">[Nome completo do paciente ou responsável legal]</span>, CPF nº <span contenteditable="true" id="ctr-cpf">[CPF]</span>, residente em <span contenteditable="true" id="ctr-endereco">[endereço]</span>.</p>
       </div>
 
       <div class="doc-section">
@@ -3915,48 +3913,78 @@ function buildContrato() {
       </div>
 
       <div class="doc-section">
-        <h3>CLÁUSULA 2ª — DAS SESSÕES</h3>
+        <h3>CLÁUSULA 2ª — DA CAPACIDADE CIVIL E REPRESENTAÇÃO LEGAL</h3>
+        <p>Caso o(a) paciente seja menor de idade ou pessoa juridicamente incapaz, o presente contrato é firmado por seu(sua) responsável legal, que declara possuir poderes para tanto e se responsabiliza pelas obrigações aqui assumidas, especialmente as de natureza financeira.</p>
+        <p style="margin-top:6px">Ao(À) paciente adolescente é assegurado, na medida de sua capacidade de compreensão e conforme o Código de Ética Profissional do Psicólogo, o direito ao sigilo sobre o conteúdo dos atendimentos, ressalvadas as hipóteses previstas na Cláusula do Sigilo Profissional.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 3ª — DAS SESSÕES</h3>
         <p>As sessões terão duração aproximada de <span contenteditable="true">50 (cinquenta)</span> minutos, realizadas com periodicidade <span contenteditable="true">semanal</span>, em dia(s) e horário(s) a serem acordados entre as partes.</p>
         <p style="margin-top:6px">A modalidade de atendimento será: <span contenteditable="true">presencial</span>.</p>
       </div>
 
       <div class="doc-section">
-        <h3>CLÁUSULA 3ª — DOS HONORÁRIOS</h3>
+        <h3>CLÁUSULA 4ª — DO ATENDIMENTO REMOTO (QUANDO APLICÁVEL)</h3>
+        <p>Quando a modalidade de atendimento for realizada a distância, por meio de tecnologias de informação e comunicação, a prestação de serviço observará as disposições da Resolução CFP nº 04/2020 (ou norma que a suceder). É de responsabilidade do contratante garantir ambiente reservado e conexão adequada para preservar o sigilo e a qualidade do atendimento.</p>
+        <p style="margin-top:6px">A psicóloga não se responsabiliza por interrupções ou prejuízos decorrentes de falhas de conexão, energia elétrica ou equipamentos sob responsabilidade do contratante.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 5ª — DOS HONORÁRIOS</h3>
         <p>Os honorários profissionais ficam estabelecidos no valor de <span contenteditable="true">R$ [VALOR]</span> por sessão, a serem pagos <span contenteditable="true">até o dia do atendimento, via PIX/transferência/dinheiro</span>.</p>
         <p style="margin-top:6px">Os honorários poderão ser reajustados anualmente, mediante comunicação prévia de <span contenteditable="true">30 (trinta)</span> dias.</p>
       </div>
 
       <div class="doc-section">
-        <h3>CLÁUSULA 4ª — DAS FALTAS E CANCELAMENTOS</h3>
+        <h3>CLÁUSULA 6ª — DAS FALTAS E CANCELAMENTOS</h3>
         <p>O cancelamento ou remarcação de sessão deverá ser comunicado com antecedência mínima de <span contenteditable="true">24 (vinte e quatro)</span> horas, por telefone ou mensagem.</p>
         <p style="margin-top:6px">Ausências sem comunicação prévia dentro do prazo estabelecido serão cobradas integralmente, salvo casos de força maior devidamente justificados.</p>
         <p style="margin-top:6px">Após <span contenteditable="true">2 (duas)</span> faltas consecutivas sem comunicação, a psicóloga poderá disponibilizar o horário para outro paciente.</p>
       </div>
 
       <div class="doc-section">
-        <h3>CLÁUSULA 5ª — DO SIGILO PROFISSIONAL</h3>
+        <h3>CLÁUSULA 7ª — DO SIGILO PROFISSIONAL</h3>
         <p>As informações compartilhadas durante os atendimentos são protegidas pelo sigilo profissional, conforme Art. 9º do Código de Ética do Psicólogo. O sigilo somente poderá ser quebrado nas hipóteses legalmente previstas, incluindo: risco à vida do paciente ou de terceiros; determinação judicial; ou quando necessário para a proteção de criança ou adolescente em situação de vulnerabilidade.</p>
       </div>
 
       <div class="doc-section">
-        <h3>CLÁUSULA 6ª — DA DURAÇÃO E RESCISÃO</h3>
+        <h3>CLÁUSULA 8ª — DA PROTEÇÃO DE DADOS PESSOAIS (LGPD)</h3>
+        <p>Os dados pessoais e dados pessoais sensíveis (art. 5º, II, da Lei nº 13.709/2018 — LGPD) fornecidos pelo contratante serão tratados exclusivamente para as finalidades de prestação do atendimento psicológico, elaboração de prontuário, documentos clínicos e cumprimento de obrigações legais e éticas da profissão, não sendo compartilhados com terceiros sem autorização expressa ou determinação legal.</p>
+        <p style="margin-top:6px">O contratante poderá, a qualquer momento, solicitar informações sobre o tratamento de seus dados, observadas as limitações do dever de guarda de prontuário previsto na regulamentação do CFP. Detalhes adicionais constam no Termo de Consentimento LGPD específico deste consultório.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 9ª — DA DURAÇÃO E RESCISÃO</h3>
         <p>O presente contrato é celebrado por prazo indeterminado, podendo ser rescindido por qualquer das partes mediante comunicação prévia de <span contenteditable="true">15 (quinze)</span> dias.</p>
         <p style="margin-top:6px">É assegurado ao contratante o direito de interromper o tratamento a qualquer momento, sendo recomendável, no entanto, que tal decisão seja discutida com a psicóloga.</p>
       </div>
 
       <div class="doc-section">
-        <h3>CLÁUSULA 7ª — DO CONTATO ENTRE SESSÕES</h3>
+        <h3>CLÁUSULA 10ª — DO CONTATO ENTRE SESSÕES</h3>
         <p>O contato entre sessões poderá ser realizado por <span contenteditable="true">WhatsApp ou e-mail</span>, sendo reservado para situações de urgência ou dúvidas pontuais. Sessões de terapia não são realizadas por mensagem ou chamada de voz fora dos horários agendados.</p>
       </div>
 
       <div class="doc-section">
-        <h3>CLÁUSULA 8ª — SITUAÇÕES DE RISCO E EMERGÊNCIA</h3>
+        <h3>CLÁUSULA 11ª — DO REGISTRO, GRAVAÇÃO E TRANSCRIÇÃO DE SESSÕES</h3>
+        <p>Caso haja gravação de áudio e/ou vídeo da sessão para fins de transcrição, registro clínico, supervisão ou aprimoramento técnico do atendimento, tal gravação e a respectiva transcrição serão tratadas como parte do prontuário, mantidas sob sigilo profissional, de uso exclusivo da psicóloga responsável, vedada sua divulgação ou compartilhamento sem autorização expressa do contratante ou determinação legal.</p>
+        <p style="margin-top:6px">O contratante poderá solicitar a exclusão da gravação a qualquer momento, preservando-se, quando necessário, o registro clínico mínimo exigido pela regulamentação profissional.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 12ª — SITUAÇÕES DE RISCO E EMERGÊNCIA</h3>
         <p>Em situações de crise ou risco imediato à vida, o contratante compromete-se a acionar os serviços de emergência (SAMU: 192, CVV: 188) ou comparecer à Unidade de Pronto Atendimento mais próxima, comunicando a psicóloga o mais breve possível.</p>
       </div>
 
       <div class="doc-section">
-        <h3>CLÁUSULA 9ª — DO FORO</h3>
+        <h3>CLÁUSULA 13ª — DO FORO</h3>
         <p>As partes elegem o foro da Comarca de <span contenteditable="true">[cidade]</span> para dirimir quaisquer litígios decorrentes do presente contrato, renunciando a qualquer outro, por mais privilegiado que seja.</p>
+      </div>
+
+      <div class="doc-section">
+        <h3>CLÁUSULA 14ª — DISPOSIÇÕES GERAIS</h3>
+        <p>O presente contrato é celebrado em duas vias de igual teor e forma, sendo uma para cada parte, ou, quando formalizado eletronicamente por meio do sistema de gestão clínica, terá validade jurídica entre as partes mediante o aceite e a assinatura eletrônica registrada no ato da contratação, nos termos do art. 10, §2º, da Medida Provisória nº 2.200-2/2001.</p>
+        <p style="margin-top:6px">As partes declaram ter lido e compreendido integralmente as cláusulas deste contrato, firmando-o de livre e espontânea vontade.</p>
       </div>
 
       <p style="margin-top:24px;font-family:Inter,sans-serif;font-size:12px;color:var(--text-muted);text-align:center">
@@ -3971,8 +3999,8 @@ function buildContrato() {
         </div>
         <div class="doc-sig-line">
           <div class="line"></div>
-          <p>${p?.name ? escHtml(p.name) : 'Contratante'}</p>
-          <p style="font-size:11px;color:var(--text-muted)">${p?.cpf ? 'CPF ' + escHtml(p.cpf) + ' — Contratante' : 'Nome e CPF'}</p>
+          <p id="ctr-sig-nome">Contratante</p>
+          <p style="font-size:11px;color:var(--text-muted)" id="ctr-sig-cpf">Nome e CPF</p>
         </div>
       </div>
 
@@ -3981,6 +4009,25 @@ function buildContrato() {
       </div>
     </div>`;
   restoreLogosInDoc();
+  syncContratanteFields(p);
+}
+
+// Preenche/atualiza os campos do Contratante (nome, CPF, endereço e a
+// assinatura final) com os dados atuais do cadastro do paciente ativo
+// (módulo Pacientes). É chamada tanto ao montar um contrato novo quanto
+// ao restaurar um contrato já salvo, garantindo que esses dados nunca
+// fiquem "presos" em um placeholder antigo.
+function syncContratanteFields(p) {
+  const nomeEl    = document.getElementById('ctr-nome');
+  const cpfEl     = document.getElementById('ctr-cpf');
+  const endEl     = document.getElementById('ctr-endereco');
+  const sigNomeEl = document.getElementById('ctr-sig-nome');
+  const sigCpfEl  = document.getElementById('ctr-sig-cpf');
+  if (nomeEl)    nomeEl.textContent    = p?.name    ? p.name    : '[Nome completo do paciente ou responsável legal]';
+  if (cpfEl)     cpfEl.textContent     = p?.cpf     ? p.cpf     : '[CPF]';
+  if (endEl)     endEl.textContent     = p?.address ? p.address : '[endereço]';
+  if (sigNomeEl) sigNomeEl.textContent = p?.name    ? p.name    : 'Contratante';
+  if (sigCpfEl)  sigCpfEl.textContent  = p?.cpf      ? ('CPF ' + p.cpf + ' — Contratante') : 'Nome e CPF';
 }
 
 function saveContract() {

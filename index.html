@@ -384,17 +384,19 @@ body {
 .topbar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  height: var(--header-h);
+  min-height: var(--header-h);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  padding: 0 28px;
+  padding: 12px 28px;
   gap: 12px;
+  row-gap: 8px;
   position: sticky;
   top: 0;
   z-index: 50;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
-.topbar-title { font-size: 17px; font-weight: 700; color: var(--text); flex: 1; }
+.topbar-title { font-size: 17px; font-weight: 700; color: var(--text); flex: 1; min-width: 160px; }
 .topbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .btn-md { padding: 9px 16px; font-size: 13px; }
 .topbar-badge {
@@ -2137,7 +2139,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 28/07/2026 19:03
+//  Gerado automaticamente em 28/07/2026 19:13
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 

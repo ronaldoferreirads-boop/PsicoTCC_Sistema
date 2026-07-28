@@ -2137,7 +2137,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 28/07/2026 18:35
+//  Gerado automaticamente em 28/07/2026 18:43
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -4018,11 +4018,41 @@ function buildContrato() {
 // ao restaurar um contrato já salvo, garantindo que esses dados nunca
 // fiquem "presos" em um placeholder antigo.
 function syncContratanteFields(p) {
-  const nomeEl    = document.getElementById('ctr-nome');
-  const cpfEl     = document.getElementById('ctr-cpf');
-  const endEl     = document.getElementById('ctr-endereco');
-  const sigNomeEl = document.getElementById('ctr-sig-nome');
-  const sigCpfEl  = document.getElementById('ctr-sig-cpf');
+  // Tenta localizar os campos pelos ids (contratos criados com esta versão).
+  let nomeEl    = document.getElementById('ctr-nome');
+  let cpfEl     = document.getElementById('ctr-cpf');
+  let endEl     = document.getElementById('ctr-endereco');
+  let sigNomeEl = document.getElementById('ctr-sig-nome');
+  let sigCpfEl  = document.getElementById('ctr-sig-cpf');
+
+  // Contratos salvos ANTES desta versão não têm esses ids no HTML salvo.
+  // Nesse caso, localiza os elementos pela estrutura do documento — o
+  // parágrafo "CONTRATANTE:" (2º <span contenteditable> em diante) e o
+  // 2º bloco de assinatura do contrato — e marca-os com id para as
+  // próximas sincronizações.
+  if (!nomeEl || !cpfEl || !endEl) {
+    const contratanteP = Array.from(document.querySelectorAll('#contract-doc p'))
+      .find(el => el.querySelector('strong') && /CONTRATANTE/i.test(el.querySelector('strong').textContent) && !/CONTRATADA/i.test(el.querySelector('strong').textContent));
+    if (contratanteP) {
+      const spans = contratanteP.querySelectorAll('span[contenteditable]');
+      if (spans[0]) { spans[0].id = 'ctr-nome'; nomeEl = spans[0]; }
+      if (spans[1]) { spans[1].id = 'ctr-cpf'; cpfEl = spans[1]; }
+      if (spans[2]) { spans[2].id = 'ctr-endereco'; endEl = spans[2]; }
+    }
+  }
+
+  if (!sigNomeEl || !sigCpfEl) {
+    // O bloco de assinatura do Contratante é o 2º ".doc-sig-line" do contrato
+    // (o 1º é sempre da Contratada/psicóloga).
+    const sigLines = document.querySelectorAll('#contract-doc .doc-sig-line');
+    const contratanteSig = sigLines[1];
+    if (contratanteSig) {
+      const ps = contratanteSig.querySelectorAll('p');
+      if (ps[0]) { ps[0].id = 'ctr-sig-nome'; sigNomeEl = ps[0]; }
+      if (ps[1]) { ps[1].id = 'ctr-sig-cpf'; sigCpfEl = ps[1]; }
+    }
+  }
+
   if (nomeEl)    nomeEl.textContent    = p?.name    ? p.name    : '[Nome completo do paciente ou responsável legal]';
   if (cpfEl)     cpfEl.textContent     = p?.cpf     ? p.cpf     : '[CPF]';
   if (endEl)     endEl.textContent     = p?.address ? p.address : '[endereço]';

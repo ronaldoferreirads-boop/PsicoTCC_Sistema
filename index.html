@@ -2137,7 +2137,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 28/07/2026 18:43
+//  Gerado automaticamente em 28/07/2026 19:03
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2367,7 +2367,8 @@ const TOPBAR_BUTTONS = {
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveDoc()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
     { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('documentos')" }],
-  contrato:     [{ label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveContract()' },
+  contrato:     [{ label:'🔄 Atualizar Modelo', cls:'btn-secondary btn-md', action:'resetContractTemplate()' },
+    { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveContract()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
     { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('contrato')" }],
   supervisor:   [{ label:'🗑️ Limpar Chat',  cls:'btn-secondary btn-md', action:'clearAIChat()' },
@@ -4065,6 +4066,21 @@ function saveContract() {
   APP.activePatient.contract = { date: new Date().toISOString().split('T')[0], content: document.getElementById('contract-doc')?.innerHTML || '' };
   savePatients();
   toast('Contrato salvo!', 'success');
+}
+
+// Descarta o contrato salvo deste paciente (que pode conter um modelo
+// antigo, com menos cláusulas) e reconstrói a partir do modelo padrão
+// mais recente, já com os dados do Contratante preenchidos. Não é
+// automático porque isso apagaria personalizações feitas nas cláusulas
+// (valor da sessão, prazos, cidade do foro etc.) — por isso pede
+// confirmação antes de agir, e só grava de fato quando o usuário clicar
+// em "Salvar" novamente.
+function resetContractTemplate() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  if (!confirm('Isso substitui o texto do contrato deste paciente pelo modelo mais recente (com as cláusulas atualizadas), preenchendo automaticamente os dados do Contratante.\n\nPersonalizações feitas nas cláusulas (valores, prazos, cidade do foro etc.) serão perdidas e voltarão ao texto padrão. Deseja continuar?')) return;
+  APP.activePatient.contract = {};
+  buildContrato();
+  toast('Modelo do contrato atualizado com as cláusulas mais recentes. Revise e clique em "💾 Salvar" para gravar.', 'info');
 }
 
 

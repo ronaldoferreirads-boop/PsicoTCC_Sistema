@@ -1522,6 +1522,8 @@ tr.clickable { cursor: pointer; }
               </div>
             </div>
 
+            <div id="evo-status-bar" class="no-print" style="margin-bottom:12px;padding:8px 12px;border-radius:6px;background:var(--surface-alt);font-size:12px;color:var(--text-muted)"></div>
+
             <div class="grid-2 no-print" style="margin-bottom:16px">
               <div class="card">
                 <div class="card-header"><div class="card-title">📋 Dados da Sessão</div></div>
@@ -1647,20 +1649,20 @@ tr.clickable { cursor: pointer; }
 
         <!-- TRANSCRICAO -->
         <div
-</div>
+
 <div id="panel-transcricao" class="panel">
           <div id="transcricao-upload-area">
             <div class="card" style="margin-bottom:16px">
-              <div class="card-header"><div class="card-title">🎙️ Processar Transcrição de Sessão</div></div>
+              <div class="card-header"><div class="card-title">🎙️ Transcrição de Sessão</div></div>
               <div class="card-body">
                 <div class="alert alert-info">
-                  📌 Faça upload do arquivo <strong>.docx</strong> com a transcrição gravada. O sistema, via IA, irá reorganizar e identificar as falas da <strong>Psicóloga</strong> e do <strong>Paciente</strong>.
+                  📌 Faça upload do arquivo <strong>.docx</strong> com a transcrição já feita no Word. O texto será carregado e poderá ser salvo diretamente. Se preferir, use <strong>"🤖 Processar com IA"</strong> para reorganizar automaticamente identificando as falas da <strong>Psicóloga</strong> e do <strong>Paciente</strong> antes de salvar.
                 </div>
                 <div style="margin-bottom:14px">
                   <label class="form-label">Data da Sessão</label>
                   <input type="date" id="trans-date" class="form-input">
                 </div>
-                <div id="drop-zone" class="drop-zone" onclick="document.getElementById('trans-file').click()" 
+                <div id="drop-zone" class="drop-zone" onclick="document.getElementById('trans-file').click()"
                      ondragover="event.preventDefault(); this.classList.add('drag-over')"
                      ondragleave="this.classList.remove('drag-over')"
                      ondrop="handleTransDrop(event)">
@@ -1680,7 +1682,7 @@ tr.clickable { cursor: pointer; }
 
           <div id="transcricao-output" style="display:none">
             <div class="transcript-output" id="transcript-content">
-              <!-- Populated by AI -->
+              <!-- Populated by AI or by direct upload -->
             </div>
           </div>
         </div>
@@ -2135,7 +2137,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 27/07/2026 20:30
+//  Gerado automaticamente em 28/07/2026 18:09
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2150,7 +2152,8 @@ const APP = {
   currentTranscriptionText: '',
   aiHistory: [],
   currentDocType: '',
-  unsaved: false
+  unsaved: false,
+  evoEditingIndex: null
 };
 
 // ── AUTENTICAÇÃO ─────────────────────────────────────────────
@@ -2350,7 +2353,8 @@ const TOPBAR_BUTTONS = {
   prontuario:   [{ label:'➕ Novo Registro', cls:'btn-primary btn-md',  action:'addProntuarioEntry()' },
     { label:'🖨️ PDF',          cls:'btn-accent btn-md',   action:'printWithWatermark()' },
     { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('prontuario')" }],
-  evolucao:     [{ label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadEvolutionList()' },
+  evolucao:     [{ label:'🆕 Novo Registro', cls:'btn-secondary btn-md', action:'newEvolutionRecord()' },
+    { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadEvolutionList()' },
     { label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'genEvolution()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveEvolution()' },
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
@@ -2422,6 +2426,7 @@ function showPanel(p) {
   if (p === 'patients') renderPatients();
   if (p === 'dashboard') updateDashboard();
   if (p === 'documentos') renderDocList();
+  if (p === 'contrato' && typeof buildContrato === 'function') buildContrato();
   if (p === 'agenda') renderAgenda();
   if (p === 'escalas') renderEscalas();
   if (p === 'recursos') renderRecursos();
@@ -2497,8 +2502,12 @@ function renderPatients() {
             ${APP.activePatient?.id === p.id ? '<span class="tag tag-green">✓ Ativo</span>' : ''}
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); deletePatient('${p.id}')" 
-          title="Excluir paciente" style="color:var(--danger);padding:4px 8px;font-size:16px">🗑️</button>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openEditPatient('${p.id}')"
+            title="Editar cadastro" style="padding:4px 8px;font-size:16px">✏️</button>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); deletePatient('${p.id}')"
+            title="Excluir paciente" style="color:var(--danger);padding:4px 8px;font-size:16px">🗑️</button>
+        </div>
       </div>
     </div>`).join('');
 }
@@ -2512,6 +2521,9 @@ function selectPatient(id) {
   document.getElementById('sb-patient-name').textContent = APP.activePatient.name;
   renderPatients();
   updateEvoHeader();
+  if (typeof resetEvolutionForm === 'function') {
+    resetEvolutionForm((APP.activePatient.evolutions || []).length + 1);
+  }
   renderProntuario();
   document.getElementById('prontuario-patient-name').textContent = APP.activePatient.name;
   toast(`Paciente ativo: ${APP.activePatient.name}`, 'success');
@@ -2548,6 +2560,11 @@ function createPatient() {
     complaint: document.getElementById('np-complaint').value,
     modality: document.getElementById('np-modality').value,
     startDate: document.getElementById('np-start').value,
+    cpf: '',
+    birthDate: '',
+    address: '',
+    email: '',
+    phone: '',
     sessions: 0,
     anamnese: {},
     evolutions: [],
@@ -2562,6 +2579,87 @@ function createPatient() {
   selectPatient(p.id);
   renderPatients();
   toast(`Paciente "${name}" criado com sucesso!`, 'success');
+}
+
+function calcAgeFromBirthDate(birthDateStr) {
+  if (!birthDateStr) return '';
+  const b = new Date(birthDateStr + 'T00:00');
+  if (isNaN(b.getTime())) return '';
+  const today = new Date();
+  let age = today.getFullYear() - b.getFullYear();
+  const m = today.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
+  return age >= 0 ? age.toString() : '';
+}
+
+function openEditPatient(id) {
+  const p = APP.patients.find(x => x.id === id);
+  if (!p) return;
+  showModal('Editar Cadastro do Paciente', `
+    <div class="form-row" style="margin-bottom:12px"><label>Nome Completo *</label><input type="text" id="ep-name" class="form-input" value="${escHtml(p.name || '')}" placeholder="Nome do paciente"></div>
+    <div class="grid-2" style="gap:10px;margin-bottom:12px">
+      <div class="form-row"><label>CPF</label><input type="text" id="ep-cpf" class="form-input" value="${escHtml(p.cpf || '')}" placeholder="000.000.000-00"></div>
+      <div class="form-row"><label>Data de Nascimento</label><input type="date" id="ep-birth" class="form-input" value="${escHtml(p.birthDate || '')}"></div>
+    </div>
+    <div class="grid-2" style="gap:10px;margin-bottom:12px">
+      <div class="form-row"><label>Idade</label><input type="number" id="ep-age" class="form-input" value="${escHtml(p.age || '')}" placeholder="28"></div>
+      <div class="form-row"><label>Gênero</label><select id="ep-gender" class="form-input"><option>—</option><option>Feminino</option><option>Masculino</option><option>Não-binário</option><option>Outro</option></select></div>
+    </div>
+    <div class="form-row" style="margin-bottom:12px"><label>Endereço Completo</label><input type="text" id="ep-address" class="form-input" value="${escHtml(p.address || '')}" placeholder="Rua, número, complemento, bairro, cidade - UF, CEP"></div>
+    <div class="grid-2" style="gap:10px;margin-bottom:12px">
+      <div class="form-row"><label>E-mail</label><input type="email" id="ep-email" class="form-input" value="${escHtml(p.email || '')}" placeholder="paciente@email.com"></div>
+      <div class="form-row"><label>Telefone / WhatsApp</label><input type="text" id="ep-phone" class="form-input" value="${escHtml(p.phone || '')}" placeholder="(00) 00000-0000"></div>
+    </div>
+    <div class="form-row" style="margin-bottom:12px"><label>Queixa Principal</label><textarea id="ep-complaint" class="form-input" rows="2" placeholder="Motivo do encaminhamento ou queixa principal...">${escHtml(p.complaint || '')}</textarea></div>
+    <div class="grid-2" style="gap:10px;margin-bottom:12px">
+      <div class="form-row"><label>Modalidade</label><select id="ep-modality" class="form-input"><option>Individual</option><option>Casal</option><option>Grupo</option></select></div>
+      <div class="form-row"><label>Data de Início</label><input type="date" id="ep-start" class="form-input" value="${escHtml(p.startDate || '')}"></div>
+    </div>
+  `, [
+    { label: '💾 Salvar Alterações', cls: 'btn-primary', action: () => saveEditPatient(id) },
+    { label: 'Cancelar', cls: 'btn-secondary', action: closeModal }
+  ]);
+  const genderEl = document.getElementById('ep-gender');
+  if (genderEl) genderEl.value = p.gender || '—';
+  const modalityEl = document.getElementById('ep-modality');
+  if (modalityEl) modalityEl.value = p.modality || 'Individual';
+  const birthEl = document.getElementById('ep-birth');
+  if (birthEl) birthEl.addEventListener('change', () => {
+    const calc = calcAgeFromBirthDate(birthEl.value);
+    if (calc) document.getElementById('ep-age').value = calc;
+  });
+}
+
+function saveEditPatient(id) {
+  const p = APP.patients.find(x => x.id === id);
+  if (!p) return;
+  const name = document.getElementById('ep-name').value.trim();
+  if (!name) return toast('Informe o nome do paciente.', 'error');
+  p.name = name;
+  p.cpf = document.getElementById('ep-cpf').value.trim();
+  p.birthDate = document.getElementById('ep-birth').value;
+  p.age = document.getElementById('ep-age').value || calcAgeFromBirthDate(p.birthDate);
+  p.gender = document.getElementById('ep-gender').value;
+  p.address = document.getElementById('ep-address').value.trim();
+  p.email = document.getElementById('ep-email').value.trim();
+  p.phone = document.getElementById('ep-phone').value.trim();
+  p.complaint = document.getElementById('ep-complaint').value;
+  p.modality = document.getElementById('ep-modality').value;
+  p.startDate = document.getElementById('ep-start').value;
+  savePatients();
+  closeModal();
+  renderPatients();
+  if (APP.activePatient?.id === id) {
+    APP.activePatient = p;
+    document.getElementById('sb-patient-name').textContent = p.name;
+    document.getElementById('prontuario-patient-name').textContent = p.name;
+    updateEvoHeader();
+    renderPatientEvolution(p);
+    if (typeof buildContrato === 'function' && document.getElementById('panel-contrato')?.classList.contains('active')) {
+      buildContrato();
+    }
+  }
+  toast(`Cadastro de "${p.name}" atualizado!`, 'success');
 }
 
 function savePatients() {
@@ -2660,6 +2758,7 @@ function deletePatient(id) {
   updateDashboard();
   toast(`Paciente "${p.name}" excluído.`, 'info');
 }
+
 
 // ── ANAMNESE ─────────────────────────────────────────────────
 const ANAMNESE_SECTIONS = [
@@ -3013,6 +3112,52 @@ function updateEvoHeader() {
   document.getElementById('evo-sig-name').textContent = cfg.name || '—';
   document.getElementById('evo-sig-crp').textContent = cfg.crp ? `${cfg.crp} · ${cfg.spec || 'Psicóloga'}` : '—';
   document.getElementById('evo-meta-patient').textContent = p ? p.name : '—';
+  updateEvoMeta();
+  updateEvoStatusBar();
+}
+
+function updateEvoMeta() {
+  document.getElementById('evo-meta-date').textContent = document.getElementById('evo-date')?.value ? new Date(document.getElementById('evo-date').value+'T00:00').toLocaleDateString('pt-BR') : '—';
+  document.getElementById('evo-meta-duration').textContent = (document.getElementById('evo-duration')?.value || '—') + ' minutos';
+  document.getElementById('evo-meta-modality').textContent = document.getElementById('evo-modality')?.value || '—';
+}
+
+function updateEvoStatusBar() {
+  const bar = document.getElementById('evo-status-bar');
+  if (!bar) return;
+  if (!APP.activePatient) {
+    bar.textContent = 'Selecione um paciente para iniciar um registro de evolução.';
+    return;
+  }
+  if (APP.evoEditingIndex !== null && APP.evoEditingIndex !== undefined && APP.activePatient.evolutions && APP.activePatient.evolutions[APP.evoEditingIndex]) {
+    const e = APP.activePatient.evolutions[APP.evoEditingIndex];
+    const dt = e.date ? new Date(e.date+'T00:00').toLocaleDateString('pt-BR') : '—';
+    bar.innerHTML = `✏️ Editando a evolução salva de <strong>${dt}</strong>. Ao clicar em "Salvar", este registro será atualizado (não será criado um novo).`;
+  } else {
+    bar.innerHTML = `🆕 Novo registro de evolução. Ao salvar, será adicionado ao histórico sem sobrepor as evoluções já registradas.`;
+  }
+}
+
+// Limpa o editor para começar um registro de evolução em branco, sem
+// mexer nas evoluções já salvas no histórico do paciente.
+function resetEvolutionForm(nextSessionNum) {
+  APP.evoEditingIndex = null;
+  const dateEl = document.getElementById('evo-date');
+  if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+  const durEl = document.getElementById('evo-duration');
+  if (durEl) durEl.value = 50;
+  const modEl = document.getElementById('evo-modality');
+  if (modEl) modEl.value = 'Presencial / individual';
+  const riskEl = document.getElementById('evo-risk');
+  if (riskEl) riskEl.value = 'baixo';
+  const riskObsEl = document.getElementById('evo-risk-obs');
+  if (riskObsEl) riskObsEl.value = '';
+  const sessNumEl = document.getElementById('evo-session-num');
+  if (sessNumEl) sessNumEl.value = nextSessionNum || 1;
+  ['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(k => {
+    const el = document.getElementById('evo-' + k);
+    if (el) el.innerHTML = '';
+  });
   const trSel = document.getElementById('evo-task-review-status');
   if (trSel) trSel.value = 'nao_havia';
   const trRelEl = document.getElementById('evo-task-review-relato');
@@ -3022,17 +3167,96 @@ function updateEvoHeader() {
   const taskDlEl = document.getElementById('evo-task-deadline');
   if (taskDlEl) taskDlEl.value = '';
   updateEvoMeta();
+  updateEvoStatusBar();
 }
 
-function updateEvoMeta() {
-  document.getElementById('evo-meta-date').textContent = document.getElementById('evo-date')?.value ? new Date(document.getElementById('evo-date').value+'T00:00').toLocaleDateString('pt-BR') : '—';
-  document.getElementById('evo-meta-duration').textContent = (document.getElementById('evo-duration')?.value || '—') + ' minutos';
-  document.getElementById('evo-meta-modality').textContent = document.getElementById('evo-modality')?.value || '—';
+// Botão "Novo Registro" do topbar — inicia uma evolução em branco sem
+// sobrepor a evolução que estava aberta (que permanece salva no histórico).
+function newEvolutionRecord() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const nextNum = (APP.activePatient.evolutions || []).length + 1;
+  resetEvolutionForm(nextNum);
+  toast('Novo registro de evolução iniciado.', 'info');
 }
 
-['evo-date','evo-duration','evo-modality'].forEach(id => {
-  document.addEventListener('change', e => { if (e.target.id === id) updateEvoMeta(); });
-});
+// Retorna a data da evolução salva mais recente do paciente, ignorando
+// (se informado) o índice da evolução que está sendo editada no momento.
+function getLastEvolutionDate(p, excludeIndex) {
+  const evos = p.evolutions || [];
+  let last = null;
+  evos.forEach((e, i) => {
+    if (i === excludeIndex) return;
+    if (e.date && (!last || e.date > last)) last = e.date;
+  });
+  return last;
+}
+
+// Reúne o que foi registrado em QUALQUER módulo do sistema (prontuário,
+// escalas, transcrições, agenda, documentos e Supervisor TCC) com data
+// posterior à última evolução salva — para que a geração por IA de um
+// Novo Registro sempre parta de onde a última evolução parou.
+function buildRecentUpdatesContext(p, sinceDate) {
+  if (!sinceDate) return '';
+  let ctx = '';
+
+  const pront = (p.prontuario || []).filter(e => e.date && e.date > sinceDate);
+  if (pront.length) {
+    ctx += `Prontuário — novos registros:\n`;
+    pront.forEach(e => { ctx += `[${e.date}] ${e.type || 'Registro'}: ${stripHtml(e.content || '')}\n`; });
+    ctx += `\n`;
+  }
+
+  const scales = (p.scales || []).filter(s => s.date && s.date > sinceDate);
+  if (scales.length) {
+    ctx += `Escalas aplicadas:\n`;
+    scales.forEach(s => {
+      const def = (typeof SCALES_DEF !== 'undefined') ? SCALES_DEF[s.scaleId] : null;
+      ctx += `[${s.date}] ${def ? def.name : s.scaleId} — pontuação ${s.score} (${s.classification})\n`;
+    });
+    ctx += `\n`;
+  }
+
+  const trans = (p.transcriptions || []).filter(t => t.date && t.date > sinceDate);
+  if (trans.length) {
+    ctx += `Transcrições de sessão registradas:\n`;
+    trans.forEach(t => {
+      const preview = t.blocks && t.blocks.length
+        ? t.blocks.map(b => `${b.speaker || ''}: ${b.text || ''}`).join(' ').substring(0, 800)
+        : (t.rawText || '').substring(0, 800);
+      ctx += `[${t.date}] ${preview}\n`;
+    });
+    ctx += `\n`;
+  }
+
+  const agenda = (p.agendaSessions || []).filter(s => s.date && s.date > sinceDate);
+  if (agenda.length) {
+    ctx += `Agenda — sessões registradas:\n`;
+    agenda.forEach(s => { ctx += `[${s.date}${s.timeStart ? ' ' + s.timeStart : ''}] status: ${s.status || '—'}${s.notes ? ' — ' + s.notes : ''}\n`; });
+    ctx += `\n`;
+  }
+
+  const docs = (p.docs || []).filter(d => d.date && d.date > sinceDate);
+  if (docs.length) {
+    ctx += `Documentos clínicos emitidos:\n`;
+    docs.forEach(d => { ctx += `[${d.date}] ${d.label || d.type}\n`; });
+    ctx += `\n`;
+  }
+
+  const chats = (typeof getAIChats === 'function' ? getAIChats() : []).filter(c => c.patient === p.name && c.date && c.date.split('T')[0] > sinceDate);
+  if (chats.length) {
+    ctx += `Supervisor TCC (IA) — conversas registradas após a última evolução:\n`;
+    chats.forEach(c => {
+      const lastAi = (c.messages || []).filter(m => m.role === 'assistant').slice(-1);
+      lastAi.forEach(m => {
+        const text = getContentText(m.content);
+        if (text) ctx += `[${c.date.split('T')[0]} · Modo ${c.mode || '—'}] ${text.substring(0, 600)}\n`;
+      });
+    });
+    ctx += `\n`;
+  }
+
+  return ctx.trim();
+}
 
 async function genEvolution() {
   if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
@@ -3056,10 +3280,18 @@ async function genEvolution() {
   // conversas registradas no Supervisor TCC (IA).
   const ctx = buildPatientClinicalContext(p);
 
-  const prompt = `Com base em TODO o histórico clínico do paciente reunido abaixo — anamnese, prontuário, evoluções de sessão anteriores, formulação de caso, escalas aplicadas e conversas registradas com o Supervisor Clínico TCC — gere o Registro de Evolução estruturado da sessão de HOJE, dando continuidade real ao caso (retome temas e planos das sessões anteriores quando fizer sentido).
+  // A geração sempre parte de após a última evolução salva, reunindo o
+  // que foi lançado em qualquer módulo do sistema desde então.
+  const lastEvoDate = getLastEvolutionDate(p, APP.evoEditingIndex);
+  const recentCtx = lastEvoDate ? buildRecentUpdatesContext(p, lastEvoDate) : '';
+  const recentBlock = lastEvoDate
+    ? `\n═══ NOVAS INFORMAÇÕES REGISTRADAS NO SISTEMA APÓS A ÚLTIMA EVOLUÇÃO (${new Date(lastEvoDate+'T00:00').toLocaleDateString('pt-BR')}) ═══\n${recentCtx || 'Nenhuma nova informação foi registrada em outros módulos desde a última evolução.'}\nDê prioridade e continuidade a partir dessas novas informações ao redigir a evolução de hoje.\n`
+    : '';
+
+  const prompt = `Com base em TODO o histórico clínico do paciente reunido abaixo — anamnese, prontuário, evoluções de sessão anteriores, formulação de caso, escalas aplicadas e conversas registradas com o Supervisor Clínico TCC — gere o Registro de Evolução estruturado da sessão de HOJE, dando continuidade real ao caso a partir de onde a última evolução parou (retome temas e planos das sessões anteriores quando fizer sentido).
 
 ${ctx || 'Nenhum histórico anterior registrado ainda para este paciente — baseie-se apenas nos dados da sessão de hoje abaixo.'}
-
+${recentBlock}
 ═══ DADOS DA SESSÃO DE HOJE ═══
 Data: ${date || 'não informada'} | Duração: ${dur || '—'}min | Modalidade: ${mod || '—'}
 Risco avaliado nesta sessão: ${risk}${riskObs ? ' — ' + riskObs : ''}
@@ -3112,10 +3344,17 @@ function saveEvolution() {
     taskPrescribed: !!(document.getElementById('evo-s8')?.innerText?.trim()),
   };
   if (!APP.activePatient.evolutions) APP.activePatient.evolutions = [];
-  APP.activePatient.evolutions.push(evo);
+  if (APP.evoEditingIndex !== null && APP.evoEditingIndex !== undefined && APP.activePatient.evolutions[APP.evoEditingIndex]) {
+    APP.activePatient.evolutions[APP.evoEditingIndex] = evo;
+    toast('Evolução atualizada!', 'success');
+  } else {
+    APP.activePatient.evolutions.push(evo);
+    APP.evoEditingIndex = APP.activePatient.evolutions.length - 1;
+    toast('Evolução salva!', 'success');
+  }
   APP.activePatient.sessions = APP.activePatient.evolutions.length;
   savePatients();
-  toast('Evolução salva!', 'success');
+  updateEvoStatusBar();
 }
 
 function loadEvolutionList() {
@@ -3140,12 +3379,16 @@ function loadEvolutionList() {
           </tr>`).join('')}
         </tbody>
       </table>
-    </div>`, [{ label: 'Fechar', cls: 'btn-secondary', action: closeModal }]);
+    </div>`, [
+      { label: '🆕 Novo Registro', cls: 'btn-primary', action: () => { closeModal(); newEvolutionRecord(); } },
+      { label: 'Fechar', cls: 'btn-secondary', action: closeModal }
+    ]);
 }
 
 function loadEvolution(i) {
   const e = APP.activePatient.evolutions[i];
   if (!e) return;
+  APP.evoEditingIndex = i;
   document.getElementById('evo-date').value = e.date || '';
   document.getElementById('evo-duration').value = e.duration || 50;
   document.getElementById('evo-modality').value = e.modality || '';
@@ -3156,7 +3399,18 @@ function loadEvolution(i) {
     const el = document.getElementById('evo-' + k);
     if (el) el.innerHTML = e[k] || '';
   });
+  const s8El = document.getElementById('evo-s8');
+  if (s8El) s8El.innerHTML = e.s8 || '';
+  const trSel = document.getElementById('evo-task-review-status');
+  if (trSel) trSel.value = e.taskReviewStatus || 'nao_havia';
+  const trRelEl = document.getElementById('evo-task-review-relato');
+  if (trRelEl) trRelEl.innerHTML = e.taskReviewRelato || '';
+  const trAnEl = document.getElementById('evo-task-review-analise');
+  if (trAnEl) trAnEl.innerHTML = e.taskReviewAnalise || '';
+  const taskDlEl = document.getElementById('evo-task-deadline');
+  if (taskDlEl) taskDlEl.value = e.taskDeadline || '';
   updateEvoMeta();
+  updateEvoStatusBar();
 }
 
 function deleteEvolution(i) {
@@ -3167,6 +3421,11 @@ function deleteEvolution(i) {
   if (!confirm('Excluir a evolução da sessão ' + dt + '?\nEsta ação não pode ser desfeita.')) return;
   APP.activePatient.evolutions.splice(i, 1);
   APP.activePatient.sessions = APP.activePatient.evolutions.length;
+  if (APP.evoEditingIndex === i) {
+    resetEvolutionForm(APP.activePatient.evolutions.length + 1);
+  } else if (APP.evoEditingIndex !== null && APP.evoEditingIndex !== undefined && APP.evoEditingIndex > i) {
+    APP.evoEditingIndex--;
+  }
   savePatients();
   closeModal();
   toast('Evolução excluída.', 'info');
@@ -3175,8 +3434,11 @@ function deleteEvolution(i) {
   }, 150);
 }
 
+
 // ── TRANSCRIÇÃO ──────────────────────────────────────────────
 let transFileData = null;
+let currentTransBlocks = null;
+
 
 function handleTransDrop(e) {
   e.preventDefault();
@@ -3188,19 +3450,55 @@ function handleTransDrop(e) {
 function handleTransFile(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
 
 function processFile(file) {
-  if (!file.name.endsWith('.docx')) return toast('Somente arquivos .docx são suportados.', 'error');
+  if (!file.name.toLowerCase().endsWith('.docx')) return toast('Somente arquivos .docx são suportados.', 'error');
+  if (!APP.activePatient) { toast('Selecione um paciente antes de subir a transcrição.', 'error'); return; }
+  if (typeof mammoth === 'undefined') {
+    toast('Biblioteca de leitura de .docx não carregou. Verifique sua conexão com a internet e recarregue a página.', 'error');
+    return;
+  }
   document.getElementById('trans-file-name').textContent = '📎 ' + file.name;
   const reader = new FileReader();
   reader.onload = async e => {
     try {
       const result = await mammoth.extractRawText({ arrayBuffer: e.target.result });
-      APP.currentTranscriptionText = result.value;
+      APP.currentTranscriptionText = result.value || '';
+      if (!APP.currentTranscriptionText.trim()) {
+        toast('Não foi possível extrair texto deste arquivo. Verifique se o .docx contém texto.', 'error');
+        return;
+      }
       transFileData = file;
+      currentTransBlocks = null;
       document.getElementById('btn-process-trans').disabled = false;
-      toast('Arquivo carregado! Clique em "Processar com IA".', 'success');
+      renderRawTranscription(APP.currentTranscriptionText);
+      toast('Arquivo carregado! Revise o texto abaixo e clique em "💾 Salvar", ou use "🤖 Processar com IA" para identificar as falas automaticamente.', 'success');
     } catch(err) { toast('Erro ao ler o arquivo: ' + err.message, 'error'); }
   };
+  reader.onerror = () => toast('Erro ao ler o arquivo selecionado.', 'error');
   reader.readAsArrayBuffer(file);
+}
+
+// Mostra o texto bruto extraído do .docx, editável, pronto para ser salvo
+// diretamente — sem depender da IA (que é opcional, apenas para
+// identificar automaticamente as falas de cada interlocutor).
+function renderRawTranscription(text) {
+  const cfg = getConfig();
+  const date = document.getElementById('trans-date').value;
+  const dateStr = date ? new Date(date+'T00:00').toLocaleDateString('pt-BR') : '';
+  const paragraphs = text.split(/\n+/).map(p => p.trim()).filter(Boolean);
+
+  let html = `
+    <div class="transcript-header">
+      <img src="" class="doc-logo" id="trans-doc-logo" style="display:none;max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
+      <div style="font-size:12px;font-family:Inter,sans-serif;color:var(--text-muted)">${cfg.name || ''} · ${cfg.crp || ''}</div>
+      <h2>Transcrição da Sessão${dateStr ? ' — ' + dateStr : ''}</h2>
+      <p>Paciente: ${APP.activePatient?.name || '—'}</p>
+      <p style="font-size:11px;margin-top:6px;font-family:Inter,sans-serif;color:var(--text-muted)"><em>Texto extraído diretamente do arquivo .docx enviado. Edite abaixo se necessário antes de salvar.</em></p>
+    </div>
+    <div contenteditable="true" id="trans-raw-text" class="transcript-text" style="margin-top:12px;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;white-space:pre-wrap">${paragraphs.map(p => escHtml(p)).join('\n\n')}</div>`;
+
+  document.getElementById('transcript-content').innerHTML = html;
+  document.getElementById('transcricao-output').style.display = 'block';
+  restoreLogosInDoc();
 }
 
 async function callClaudeForTranscription(userPrompt, maxTokens = 4000) {
@@ -3233,14 +3531,16 @@ async function callClaudeForTranscription(userPrompt, maxTokens = 4000) {
 
 async function processTranscription() {
   if (!APP.currentTranscriptionText) return toast('Carregue um arquivo primeiro.', 'error');
-  const apiKey = localStorage.getItem('psicotcc_apikey');
-  if (!apiKey) return toast('Configure a chave de API Claude nas Configurações.', 'error');
   if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const apiKey = localStorage.getItem('psicotcc_apikey');
+  if (!apiKey) {
+    toast('Configure a chave de API Claude em Configurações → API Claude para identificar as falas automaticamente. Você também pode salvar a transcrição sem IA clicando em "💾 Salvar".', 'error');
+    return;
+  }
 
   document.getElementById('btn-process-trans').disabled = true;
   toast('Processando transcrição com IA...', 'info');
 
-  const cfg = getConfig();
   const prompt = `Você é um assistente clínico especializado em transcrição de sessões de psicoterapia.
 
 Processe a transcrição abaixo e reformate-a identificando claramente as falas de cada interlocutor.
@@ -3263,15 +3563,12 @@ ${APP.currentTranscriptionText.substring(0, 12000)}`;
     const match = clean.match(/\[[\s\S]*\]/);
     if (!match) throw new Error('A IA não retornou um JSON válido. Tente novamente.');
     const blocks = JSON.parse(match[0]);
+    currentTransBlocks = blocks;
     renderTranscription(blocks);
-    // Save
-    const date = document.getElementById('trans-date').value;
-    if (!APP.activePatient.transcriptions) APP.activePatient.transcriptions = [];
-    APP.activePatient.transcriptions.push({ date, blocks });
-    savePatients();
-    toast('Transcrição processada com sucesso!', 'success');
+    toast('Transcrição reorganizada pela IA! Revise e clique em "💾 Salvar" para gravar.', 'success');
   } catch(e) {
     toast('Erro ao processar: ' + e.message, 'error');
+  } finally {
     document.getElementById('btn-process-trans').disabled = false;
   }
 }
@@ -3308,13 +3605,36 @@ function renderTranscription(blocks) {
 function clearTranscription() {
   APP.currentTranscriptionText = '';
   transFileData = null;
+  currentTransBlocks = null;
   document.getElementById('trans-file-name').textContent = '';
   document.getElementById('trans-file').value = '';
   document.getElementById('btn-process-trans').disabled = true;
   document.getElementById('transcricao-output').style.display = 'none';
+  document.getElementById('transcript-content').innerHTML = '';
 }
 
-function saveTranscription() { toast('Transcrição salva automaticamente!', 'success'); }
+// Salva a transcrição atualmente exibida — seja o texto bruto extraído
+// do .docx ou a versão reorganizada pela IA (com falas identificadas).
+function saveTranscription() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  const hasContent = currentTransBlocks?.length || APP.currentTranscriptionText?.trim() || document.getElementById('trans-raw-text')?.innerText?.trim();
+  if (!hasContent) return toast('Carregue um arquivo de transcrição antes de salvar.', 'error');
+
+  const date = document.getElementById('trans-date').value;
+  const record = {
+    date,
+    fileName: transFileData ? transFileData.name : '',
+    blocks: currentTransBlocks && currentTransBlocks.length ? currentTransBlocks : null,
+    rawText: (!currentTransBlocks || !currentTransBlocks.length)
+      ? (document.getElementById('trans-raw-text')?.innerText || APP.currentTranscriptionText || '')
+      : null
+  };
+
+  if (!APP.activePatient.transcriptions) APP.activePatient.transcriptions = [];
+  APP.activePatient.transcriptions.push(record);
+  savePatients();
+  toast('Transcrição salva com sucesso!', 'success');
+}
 
 function loadTranscriptionHistory() {
   if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
@@ -3326,7 +3646,7 @@ function loadTranscriptionHistory() {
         <div class="history-dot"></div>
         <div style="flex:1" onclick="loadSavedTranscription(${i}); closeModal()" style="cursor:pointer">
           <div class="history-title">📝 Sessão de ${t.date ? new Date(t.date+'T00:00').toLocaleDateString('pt-BR') : '—'}</div>
-          <div class="history-preview">${(t.blocks?.length || 0)} blocos de fala</div>
+          <div class="history-preview">${t.blocks?.length ? t.blocks.length + ' blocos de fala (IA)' : 'Texto bruto do .docx'}</div>
         </div>
         <div style="display:flex;gap:6px;margin-left:10px">
           <button class="btn btn-sm btn-secondary" onclick="loadSavedTranscription(${i}); closeModal()">📂 Abrir</button>
@@ -3352,8 +3672,20 @@ function deleteTranscription(i) {
 
 function loadSavedTranscription(i) {
   const t = APP.activePatient.transcriptions[i];
-  if (t) { document.getElementById('trans-date').value = t.date; renderTranscription(t.blocks); }
+  if (!t) return;
+  document.getElementById('trans-date').value = t.date || '';
+  document.getElementById('btn-process-trans').disabled = false;
+  if (t.blocks && t.blocks.length) {
+    currentTransBlocks = t.blocks;
+    APP.currentTranscriptionText = t.blocks.map(b => b.text || '').join('\n');
+    renderTranscription(t.blocks);
+  } else {
+    currentTransBlocks = null;
+    APP.currentTranscriptionText = t.rawText || '';
+    renderRawTranscription(t.rawText || '');
+  }
 }
+
 
 // ── DOCUMENTOS CLÍNICOS ──────────────────────────────────────
 const DOC_TEMPLATES = {
@@ -3540,6 +3872,24 @@ function deleteSavedDoc(i) {
 // ── CONTRATO ─────────────────────────────────────────────────
 function buildContrato() {
   const cfg = getConfig();
+  const p = APP.activePatient;
+
+  // Se já existe um contrato salvo para o paciente ativo, restaura o que
+  // foi salvo (preservando eventuais edições feitas manualmente) em vez
+  // de reconstruir o modelo em branco.
+  if (p && p.contract && p.contract.content) {
+    document.getElementById('contrato-area').innerHTML = `<div class="doc-template" id="contract-doc">${p.contract.content}</div>`;
+    restoreLogosInDoc();
+    return;
+  }
+
+  // Preenchimento automático do Contratante com base no cadastro do
+  // paciente ativo (módulo Pacientes). Os campos continuam editáveis
+  // (contenteditable) para ajustes manuais antes de salvar/imprimir.
+  const contratanteNome     = p?.name    ? escHtml(p.name)    : '[Nome completo do paciente ou responsável legal]';
+  const contratanteCpf      = p?.cpf     ? escHtml(p.cpf)     : '[CPF]';
+  const contratanteEndereco = p?.address ? escHtml(p.address) : '[endereço]';
+
   document.getElementById('contrato-area').innerHTML = `
     <div class="doc-template" id="contract-doc">
       <div class="doc-header">
@@ -3556,7 +3906,7 @@ function buildContrato() {
       <div class="doc-section">
         <h3>PARTES CONTRATANTES</h3>
         <p><strong>CONTRATADA:</strong> ${cfg.name || '[Nome]'}, Psicóloga inscrita no Conselho Regional de Psicologia sob o nº ${cfg.crp || '[CRP]'}, com consultório localizado em ${cfg.address || '[endereço]'}.</p>
-        <p style="margin-top:8px"><strong>CONTRATANTE:</strong> <span contenteditable="true">[Nome completo do paciente ou responsável legal]</span>, CPF nº <span contenteditable="true">[CPF]</span>, residente em <span contenteditable="true">[endereço]</span>.</p>
+        <p style="margin-top:8px"><strong>CONTRATANTE:</strong> <span contenteditable="true">${contratanteNome}</span>, CPF nº <span contenteditable="true">${contratanteCpf}</span>, residente em <span contenteditable="true">${contratanteEndereco}</span>.</p>
       </div>
 
       <div class="doc-section">
@@ -3621,8 +3971,8 @@ function buildContrato() {
         </div>
         <div class="doc-sig-line">
           <div class="line"></div>
-          <p>Contratante</p>
-          <p style="font-size:11px;color:var(--text-muted)">Nome e CPF</p>
+          <p>${p?.name ? escHtml(p.name) : 'Contratante'}</p>
+          <p style="font-size:11px;color:var(--text-muted)">${p?.cpf ? 'CPF ' + escHtml(p.cpf) + ' — Contratante' : 'Nome e CPF'}</p>
         </div>
       </div>
 
@@ -3639,6 +3989,7 @@ function saveContract() {
   savePatients();
   toast('Contrato salvo!', 'success');
 }
+
 
 // ── SUPERVISOR TCC (IA) ──────────────────────────────────────
 const TCC_SYSTEM_PROMPT = JSON.parse("\"Voc\\u00ea atuar\\u00e1 como um Supervisor Cl\\u00ednico Especialista em Terapia Cognitivo-Comportamental (TCC), Psicopatologia, Formula\\u00e7\\u00e3o Cognitiva de Casos e Psicologia Baseada em Evid\\u00eancias.\\n\\n\\u26a0\\ufe0f AVISO \\u00c9TICO: Este sistema \\u00e9 uma ferramenta de apoio ao racioc\\u00ednio cl\\u00ednico. N\\u00e3o substitui julgamento profissional, supervis\\u00e3o humana ou responsabilidade do psic\\u00f3logo. Nunca tome decis\\u00f5es cl\\u00ednicas baseadas exclusivamente nas sa\\u00eddas deste sistema. Em situa\\u00e7\\u00f5es de risco, acione protocolos de seguran\\u00e7a imediatamente.\\n\\nPRINC\\u00cdPIO DE EPISTEMOLOGIA CL\\u00cdNICA \\u2014 Marque SEMPRE cada afirma\\u00e7\\u00e3o:\\n- [FATO] \\u2014 Informa\\u00e7\\u00e3o objetivamente relatada, sem interpreta\\u00e7\\u00e3o adicional.\\n- [INFER\\u00caNCIA] \\u2014 Conclus\\u00e3o plaus\\u00edvel derivada dos fatos, claramente sinalizada como tal.\\n- [HIP\\u00d3TESE] \\u2014 Possibilidade cl\\u00ednica que requer confirma\\u00e7\\u00e3o \\u2014 nunca afirmada como certeza.\\n\\nREGRA DE DIAGN\\u00d3STICO: Use SEMPRE o DSM-5 como refer\\u00eancia prim\\u00e1ria. NUNCA afirme diagn\\u00f3stico definitivo \\u2014 apenas hip\\u00f3teses com grau de confian\\u00e7a. Use linguagem como \\\"Hip\\u00f3tese compat\\u00edvel com...\\\", \\\"Dados sugerem poss\\u00edvel...\\\", \\\"N\\u00e3o \\u00e9 poss\\u00edvel descartar...\\\". Sempre apresente diagn\\u00f3sticos diferenciais.\\n\\nMODOS DE OPERA\\u00c7\\u00c3O:\\n\\ud83d\\udd35 ANAMNESE INICIAL: Etapas 1, 2, 5, 8, 9 (obrigat\\u00f3rias)\\n\\ud83d\\udfe2 SESS\\u00c3O CL\\u00cdNICA: Etapas 3, 4, 6, 11, 12 (obrigat\\u00f3rias)\\n\\ud83d\\udfe0 SUPERVIS\\u00c3O: Etapas 13, 2, 7 (obrigat\\u00f3rias)\\n\\ud83d\\udd34 CRISE/RISCO: Etapa 8 (prioridade absoluta)\\n\\u26aa LIVRE: Resposta direta e objetiva\\n\\nETAPAS DISPON\\u00cdVEIS:\\n01 \\u2014 Resumo Cl\\u00ednico Estruturado: Dados sociodemogr\\u00e1ficos, queixa, hist\\u00f3ricos, fatores de risco/prote\\u00e7\\u00e3o\\n02 \\u2014 Mapa de Lacunas: Informa\\u00e7\\u00f5es ausentes priorizadas (\\ud83d\\udd34 Alta / \\ud83d\\udfe0 M\\u00e9dia-Alta / \\ud83d\\udfe1 M\\u00e9dia / \\ud83d\\udfe2 Baixa)\\n03 \\u2014 Modelo Cognitivo ABC+: Situa\\u00e7\\u00e3o \\u2192 Pensamentos \\u2192 Emo\\u00e7\\u00f5es \\u2192 Fisiologia \\u2192 Comportamentos \\u2192 Consequ\\u00eancias\\n04 \\u2014 An\\u00e1lise de Distor\\u00e7\\u00f5es Cognitivas: Por distor\\u00e7\\u00e3o: evid\\u00eancias a favor/contra, grau de confian\\u00e7a, impacto funcional\\n05 \\u2014 Hierarquia de Cren\\u00e7as: Central (\\\"Sou...\\\"), Intermedi\\u00e1ria (SE...ENT\\u00c3O...), Pressupostos (regras de conduta)\\n06 \\u2014 Fatores de Manuten\\u00e7\\u00e3o: Evita\\u00e7\\u00e3o, comportamentos de seguran\\u00e7a, rumina\\u00e7\\u00e3o, perfeccionismo, depend\\u00eancia emocional\\n07 \\u2014 Hip\\u00f3teses Diagn\\u00f3sticas (DSM-5): Confian\\u00e7a, evid\\u00eancias a favor/contra, dados faltantes, diferenciais\\n08 \\u2014 Avalia\\u00e7\\u00e3o de Risco: Idea\\u00e7\\u00e3o/plano/inten\\u00e7\\u00e3o/meios. N\\u00edveis: Baixo / Moderado / Elevado / Cr\\u00edtico\\n09 \\u2014 Formula\\u00e7\\u00e3o Cognitiva Integrativa: Narrativa longitudinal \\u2014 Experi\\u00eancias \\u2192 Cren\\u00e7as \\u2192 Gatilhos \\u2192 Respostas \\u2192 Manuten\\u00e7\\u00e3o\\n10 \\u2014 Plano Terap\\u00eautico: Objetivos curto/m\\u00e9dio/longo prazo com indicadores mensur\\u00e1veis\\n11 \\u2014 Interven\\u00e7\\u00f5es TCC Indicadas: T\\u00e9cnicas selecionadas com justificativa cl\\u00ednica vinculada aos fatores de manuten\\u00e7\\u00e3o\\n12 \\u2014 Plano de Sess\\u00e3o: Agenda, objetivo, t\\u00e9cnica(s), exerc\\u00edcio(s), tarefa de casa, avalia\\u00e7\\u00e3o da tarefa\\n13 \\u2014 Supervis\\u00e3o Reflexiva: Pontos cegos, hip\\u00f3teses alternativas, vieses cl\\u00ednicos, perguntas para aprofundar\\n\\nDETALHAMENTO DA ETAPA 09 \\u2014 FORMULA\\u00c7\\u00c3O COGNITIVA INTEGRATIVA (Modelo de Beck):\\nConstrua uma narrativa longitudinal coerente que responda: \\\"Por que esta pessoa, com este problema, neste momento?\\\"\\n\\nComponentes obrigat\\u00f3rios:\\n\\u2022 EXPERI\\u00caNCIAS FORMATIVAS: Eventos de desenvolvimento que contribu\\u00edram para a forma\\u00e7\\u00e3o das cren\\u00e7as centrais (inf\\u00e2ncia, fam\\u00edlia de origem, traumas, v\\u00ednculos precoces)\\n\\u2022 CREN\\u00c7AS CENTRAIS: N\\u00facleos de cren\\u00e7a absolutas e globais sobre si mesmo (\\\"Sou incapaz/rejeit\\u00e1vel/indigno\\\"), os outros (\\\"As pessoas me abandonam\\\") e o mundo (\\\"O mundo \\u00e9 perigoso\\\")\\n\\u2022 CREN\\u00c7AS INTERMEDI\\u00c1RIAS: Regras e pressupostos condicionais (SE...ENT\\u00c3O..., DEVO...) que operacionalizam as cren\\u00e7as centrais\\n\\u2022 SITUA\\u00c7\\u00c3O GATILHO: Situa\\u00e7\\u00f5es contempor\\u00e2neas que ativam as cren\\u00e7as e disparam pensamentos autom\\u00e1ticos\\n\\u2022 PENSAMENTOS AUTOM\\u00c1TICOS: Cogni\\u00e7\\u00f5es imediatas e involunt\\u00e1rias t\\u00edpicas do paciente, incluindo imagens mentais\\n\\u2022 EMO\\u00c7\\u00d5ES: Nome da emo\\u00e7\\u00e3o + intensidade estimada (0-100%). Ex: Ansiedade 80%, Vergonha 70%\\n\\u2022 REA\\u00c7\\u00d5ES FISIOL\\u00d3GICAS: Sintomas corporais t\\u00edpicos (taquicardia, tens\\u00e3o muscular, sudorese, fadiga etc.)\\n\\u2022 COMPORTAMENTOS: O que o paciente faz e o que evita; comportamentos de seguran\\u00e7a; padr\\u00f5es recorrentes\\n\\u2022 MECANISMOS DE MANUTEN\\u00c7\\u00c3O: Fatores que perpetuam o ciclo \\u2014 evita\\u00e7\\u00e3o, rumina\\u00e7\\u00e3o, busca de garantias, perfeccionismo, depend\\u00eancia emocional\\n\\nTom de resposta: linguagem t\\u00e9cnica e precisa mas acess\\u00edvel, como um colega supervisor experiente. Reconhe\\u00e7a explicitamente quando os dados s\\u00e3o insuficientes. Fa\\u00e7a perguntas reflexivas quando pertinente.\"");

@@ -1067,11 +1067,11 @@ tr.clickable { cursor: pointer; }
   display: block;
 }
 
-/* Margem fixa de 1cm nos 4 lados de toda página impressa (PDF).
+/* Margem de toda página impressa (PDF): 2cm em cima/embaixo, 1cm nas laterais.
    Obs.: se a opção "Cabeçalhos e rodapés" do navegador estiver marcada na
    caixa de impressão, o Chrome pode usar essa margem para desenhar URL/data/
    numeração — oriente deixar essa opção desmarcada para um resultado limpo. */
-@page { size: A4; margin: 1cm; }
+@page { size: A4; margin: 2cm 1cm; }
 
 @media print {
   html, body { margin: 0 !important; }
@@ -1105,6 +1105,8 @@ tr.clickable { cursor: pointer; }
   /* CABEÇALHO DA EVOLUÇÃO / ANAMNESE — mostra na impressão no topo */
   #evo-print-header { display: block !important; }
   #anamnese-form { display: none !important; }
+  #panel-prontuario > .card { display: none !important; }
+  #panel-formulacao > .card { display: none !important; }
   .print-only { display: block !important; }
 
   /* Transição de página suave: evita cortar cabeçalho, tabelas, assinatura
@@ -1576,6 +1578,7 @@ tr.clickable { cursor: pointer; }
             </div>
             <div id="prontuario-list"></div>
           </div>
+          <div id="prontuario-print-report" class="doc-template print-only"></div>
         </div>
 
         <!-- EVOLUCAO -->
@@ -1588,7 +1591,7 @@ tr.clickable { cursor: pointer; }
             <div id="evo-print-header" class="evolution-doc" style="display:none; margin-bottom:20px; padding:24px 32px 16px 32px">
               <div class="doc-header" style="margin-bottom:0">
                 <div class="doc-header-left">
-                  <img id="evo-doc-logo" class="doc-logo" src="" alt="" style="max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
+                  <img id="evo-doc-logo" class="doc-logo" src="" alt="">
                 </div>
                 <div class="doc-header-right">
                   <div class="doc-psi-name" id="evo-doc-psi">—</div>
@@ -2180,6 +2183,7 @@ tr.clickable { cursor: pointer; }
               <div id="formulacao-diagram" style="max-width:680px;margin:0 auto"></div>
             </div>
           </div>
+          <div id="formulacao-print-report" class="doc-template print-only"></div>
         </div>
 
       </div>
@@ -2212,7 +2216,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 29/07/2026 22:11
+//  Gerado automaticamente em 29/07/2026 22:48
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2426,7 +2430,7 @@ const TOPBAR_BUTTONS = {
     { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printAnamnese()' },
     { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('anamnese')" }],
   prontuario:   [{ label:'➕ Novo Registro', cls:'btn-primary btn-md',  action:'addProntuarioEntry()' },
-    { label:'🖨️ PDF',          cls:'btn-accent btn-md',   action:'printWithWatermark()' },
+    { label:'🖨️ PDF',          cls:'btn-accent btn-md',   action:'printProntuario()' },
     { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('prontuario')" }],
   evolucao:     [{ label:'🆕 Novo Registro', cls:'btn-secondary btn-md', action:'newEvolutionRecord()' },
     { label:'📂 Histórico',    cls:'btn-secondary btn-md', action:'loadEvolutionList()' },
@@ -3123,7 +3127,6 @@ function buildAnamnesePrintReport() {
       <div class="doc-header-right">
         <div class="doc-psi-name">${escHtml(cfg.name || '—')}</div>
         <div class="doc-psi-crp">${escHtml(cfg.crp || '')}${cfg.spec ? ' · ' + escHtml(cfg.spec) : ''}</div>
-        ${cfg.address ? `<div class="doc-psi-address">${escHtml(cfg.address)}</div>` : ''}
       </div>
     </div>
     <div class="doc-title">Ficha de Anamnese Psicológica</div>
@@ -3237,6 +3240,60 @@ function deleteProntuarioEntry(i) {
   renderProntuario();
   toast('Registro removido.', 'info');
 }
+
+// ═══ RELATÓRIO DO PRONTUÁRIO PARA IMPRESSÃO EM PDF ═══
+function buildProntuarioPrintReport() {
+  const container = document.getElementById('prontuario-print-report');
+  if (!container) return;
+  const cfg = getConfig();
+  const logoSrc = localStorage.getItem('psicotcc_logo') || '';
+  const p = APP.activePatient;
+  const entries = p ? (p.prontuario || []) : [];
+
+  let html = `
+    <div class="doc-header">
+      <div class="doc-header-left">
+        <img class="doc-logo" src="${logoSrc}" alt="" style="${logoSrc ? 'display:block' : 'display:none'}">
+      </div>
+      <div class="doc-header-right">
+        <div class="doc-psi-name">${escHtml(cfg.name || '—')}</div>
+        <div class="doc-psi-crp">${escHtml(cfg.crp || '')}${cfg.spec ? ' · ' + escHtml(cfg.spec) : ''}</div>
+      </div>
+    </div>
+    <div class="doc-title">Prontuário Eletrônico</div>
+    <table class="evolution-meta-table" style="margin-bottom:22px">
+      <tr><td>Paciente</td><td>${escHtml(p ? p.name : '—')}</td></tr>
+      <tr><td>Data de Emissão</td><td>${new Date().toLocaleDateString('pt-BR')}</td></tr>
+      <tr><td>Total de Registros</td><td>${entries.length}</td></tr>
+    </table>`;
+
+  if (!entries.length) {
+    html += `<div class="doc-section"><p>Nenhum registro no prontuário deste paciente até o momento.</p></div>`;
+  } else {
+    entries.forEach(e => {
+      const dt = e.date ? new Date(e.date + 'T00:00').toLocaleDateString('pt-BR') : '—';
+      const conteudo = escHtml(e.content || '').replace(/\n/g, '<br>');
+      html += `<div class="doc-section"><h3>${escHtml(e.type || 'Registro')} — ${dt}</h3><p>${conteudo}</p></div>`;
+    });
+  }
+
+  html += `
+    <div class="doc-footer">
+      <p>Documento elaborado em conformidade com o Código de Ética Profissional do Psicólogo.</p>
+      <p>Este documento contém informações protegidas pelo sigilo psicológico (Art. 9º do CEPP).</p>
+    </div>`;
+
+  container.innerHTML = html;
+}
+
+// Botão "🖨️ PDF" do painel de Prontuário — gera o relatório completo e imprime.
+function printProntuario() {
+  if (!APP.activePatient) return toast('Selecione um paciente primeiro.', 'error');
+  buildProntuarioPrintReport();
+  applyWatermark();
+  window.print();
+}
+
 
 // ── EVOLUÇÃO ─────────────────────────────────────────────────
 ['evo-date','evo-duration','evo-modality'].forEach(id => {
@@ -3864,7 +3921,6 @@ function loadDocTemplate() {
         <div class="doc-header-right">
           <div class="doc-psi-name">${cfg.name || '—'}</div>
           <div class="doc-psi-crp">${cfg.crp || '—'}${cfg.spec ? ' · ' + cfg.spec : ''}</div>
-          ${cfg.address ? `<div class="doc-psi-address">${cfg.address}</div>` : ''}
         </div>
       </div>
       <div class="doc-title">${tpl.title}</div>
@@ -4045,7 +4101,7 @@ function buildContrato() {
     <div class="doc-template" id="contract-doc">
       <div class="doc-header">
         <div class="doc-header-left">
-          <img id="contract-doc-logo" class="doc-logo" src="" alt="" style="max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
+          <img id="contract-doc-logo" class="doc-logo" src="" alt="">
         </div>
         <div class="doc-header-right">
           <div class="doc-psi-name">${cfg.name || '[Nome do Psicólogo]'}</div>
@@ -5630,21 +5686,56 @@ function saveFormulacao() {
   toast('Formulação salva!', 'success');
 }
 
+// ═══ RELATÓRIO DA FORMULAÇÃO DE CASO PARA IMPRESSÃO EM PDF ═══
+function buildFormulacaoPrintReport() {
+  const container = document.getElementById('formulacao-print-report');
+  if (!container) return;
+  const cfg = getConfig();
+  const logoSrc = localStorage.getItem('psicotcc_logo') || '';
+  const p = APP.activePatient;
+  const cf = p ? (p.caseFormulation || {}) : {};
+
+  let html = `
+    <div class="doc-header">
+      <div class="doc-header-left">
+        <img class="doc-logo" src="${logoSrc}" alt="" style="${logoSrc ? 'display:block' : 'display:none'}">
+      </div>
+      <div class="doc-header-right">
+        <div class="doc-psi-name">${escHtml(cfg.name || '—')}</div>
+        <div class="doc-psi-crp">${escHtml(cfg.crp || '')}${cfg.spec ? ' · ' + escHtml(cfg.spec) : ''}</div>
+      </div>
+    </div>
+    <div class="doc-title">Formulação de Caso — Modelo Cognitivo de Beck</div>
+    <table class="evolution-meta-table" style="margin-bottom:22px">
+      <tr><td>Paciente</td><td>${escHtml(p ? p.name : '—')}</td></tr>
+      <tr><td>Data</td><td>${new Date().toLocaleDateString('pt-BR')}</td></tr>
+    </table>`;
+
+  const preenchidos = FORMULACAO_BLOCKS.filter(b => (cf[b.id] || '').toString().trim());
+  if (!preenchidos.length) {
+    html += `<div class="doc-section"><p>Nenhum bloco da formulação foi preenchido ainda para este paciente.</p></div>`;
+  } else {
+    preenchidos.forEach(b => {
+      const val = escHtml((cf[b.id] || '').toString().trim()).replace(/\n/g, '<br>');
+      html += `<div class="doc-section"><h3>${b.icon} ${escHtml(b.label)}</h3><p>${val}</p></div>`;
+    });
+  }
+
+  html += `
+    <div class="doc-footer">
+      <p>Documento elaborado em conformidade com o Código de Ética Profissional do Psicólogo.</p>
+      <p>Este documento contém informações protegidas pelo sigilo psicológico (Art. 9º do CEPP).</p>
+    </div>`;
+
+  container.innerHTML = html;
+}
+
+// Botão "🖨️ Imprimir PDF" da Formulação de Caso — gera o relatório e imprime.
 function printFormulacao() {
   if (!APP.activePatient) return toast('Selecione um paciente ativo.', 'error');
-  const p = APP.activePatient;
-  const cf = p.caseFormulation || {};
-  const cfg = getConfig();
-  const w = window.open('', '_blank');
-  let body = '<h2 style="text-align:center;color:#2c3e50">🧩 Formulação de Caso</h2>';
-  body += '<p style="text-align:center"><strong>Paciente:</strong> ' + escHtml(p.name) + ' &nbsp; <strong>Data:</strong> ' + new Date().toLocaleDateString('pt-BR') + '</p>';
-  body += '<p style="text-align:center;color:#777"><strong>Psicólogo(a):</strong> ' + escHtml(cfg.name || '') + ' &nbsp; ' + escHtml(cfg.crp || '') + '</p><hr>';
-  FORMULACAO_BLOCKS.forEach(b => {
-    const val = cf[b.id] || '—';
-    body += '<div style="margin-bottom:16px;border-left:4px solid #2c3e50;padding:10px 14px;background:#f8f9fa"><strong>' + b.icon + ' ' + b.label + '</strong><br><span style="color:#555;font-size:13px">' + escHtml(b.desc) + '</span><p style="margin:8px 0 0 0;white-space:pre-wrap">' + escHtml(val) + '</p></div>';
-  });
-  w.document.write('<html><head><title>Formulação — ' + escHtml(p.name) + '</title><style>body{font-family:Georgia,serif;padding:28px;color:#222;max-width:720px;margin:0 auto}@media print{button{display:none}}</style></head><body>' + body + '<br><button onclick="window.print()">Imprimir</button></body></html>');
-  w.document.close();
+  buildFormulacaoPrintReport();
+  applyWatermark();
+  window.print();
 }
 
 // ── AI GENERATION ────────────────────────────────────────────────

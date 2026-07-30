@@ -791,13 +791,13 @@ tr.clickable { cursor: pointer; }
   line-height: 1.9;
 }
 .transcript-header {
-  text-align: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 2px solid var(--primary);
 }
-.transcript-header h2 { font-size: 20px; color: var(--primary); margin-bottom: 4px; }
-.transcript-header p { font-size: 13px; color: var(--text-muted); }
+.transcript-header .doc-header { margin-bottom: 14px; padding-bottom: 0; border-bottom: none; }
+.transcript-header h2 { font-size: 19px; color: var(--primary); margin-bottom: 4px; text-align: center; }
+.transcript-header p { font-size: 13px; color: var(--text-muted); text-align: center; }
 .transcript-block { margin-bottom: 18px; }
 .transcript-speaker {
   font-family: 'Inter', sans-serif;
@@ -858,30 +858,37 @@ tr.clickable { cursor: pointer; }
 }
 .evolution-meta-table td:first-child { font-weight: 700; color: var(--text-secondary); background: var(--surface-alt); width: 40%; }
 
-/* DOCUMENT TEMPLATES */
+/* Conteúdo que só deve existir no papel (ex.: relatório da Anamnese) —
+   fica oculto na tela e some do .no-print em tudo, exceto na impressão. */
+.print-only { display: none; }
+
+/* DOCUMENT TEMPLATES — visual de relatório clínico profissional */
 .doc-template {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 32px;
+  padding: 36px 40px;
   font-family: 'Crimson Pro', serif;
-  font-size: 15px;
-  line-height: 1.85;
-  max-width: 800px;
+  font-size: 15.5px;
+  line-height: 1.9;
+  max-width: 820px;
   margin: 0 auto;
 }
 .doc-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 28px;
-  padding-bottom: 20px;
+  gap: 24px;
+  margin-bottom: 26px;
+  padding-bottom: 18px;
   border-bottom: 2px solid var(--primary);
 }
 .doc-header-left {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   align-items: center;
+  gap: 14px;
 }
 .doc-header-right {
   flex: 0 0 auto;
@@ -893,9 +900,11 @@ tr.clickable { cursor: pointer; }
   align-items: center;
   text-align: center;
 }
-.doc-logo { max-width: 180px; max-height: 100px; object-fit: contain; object-position: left center; display: none; border-radius: 12px; }
-.doc-psi-name { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--primary); }
-.doc-psi-crp { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); }
+.doc-logo { max-width: 150px; max-height: 82px; object-fit: contain; object-position: left center; display: none; border-radius: 8px; }
+.doc-header-right .doc-logo { object-position: right center; }
+.doc-psi-name { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.2px; color: var(--primary); }
+.doc-psi-crp { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.doc-psi-address { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 .doc-title {
   font-family: 'Inter', sans-serif;
   font-size: 18px;
@@ -906,7 +915,7 @@ tr.clickable { cursor: pointer; }
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-.doc-section { margin-bottom: 18px; }
+.doc-section { margin-bottom: 20px; }
 .doc-section h3 {
   font-family: 'Inter', sans-serif;
   font-size: 12px;
@@ -914,11 +923,12 @@ tr.clickable { cursor: pointer; }
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--primary);
-  margin-bottom: 8px;
+  margin-bottom: 9px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--border);
+  text-align: left;
 }
-.doc-section p { color: var(--text); margin-bottom: 6px; }
+.doc-section p { color: var(--text); margin-bottom: 8px; }
 .doc-footer {
   margin-top: 40px;
   padding-top: 20px;
@@ -938,6 +948,23 @@ tr.clickable { cursor: pointer; }
   margin: 0 auto 6px;
 }
 .doc-sig-line p { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-secondary); }
+
+/* Texto corrido em forma de relatório — justificado, títulos ficam de fora */
+.doc-template p,
+.doc-template li,
+.doc-section p,
+.doc-section div[contenteditable],
+.evolution-doc p,
+.evolution-doc li,
+.evolution-doc [contenteditable="true"],
+.transcript-text {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+.doc-footer p, .doc-sig-line p {
+  text-align: center;
+}
 
 /* MODAL */
 .modal-overlay {
@@ -1041,15 +1068,62 @@ tr.clickable { cursor: pointer; }
   display: block;
 }
 
+/* Página impressa sem cabeçalho/rodapé do navegador (URL, data, "file://...",
+   numeração) — funciona porque o Chrome só desenha esse conteúdo dentro da
+   margem reservada da página; com margin:0 não sobra espaço para ele.
+   O "rodapé" visual do documento vira responsabilidade do nosso próprio CSS
+   (padding do .print-page abaixo), por isso ele fica mais generoso. */
+@page { size: A4; margin: 0; }
+
 @media print {
+  html, body { margin: 0 !important; }
   .sidebar, .topbar, .toolbar, .btn, .no-print, .modal-overlay { display: none !important; }
   .main-content { margin-left: 0 !important; }
   .content-area { padding: 0 !important; }
   body { background: white; font-size: 12px; }
-  .doc-template, .evolution-doc, .transcript-output { border: none; box-shadow: none; padding: 10px 20px; }
+
+  /* Página do relatório: ocupa a largura útil, com margem própria
+     (maior embaixo — "rodapé" — para descanso visual da página impressa). */
+  .doc-template, .evolution-doc, .transcript-output {
+    border: none;
+    box-shadow: none;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 16mm 16mm 24mm !important;
+  }
   .card { border: 1px solid #ccc; box-shadow: none; }
-  /* CABEÇALHO DA EVOLUÇÃO — mostra na impressão no topo */
+
+  /* Formulários viram relatório: nenhuma coluna de grade nem caixas de
+     campo — apenas o texto corrido, justificado. */
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+  .doc-section [contenteditable], .evolution-doc [contenteditable] {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* CABEÇALHO DA EVOLUÇÃO / ANAMNESE — mostra na impressão no topo */
   #evo-print-header { display: block !important; }
+  #anamnese-form { display: none !important; }
+  .print-only { display: block !important; }
+
+  /* Transição de página suave: evita cortar cabeçalho, tabelas, assinatura
+     e títulos ao meio; parágrafos deixam ao menos 3 linhas de cada lado. */
+  .doc-header, .doc-sig-line, .evolution-meta-table, .evolution-meta-table tr,
+  .doc-section, .transcript-header, .transcript-block {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  h1, h2, h3, .doc-title, .doc-section h3 {
+    page-break-after: avoid;
+    break-after: avoid-page;
+  }
+  p, li, div[contenteditable] {
+    orphans: 3;
+    widows: 3;
+  }
   /* MARCA D'ÁGUA NA IMPRESSÃO — horizontal, centralizada, sem rotação */
   .watermark-overlay {
     display: flex !important;
@@ -1071,8 +1145,6 @@ tr.clickable { cursor: pointer; }
     border-radius: 32px;
     display: block;
   }
-  /* Cabeçalho da anamnese na impressão — mantém layout lado a lado */
-  .doc-template { page-break-inside: avoid; }
 }
 
 /* SETTINGS */
@@ -1495,6 +1567,9 @@ tr.clickable { cursor: pointer; }
               Selecione um paciente ativo na barra lateral antes de preencher.
             </div>
           </div>
+          <!-- Relatório usado somente na impressão em PDF — montado por
+               buildAnamnesePrintReport() a partir dos dados preenchidos -->
+          <div id="anamnese-print-report" class="doc-template print-only"></div>
         </div>
 <div id="panel-prontuario" class="panel">
           <div class="card">
@@ -1696,7 +1771,7 @@ tr.clickable { cursor: pointer; }
       <option value="relatorio">📄 Relatório Psicológico</option>
       <option value="atestado">📝 Atestado Psicológico</option>
       <option value="parecer">🔍 Parecer Psicológico</option>
-      <option value="encaminhamento">➡️ Encaminhamento</option>
+      <option value="encaminhamento">➡️ Encaminhamento Psicológico</option>
     </select>
   </div>
 
@@ -2139,7 +2214,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 28/07/2026 19:13
+//  Gerado automaticamente em 29/07/2026 18:43
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -2350,7 +2425,7 @@ const TOPBAR_BUTTONS = {
   anamnese:     [{ label:'🤖 Gerar com IA', cls:'btn-accent btn-md',    action:'gerarAnamneseIA()' },
     { label:'📂 Carregar',     cls:'btn-secondary btn-md', action:'loadAnamnese()' },
     { label:'💾 Salvar',       cls:'btn-primary btn-md',   action:'saveAnamnese()' },
-    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printWithWatermark()' },
+    { label:'🖨️ PDF',         cls:'btn-accent btn-md',    action:'printAnamnese()' },
     { label:'❓ Ajuda', cls:'btn-ghost btn-md', action:"showHelp('anamnese')" }],
   prontuario:   [{ label:'➕ Novo Registro', cls:'btn-primary btn-md',  action:'addProntuarioEntry()' },
     { label:'🖨️ PDF',          cls:'btn-accent btn-md',   action:'printWithWatermark()' },
@@ -3030,6 +3105,69 @@ Responda em JSON usando exatamente estas chaves: ${JSON.stringify(fieldTemplate)
   }
 }
 
+// ═══ RELATÓRIO DE ANAMNESE PARA IMPRESSÃO EM PDF ═══
+// Constrói uma versão em forma de relatório (texto corrido, sem caixas de
+// formulário) a partir dos dados preenchidos — usada somente na impressão.
+function buildAnamnesePrintReport() {
+  const container = document.getElementById('anamnese-print-report');
+  if (!container) return;
+  const cfg = getConfig();
+  const logoSrc = localStorage.getItem('psicotcc_logo') || '';
+  const p = APP.activePatient;
+  const data = getAnamneseData();
+  const dataAval = data.data ? new Date(data.data + 'T00:00').toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
+
+  let html = `
+    <div class="doc-header">
+      <div class="doc-header-left">
+        <div class="doc-psi-name">${escHtml(cfg.name || '—')}</div>
+        <div class="doc-psi-crp">${escHtml(cfg.crp || '')}${cfg.spec ? ' · ' + escHtml(cfg.spec) : ''}</div>
+        ${cfg.address ? `<div class="doc-psi-address">${escHtml(cfg.address)}</div>` : ''}
+      </div>
+      <div class="doc-header-right">
+        <img class="doc-logo" src="${logoSrc}" alt="" style="${logoSrc ? 'display:block;object-position:right center' : 'display:none'}">
+      </div>
+    </div>
+    <div class="doc-title">Ficha de Anamnese Psicológica</div>
+    <table class="evolution-meta-table" style="margin-bottom:22px">
+      <tr><td>Paciente</td><td>${escHtml(p ? p.name : '—')}</td></tr>
+      <tr><td>Data da Avaliação</td><td>${dataAval}</td></tr>
+      <tr><td>Nº de Sessões na Avaliação</td><td>${escHtml(data.sessoesAval || '—')}</td></tr>
+    </table>`;
+
+  ANAMNESE_SECTIONS.forEach(sec => {
+    const rows = sec.fields.map(([label, id]) => {
+      const raw = (data[id] || '').toString().trim();
+      if (!raw || raw === '—') return '';
+      return `<p><strong>${escHtml(label)}:</strong> ${escHtml(raw).replace(/\n/g, '<br>')}</p>`;
+    }).filter(Boolean).join('');
+    if (!rows) return;
+    html += `<div class="doc-section"><h3>${escHtml(sec.title)}</h3>${rows}</div>`;
+  });
+
+  html += `
+    <div class="doc-footer">
+      <p>Documento elaborado em conformidade com o Código de Ética Profissional do Psicólogo.</p>
+      <p>Este documento contém informações protegidas pelo sigilo psicológico (Art. 9º do CEPP).</p>
+    </div>
+    <div class="doc-sig-line">
+      <div class="line"></div>
+      <p>${escHtml(cfg.name || '—')}</p>
+      <p style="font-size:11px;color:var(--text-muted)">${escHtml(cfg.crp || '—')}</p>
+    </div>`;
+
+  container.innerHTML = html;
+}
+
+// Botão "🖨️ PDF" do painel de Anamnese — gera o relatório completo e imprime.
+function printAnamnese() {
+  if (!APP.activePatient) return toast('Selecione um paciente antes de gerar o PDF.', 'error');
+  buildAnamnesePrintReport();
+  applyWatermark();
+  window.print();
+}
+
+
 // ── PRONTUÁRIO ───────────────────────────────────────────────
 function renderProntuario() {
   const list = document.getElementById('prontuario-list');
@@ -3491,8 +3629,13 @@ function renderRawTranscription(text) {
 
   let html = `
     <div class="transcript-header">
-      <img src="" class="doc-logo" id="trans-doc-logo" style="display:none;max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
-      <div style="font-size:12px;font-family:Inter,sans-serif;color:var(--text-muted)">${cfg.name || ''} · ${cfg.crp || ''}</div>
+      <div class="doc-header">
+        <div class="doc-header-left"><img src="" class="doc-logo" id="trans-doc-logo" style="display:none"></div>
+        <div class="doc-header-right">
+          <div class="doc-psi-name">${cfg.name || '—'}</div>
+          <div class="doc-psi-crp">${cfg.crp || ''}</div>
+        </div>
+      </div>
       <h2>Transcrição da Sessão${dateStr ? ' — ' + dateStr : ''}</h2>
       <p>Paciente: ${APP.activePatient?.name || '—'}</p>
       <p style="font-size:11px;margin-top:6px;font-family:Inter,sans-serif;color:var(--text-muted)"><em>Texto extraído diretamente do arquivo .docx enviado. Edite abaixo se necessário antes de salvar.</em></p>
@@ -3583,8 +3726,13 @@ function renderTranscription(blocks) {
 
   let html = `
     <div class="transcript-header">
-      <img src="" class="doc-logo" id="trans-doc-logo" style="display:none;max-width:180px;max-height:100px;object-fit:contain;object-position:left center;border-radius:12px">
-      <div style="font-size:12px;font-family:Inter,sans-serif;color:var(--text-muted)">${cfg.name || ''} · ${cfg.crp || ''}</div>
+      <div class="doc-header">
+        <div class="doc-header-left"><img src="" class="doc-logo" id="trans-doc-logo" style="display:none"></div>
+        <div class="doc-header-right">
+          <div class="doc-psi-name">${cfg.name || '—'}</div>
+          <div class="doc-psi-crp">${cfg.crp || ''}</div>
+        </div>
+      </div>
       <h2>Transcrição da Sessão — ${dateStr}</h2>
       <p>Paciente: ${APP.activePatient?.name || '—'}</p>
       <p style="font-size:11px;margin-top:6px;font-family:Inter,sans-serif;color:var(--text-muted)"><em>Documento reorganizado a partir de transcrição automática. Revisado e de responsabilidade da psicóloga responsável.</em></p>
@@ -3712,10 +3860,14 @@ function loadDocTemplate() {
   let html = `
     <div class="doc-template" id="doc-content">
       <div class="doc-header">
-        <img id="doc-logo-main" class="doc-logo" src="" alt="">
-        <div class="doc-psi-name">${cfg.name || '—'}</div>
-        <div class="doc-psi-crp">${cfg.crp || '—'} ${cfg.spec ? '· ' + cfg.spec : ''}</div>
-        ${cfg.address ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">${cfg.address}</div>` : ''}
+        <div class="doc-header-left">
+          <img id="doc-logo-main" class="doc-logo" src="" alt="">
+        </div>
+        <div class="doc-header-right">
+          <div class="doc-psi-name">${cfg.name || '—'}</div>
+          <div class="doc-psi-crp">${cfg.crp || '—'}${cfg.spec ? ' · ' + cfg.spec : ''}</div>
+          ${cfg.address ? `<div class="doc-psi-address">${cfg.address}</div>` : ''}
+        </div>
       </div>
       <div class="doc-title">${tpl.title}</div>
       <div style="text-align:right;font-family:Inter,sans-serif;font-size:12px;color:var(--text-muted);margin-bottom:20px">Ref.: ${tpl.refCFP}</div>`;
@@ -3805,7 +3957,7 @@ function saveDoc() {
   const typeLabels = {
     laudo: 'Laudo Psicológico', relatorio: 'Relatório Psicológico',
     atestado: 'Atestado Psicológico', parecer: 'Parecer Psicológico',
-    encaminhamento: 'Encaminhamento'
+    encaminhamento: 'Encaminhamento Psicológico'
   };
   if (!APP.activePatient.docs) APP.activePatient.docs = [];
   APP.activePatient.docs.push({

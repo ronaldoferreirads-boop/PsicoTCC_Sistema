@@ -928,6 +928,15 @@ tr.clickable { cursor: pointer; }
   text-align: left;
 }
 .doc-section p { color: var(--text); margin-bottom: 8px; }
+/* Blinda o corpo do documento contra tamanho de fonte inconsistente entre
+   quadros — texto colado do Word/Google Docs ou gerado por IA às vezes traz
+   <span style="font-size:..."> embutido, que sem isso sobrescreveria o
+   tamanho só naquele trecho e quebraria a uniformidade do relatório. */
+.doc-section [contenteditable] *,
+.evolution-doc [contenteditable] * {
+  font-size: inherit !important;
+  font-family: inherit !important;
+}
 .doc-footer {
   margin-top: 40px;
   padding-top: 20px;
@@ -2216,7 +2225,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 29/07/2026 22:48
+//  Gerado automaticamente em 30/07/2026 11:27
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -3939,7 +3948,7 @@ function loadDocTemplate() {
       html += `
         <div class="doc-section">
           <h3>${sec}</h3>
-          <div contenteditable="true" style="min-height:60px;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;line-height:1.7;font-family:'Crimson Pro',serif" placeholder="Clique para editar...">[Clique para editar — ${sec}]</div>
+          <div contenteditable="true" style="min-height:60px;padding:8px;border:1px solid var(--border);border-radius:6px;outline:none;line-height:1.7;font-family:'Crimson Pro',serif" placeholder="Clique para editar...">[Clique para editar — ${sec}]</div>
         </div>`;
     });
   }

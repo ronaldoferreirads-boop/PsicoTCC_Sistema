@@ -900,8 +900,7 @@ tr.clickable { cursor: pointer; }
   align-items: center;
   text-align: center;
 }
-.doc-logo { max-width: 150px; max-height: 82px; object-fit: contain; object-position: left center; display: none; border-radius: 8px; }
-.doc-header-right .doc-logo { object-position: right center; }
+.doc-logo { max-width: 150px; max-height: 130px; object-fit: contain; object-position: left center; display: none; border-radius: 8px; }
 .doc-psi-name { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.2px; color: var(--primary); }
 .doc-psi-crp { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 .doc-psi-address { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--text-muted); margin-top: 3px; }
@@ -1068,12 +1067,11 @@ tr.clickable { cursor: pointer; }
   display: block;
 }
 
-/* Página impressa sem cabeçalho/rodapé do navegador (URL, data, "file://...",
-   numeração) — funciona porque o Chrome só desenha esse conteúdo dentro da
-   margem reservada da página; com margin:0 não sobra espaço para ele.
-   O "rodapé" visual do documento vira responsabilidade do nosso próprio CSS
-   (padding do .print-page abaixo), por isso ele fica mais generoso. */
-@page { size: A4; margin: 0; }
+/* Margem fixa de 1cm nos 4 lados de toda página impressa (PDF).
+   Obs.: se a opção "Cabeçalhos e rodapés" do navegador estiver marcada na
+   caixa de impressão, o Chrome pode usar essa margem para desenhar URL/data/
+   numeração — oriente deixar essa opção desmarcada para um resultado limpo. */
+@page { size: A4; margin: 1cm; }
 
 @media print {
   html, body { margin: 0 !important; }
@@ -1082,14 +1080,14 @@ tr.clickable { cursor: pointer; }
   .content-area { padding: 0 !important; }
   body { background: white; font-size: 12px; }
 
-  /* Página do relatório: ocupa a largura útil, com margem própria
-     (maior embaixo — "rodapé" — para descanso visual da página impressa). */
+  /* Página do relatório: ocupa toda a área útil dentro da margem de 1cm
+     definida em @page — sem padding extra, para a margem ficar exata. */
   .doc-template, .evolution-doc, .transcript-output {
     border: none;
     box-shadow: none;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 16mm 16mm 24mm !important;
+    padding: 0 !important;
   }
   .card { border: 1px solid #ccc; box-shadow: none; }
 
@@ -2214,7 +2212,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 29/07/2026 18:43
+//  Gerado automaticamente em 29/07/2026 22:11
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -3120,12 +3118,12 @@ function buildAnamnesePrintReport() {
   let html = `
     <div class="doc-header">
       <div class="doc-header-left">
+        <img class="doc-logo" src="${logoSrc}" alt="" style="${logoSrc ? 'display:block' : 'display:none'}">
+      </div>
+      <div class="doc-header-right">
         <div class="doc-psi-name">${escHtml(cfg.name || '—')}</div>
         <div class="doc-psi-crp">${escHtml(cfg.crp || '')}${cfg.spec ? ' · ' + escHtml(cfg.spec) : ''}</div>
         ${cfg.address ? `<div class="doc-psi-address">${escHtml(cfg.address)}</div>` : ''}
-      </div>
-      <div class="doc-header-right">
-        <img class="doc-logo" src="${logoSrc}" alt="" style="${logoSrc ? 'display:block;object-position:right center' : 'display:none'}">
       </div>
     </div>
     <div class="doc-title">Ficha de Anamnese Psicológica</div>

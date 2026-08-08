@@ -851,12 +851,16 @@ tr.clickable { cursor: pointer; }
   margin-bottom: 24px;
   font-family: 'Inter', sans-serif;
   font-size: 12px;
+  /* Fecha a tabela com uma linha mais forte embaixo, na cor principal do
+     documento (mesmo tom da borda sob o cabeçalho/.doc-header). Com
+     border-collapse, essa borda de 2px "vence" a de 1px da última linha. */
+  border-bottom: 2px solid var(--primary);
 }
 .evolution-meta-table td {
   padding: 8px 12px;
-  border: 1px solid var(--border);
+  border: 1.3px solid var(--primary);
 }
-.evolution-meta-table td:first-child { font-weight: 700; color: var(--text-secondary); background: var(--surface-alt); width: 40%; }
+.evolution-meta-table td:first-child { font-weight: 700; color: var(--primary-dark); background: var(--primary-light); width: 40%; }
 
 /* Conteúdo que só deve existir no papel (ex.: relatório da Anamnese) —
    fica oculto na tela e some do .no-print em tudo, exceto na impressão. */
@@ -939,28 +943,16 @@ tr.clickable { cursor: pointer; }
   margin-top: -10px;
   margin-bottom: 20px;
 }
-/* Campos da Ficha de Anamnese impressa — rótulo em caixa alta sobre o valor,
-   no formato de um documento formal em vez de um parágrafo corrido. */
-.anamnese-field {
-  margin-bottom: 14px;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-.anamnese-field-label {
+/* Subtítulo do documento (ex.: "Avaliação Neurológica/Psiquiátrica" no
+   Encaminhamento) — menor que o .doc-title, sem caixa alta forçada. */
+.doc-subtitle-ref {
   font-family: 'Inter', sans-serif;
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--primary);
-  margin-bottom: 3px;
-}
-.anamnese-field-value {
-  font-family: 'Crimson Pro', serif;
-  font-size: 15px;
-  line-height: 1.75;
-  color: var(--text);
-  padding-left: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-secondary);
+  margin-top: -12px;
+  margin-bottom: 18px;
 }
 /* Blinda o corpo do documento contra tamanho de fonte inconsistente entre
    quadros — texto colado do Word/Google Docs ou gerado por IA às vezes traz
@@ -1137,7 +1129,10 @@ tr.clickable { cursor: pointer; }
   /* Formulários viram relatório: nenhuma coluna de grade nem caixas de
      campo — apenas o texto corrido, justificado. */
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
-  .doc-section [contenteditable], .evolution-doc [contenteditable] {
+  /* :not(td) — a tabela de Dados de Identificação do Encaminhamento tem
+     células editáveis (<td contenteditable>); sem essa exceção, esta regra
+     também apagava a borda da tabela na impressão. */
+  .doc-section [contenteditable]:not(td), .evolution-doc [contenteditable]:not(td) {
     border: none !important;
     background: transparent !important;
     padding: 0 !important;
@@ -2371,7 +2366,7 @@ tr.clickable { cursor: pointer; }
 <script>
 // ============================================================
 //  PsicoTCC — Sistema Clínico
-//  Gerado automaticamente em 07/08/2026 16:44
+//  Gerado automaticamente em 07/08/2026 20:46
 //  Modelo IA: claude-sonnet-4-6
 // ============================================================
 
@@ -3309,25 +3304,25 @@ function buildAnamnesePrintReport() {
     <table class="evolution-meta-table" style="margin-bottom:26px">${metaRows}</table>`;
 
   ANAMNESE_SECTIONS.forEach(sec => {
-    const campos = sec.fields.map(([label, id]) => {
+    const linhas = sec.fields.map(([label, id]) => {
       const raw = (data[id] || '').toString().trim();
       if (!raw || raw === '—') return '';
-      return `<div class="anamnese-field"><div class="anamnese-field-label">${escHtml(label)}</div><div class="anamnese-field-value">${escHtml(raw).replace(/\n/g, '<br>')}</div></div>`;
+      return `<tr><td>${escHtml(label)}</td><td>${escHtml(raw).replace(/\n/g, '<br>')}</td></tr>`;
     }).filter(Boolean).join('');
-    if (!campos) return;
-    html += `<div class="doc-section"><h3>${escHtml(sec.title)}</h3>${campos}</div>`;
+    if (!linhas) return;
+    html += `<div class="doc-section"><h3>${escHtml(sec.title)}</h3><table class="evolution-meta-table">${linhas}</table></div>`;
   });
 
   html += `
-    <div class="doc-footer">
-      <p>Documento elaborado em conformidade com o Código de Ética Profissional do Psicólogo.</p>
-      <p>Este documento contém informações protegidas pelo sigilo psicológico (Art. 9º do CEPP).</p>
-    </div>
     ${htmlLocalDataHora()}
     <div class="doc-sig-line">
       <div class="line"></div>
       <p>${escHtml(cfg.name || '—')}</p>
       <p style="font-size:11px;color:var(--text-muted)">${escHtml(cfg.crp || '—')}</p>
+    </div>
+    <div class="doc-footer">
+      <p>Documento elaborado em conformidade com o Código de Ética Profissional do Psicólogo.</p>
+      <p>Este documento contém informações protegidas pelo sigilo psicológico (Art. 9º do CEPP).</p>
     </div>`;
 
   container.innerHTML = html;
@@ -4098,6 +4093,7 @@ function loadDocTemplate() {
         </div>
       </div>
       <div class="doc-title">${tpl.title}</div>
+      ${type === 'encaminhamento' ? '<div class="doc-subtitle-ref" contenteditable="true">Avaliação Neurológica/Psiquiátrica</div>' : ''}
       <div style="text-align:right;font-family:Inter,sans-serif;font-size:12px;color:var(--text-muted);margin-bottom:20px">Ref.: ${tpl.refCFP}</div>`;
 
   // Special handling for atestado
@@ -4140,15 +4136,15 @@ function loadDocTemplate() {
   }
 
   html += `
-      <div class="doc-footer">
-        <p style="margin-bottom:4px">Documento elaborado em conformidade com ${tpl.refCFP}.</p>
-        <p>Este documento é de uso profissional e contém informações protegidas pelo sigilo psicológico (Art. 9º do Código de Ética do Psicólogo).</p>
-      </div>
       ${htmlLocalDataHora()}
       <div class="doc-sig-line">
         <div class="line"></div>
         <p>${cfg.name || '—'}</p>
         <p style="font-size:11px;color:var(--text-muted)">${cfg.crp || '—'}</p>
+      </div>
+      <div class="doc-footer">
+        <p style="margin-bottom:4px">Documento elaborado em conformidade com ${tpl.refCFP}.</p>
+        <p>Este documento é de uso profissional e contém informações protegidas pelo sigilo psicológico (Art. 9º do Código de Ética do Psicólogo).</p>
       </div>
     </div>`;
 
@@ -4521,7 +4517,10 @@ function buildContrato() {
 
       <div class="doc-section">
         <h3>CLÁUSULA 5ª — DOS HONORÁRIOS</h3>
-        <p>Os honorários profissionais ficam estabelecidos no valor de <span contenteditable="true">R$ [VALOR]</span> por sessão, a serem pagos <span contenteditable="true">até o dia do atendimento, via PIX/transferência/dinheiro</span>.</p>
+        <p>Os honorários profissionais poderão ser cobrados em uma das seguintes modalidades, conforme acordado entre as partes:</p>
+        <p style="margin-top:6px"><strong>a) Por sessão avulsa:</strong> valor de <span contenteditable="true">R$ [VALOR]</span> por sessão realizada.</p>
+        <p style="margin-top:6px"><strong>b) Por pacote mensal:</strong> valor de <span contenteditable="true">R$ [VALOR]</span> referente ao conjunto de sessões do mês.</p>
+        <p style="margin-top:6px">Em ambas as modalidades, o pagamento deverá ser efetuado <span contenteditable="true">até o dia do atendimento, via PIX/transferência/dinheiro</span>.</p>
         <p style="margin-top:6px">Os honorários poderão ser reajustados anualmente, mediante comunicação prévia de <span contenteditable="true">30 (trinta)</span> dias.</p>
       </div>
 
@@ -7455,7 +7454,7 @@ function linhaLocalDataHora() {
 }
 
 function htmlLocalDataHora(idAttr) {
-  return `<p${idAttr ? ` id="${idAttr}"` : ''} contenteditable="true" style="text-align:center;font-family:'Inter',sans-serif;font-size:12px;color:var(--text-secondary);margin-top:28px">${linhaLocalDataHora()}</p>`;
+  return `<p${idAttr ? ` id="${idAttr}"` : ''} contenteditable="true" style="text-align:center;font-family:'Inter',sans-serif;font-size:12px;color:var(--text-secondary);margin-top:28px;margin-bottom:55px">${linhaLocalDataHora()}</p>`;
 }
 
 function showModal(title, body, buttons) {
